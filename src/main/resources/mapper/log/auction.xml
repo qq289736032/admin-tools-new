@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="auctionHouse">
+	
+	<select id="auctionStat" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		<!-- 拍卖记录统计-->
+		SELECT role_name, item_id, item_name, num, cost, money, seller_role_name, log_time
+		FROM stall_trade_log 
+		where 1 = 1
+		<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+		<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+		<if test="@Ognl@isNotBlank(roleName)"> and (role_name= #{roleName} or seller_role_name=#{roleName}) </if>
+		<if test="@Ognl@isNotBlank(itemName)"> and item_name= #{itemName} </if>
+	</select> 
+	
+</mapper>

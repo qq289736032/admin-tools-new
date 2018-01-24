@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="wuji">
+
+    <select id="paging" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT
+            user_role_id,
+            meiren_id,
+            meiren_level,
+            meiren_heti,
+            FROM_UNIXTIME(`meiren_time`/1000, '%Y-%m-%d %H:%i:%S') AS lingqu_time
+        FROM `role_meiren`
+        WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(id)">and user_role_id = #{id}</if>
+        order by create_time desc
+    </select>
+
+    <select id="findWujiByRoleId" resultType="java.util.HashMap">
+       SELECT
+            user_role_id,
+            meiren_id,
+            meiren_level,
+            meiren_heti,
+            FROM_UNIXTIME(`meiren_time`/1000, '%Y-%m-%d %H:%i:%S') AS lingqu_time
+        FROM `role_meiren`
+        WHERE user_role_id = #{id}
+    </select>
+</mapper>

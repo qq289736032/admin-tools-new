@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="rechargeDistribution">
+	<select id="findRechargeDistribution" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+    	SELECT
+            log_day,
+            sum(num) num,
+            sum(amount) amount,
+            section       
+        FROM  stat_recharge_distribution
+        WHERE 1 = 1 
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+	    <if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>        
+        GROUP BY log_day,section
+        ORDER BY log_day DESC
+    </select>
+    
+    <select id="findRechargeDistributionLogDay" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+    	SELECT
+            log_day
+        FROM  stat_recharge_distribution
+        WHERE 1 = 1 
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+	    <if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>        
+        GROUP BY log_day
+        ORDER BY log_day DESC
+    </select>
+    
+    <!-- 只能选平台 -->
+    <select id="findMonthlyRecharge" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        SELECT
+            log_month,
+            sum(is_open_month) kaifuNum,
+            sum(income) income, <!-- 月收入 -->
+            sum(ru) ru, <!-- 月新注册 -->
+            sum(au) au, <!-- 月活跃 登录人数-->
+            sum(ou) ou, <!-- 月老用户数 -->
+            sum(pa) pa, <!-- 月充值用户 -->
+            sum(pay_times) pay_times, <!-- 月充值次数 --> 
+            sum(pa) / sum(au) pay_rate, <!-- 月付费率 -->
+            sum(income) / sum(pa) arpu, <!-- 月ARPU -->
+            sum(income) / sum(au) active_arpu, <!-- 月活跃ARPU -->
+            sum(first_pay_user) first_pay_user, <!-- 月首充人数 -->
+            sum(first_pay_times) first_pay_times, <!-- 月首充次数  -->
+            sum(first_pay_value) first_pay_value, <!-- 月首充金额 -->
+            sum(nn_pa) mnn_pa, <!-- 月新新充值人数 -->
+            sum(nn_pay_times) nn_pay_times, <!-- 月新新充值次数 -->
+            sum(nn_pay_value) nn_pay_value, <!-- 月新新充值金额 -->
+            sum(nn_pa) / (sum(ru) - sum(ru_gunfu)) nn_pay_rate, <!-- 月新新付费率 -->
+            sum(nn_pay_value) / sum(nn_pa) nn_arpu, <!-- 月新新ARPU -->
+            sum(ou_pa) d_n_pa, <!-- 月老充值人数 -->
+            sum(ou_pay_times) df_times, <!-- 月老充值次数 -->
+            sum(ou_pay_value) i_f_pay_value, <!-- 月老充值金额  -->
+            sum(ou_pa) / sum(ou) on_pay_rate, <!-- 月老付费率 老充值人数/(日活跃-日新注册人数)-->
+            sum(ou_pay_value) / sum(ou_pa) on_arpu <!-- 月老ARPU 老充值金额/老充值人数-->
+        FROM  stat_monthly_integrated
+        WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(pidsList)">
+			AND pid IN
+		     <foreach item="item" index="index" collection="pidsList" open="(" separator="," close=")">
+		       #{item}
+		     </foreach>
+	    </if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_month <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_month <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+        GROUP BY log_month
+        ORDER BY log_month DESC
+    </select>
+    
+    <!-- 只能选平台 -->
+    <select id="findNewServerMonthlyRecharge" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        SELECT
+            log_month,
+            sum(income) income, <!-- 月收入 -->
+            sum(au) au, <!-- 月活跃 登录人数-->
+            sum(pa) pa, <!-- 月充值用户 -->
+            sum(pay_times) pay_times, <!-- 月充值次数 --> 
+            sum(pa) / sum(au) pay_rate, <!-- 月付费率 -->
+            sum(income) / sum(pa) arpu <!-- 月ARPU -->
+        FROM  stat_monthly_integrated
+        WHERE is_open_month = '1' 
+        <if test="@Ognl@isNotBlank(pidsList)">
+			AND pid IN
+		     <foreach item="item" index="index" collection="pidsList" open="(" separator="," close=")">
+		       #{item}
+		     </foreach>
+	    </if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_month <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_month <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+        GROUP BY log_month
+        ORDER BY log_month DESC
+    </select>
+    
+    <!-- 只能选平台 -->
+    <select id="findOldServerMonthlyRecharge" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        SELECT
+            log_month,
+            sum(income) income, <!-- 月收入 -->
+            sum(au) au, <!-- 月活跃 登录人数-->
+            sum(pa) pa, <!-- 月充值用户 -->
+            sum(pay_times) pay_times, <!-- 月充值次数 --> 
+            sum(pa) / sum(au) pay_rate, <!-- 月付费率 -->
+            sum(income) / sum(pa) arpu <!-- 月ARPU -->
+        FROM  stat_monthly_integrated
+        WHERE is_open_month = '0'
+        <if test="@Ognl@isNotBlank(pidsList)">
+			AND pid IN
+		     <foreach item="item" index="index" collection="pidsList" open="(" separator="," close=")">
+		       #{item}
+		     </foreach>
+	    </if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_month <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_month <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+        GROUP BY log_month
+        ORDER BY log_month DESC
+    </select>
+    
+    <!-- 只能选平台 -->
+    <select id="findPlatformListRecharge" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        SELECT
+            log_month,
+            pid,
+            sum(au) au, <!-- 月活跃 登录人数-->
+            sum(pa) pa, <!-- 月充值用户 -->
+            sum(pay_times) pay_times, <!-- 月充值次数 --> 
+            sum(income) income, <!-- 月收入 -->
+            sum(pa) / sum(au) pay_rate, <!-- 月付费率 -->
+            sum(income) / sum(pa) arpu, <!-- 月ARPU -->
+            sum(income) / sum(au) active_arpu <!-- 月活跃ARPU -->
+        FROM  stat_monthly_integrated
+        WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(pidsList)">
+			AND pid IN
+		     <foreach item="item" index="index" collection="pidsList" open="(" separator="," close=")">
+		       #{item}
+		     </foreach>
+	    </if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_month <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_month <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+        GROUP BY log_month, pid
+        ORDER BY log_month DESC
+    </select>
+    
+</mapper>

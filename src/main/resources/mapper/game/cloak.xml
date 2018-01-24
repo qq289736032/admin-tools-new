@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cloak">
+
+    <select id="paging" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+       SELECT
+            role_guangyi.user_role_id,
+            role_guangyi.binqi_level,
+            1,
+            role_guangyi.lucky_value,
+            1,
+            role_guangyi.binqi_level,
+            1,
+            role_guangyi.draw_list,
+            FROM_UNIXTIME(role_guangyi.`lingqu_time`/1000, '%Y-%m-%d %H:%i:%S') AS lingqu_time,
+            FROM_UNIXTIME(role_guangyi.`update_time`/1000, '%Y-%m-%d %H:%i:%S') AS update_time,
+            role_guangyi.peidai_id,
+            role_guangyi.binqi_level
+        FROM `role_guangyi`
+        WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(id)">and user_role_id = #{id}</if>
+        order by lingqu_time desc
+    </select>
+
+    <select id="findCloakByRoleId" resultType="java.util.HashMap">
+      SELECT
+            role_guangyi.user_role_id,
+            role_guangyi.binqi_level,
+            1,
+            role_guangyi.lucky_value,
+            1,
+            role_guangyi.binqi_level,
+            1,
+            role_guangyi.draw_list,
+            FROM_UNIXTIME(role_guangyi.`lingqu_time`/1000, '%Y-%m-%d %H:%i:%S') AS lingqu_time,
+            FROM_UNIXTIME(role_guangyi.`update_time`/1000, '%Y-%m-%d %H:%i:%S') AS update_time,
+            role_guangyi.peidai_id,
+            role_guangyi.binqi_level
+        FROM `role_guangyi`
+        WHERE user_role_id = #{id}
+    </select>
+</mapper>

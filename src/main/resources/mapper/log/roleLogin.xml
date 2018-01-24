@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="roleLogin">
+
+	<select id="paging" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT
+            role_login.id,
+            role_login.user_id userId,
+            role_login.role_id roleId,
+            role_login.role_name roleName,
+            role_login.level,
+            role_login.reg_time regTime,
+            role_login.reg_day regDay,
+            role_login.is_gunfu isGunfu,
+            role_login.login_time loginTime,
+            role_login.pid platformId,
+            role_login.server_id serverId,
+            role_login.ip,
+            role_login.log_month,
+            role_login.log_week,
+            role_login.log_day,
+            role_login.log_hour
+        FROM `role_login` WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(userId)">and user_id = #{userId} </if>
+        <if test="@Ognl@isNotBlank(roleId)">and role_id = #{roleId} </if>
+        <if test="@Ognl@isNotBlank(roleName)">and role_name = #{roleName} </if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+    </select>
+    
+    <select id="findActiveStatistics" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+
+        select pid ,count(role_id) au from(
+        	select pid,role_id 
+        	from role_login 
+        	where 1 = 1 
+        	<if test="@Ognl@isNotBlank(pidsList)">
+			AND pid IN
+		     <foreach item="item" index="index" collection="pidsList" open="(" separator="," close=")">
+		       #{item}
+		     </foreach>
+	    	</if>
+       		<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+        	<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+        	group by role_id
+        	) a 
+        	group by pid 
+        
+        
+    </select>
+
+    <select id="findPlatformData" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT a.pid,ru,au,IFNULL(income,0) income FROM (
+        SELECT pid,count(role_id) ru FROM role_registration
+        WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(serverIdList)">
+            AND server_id IN
+            <foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="@Ognl@isNotBlank(endDate)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+        <if test="@Ognl@isNotBlank(startDate)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+        GROUP BY pid
+        ) a LEFT JOIN
+        (
+        select pid,count(role_id) au from(select pid,role_id from role_login 
+        where 1=1
+         <if test="@Ognl@isNotBlank(serverIdList)">
+            AND server_id IN
+            <foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="@Ognl@isNotBlank(endDate)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+        <if test="@Ognl@isNotBlank(startDate)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+         GROUP BY role_id) a GROUP BY pid
+       <!--  SELECT pid,count(role_id) au from role_login
+        WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(serverIdList)">
+            AND server_id IN
+            <foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+        GROUP BY pid -->
+        ) b ON a.pid = b.pid LEFT JOIN
+        (
+        SELECT pid,SUM(rmb_amount) income from role_recharge
+        WHERE 1 = 1
+        and  recharge_type = 3
+        <if test="@Ognl@isNotBlank(serverIdList)">
+            AND server_id IN
+            <foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+        GROUP BY pid
+        ) c ON a.pid = c.pid
+    </select>
+
+
+    <select id="findSumActive" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+
+        select count(role_id) sum_au from(
+        	select role_id 
+        	from role_login 
+        	where 1 = 1 
+        	<if test="@Ognl@isNotBlank(pidsList)">
+			AND pid IN
+		     <foreach item="item" index="index" collection="pidsList" open="(" separator="," close=")">
+		       #{item}
+		     </foreach>
+	    	</if>
+        	<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+        	<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+        	group by role_id) a  
+        
+        
+    </select>
+    
+    <select id="findActiveStatisticsByPid" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select pid ,count(role_id) au from(
+        	select pid,role_id from 
+        		role_login 
+        		where pid=#{pid}
+        		<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+        		<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+        		group by role_id) a 
+    </select>
+    
+    <select id="findSumOldActive" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        
+        select count(role_id) sum_old_au from(
+        	select role_id 
+        	from role_login
+        	where 1 = 1 
+        	<if test="@Ognl@isNotBlank(pidsList)">
+			AND pid IN
+		     <foreach item="item" index="index" collection="pidsList" open="(" separator="," close=")">
+		       #{item}
+		     </foreach>
+	    	</if>
+        	<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}
+        	</if>
+        	<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}
+        	  and reg_day <![CDATA[ < ]]> #{startDate}
+        	</if> 
+        	group by role_id) a  
+        
+    </select>
+    
+    <select id="findOldActiveStatisticsByPid" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT
+            pid,
+            count(distinct role_id) old_au
+        FROM `role_login` WHERE pid = #{pid}
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')
+        </if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')
+        	  and reg_day <![CDATA[ < ]]> replace(#{createDateStart},'-','')
+        </if>
+    </select>
+    
+    <select id="findActiveSumByArea" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT
+            count( role_id) au
+        FROM (
+         SELECT
+               role_id
+         FROM
+        `role_login` WHERE 1 = 1
+         <if test="@Ognl@isNotBlank(endDate)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+         <if test="@Ognl@isNotBlank(startDate)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+        <if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if> 
+		group  by    role_id
+		)   a
+    </select>
+
+    <!--流失用户统计 一起查询7天的数据预计耗时8秒-->
+    <select id="churnUser" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT cdate,
+        (
+        SELECT COUNT(DISTINCT role_id) FROM role_login where log_day <![CDATA[ <= ]]> DATE_FORMAT(DATE_ADD(cdate,INTERVAL -7 DAY),'%Y%m%d') and log_day <![CDATA[ >= ]]> DATE_FORMAT(DATE_ADD(cdate,INTERVAL -14 DAY),'%Y%m%d')
+        AND role_id not in (
+        SELECT role_id FROM role_login where log_day <![CDATA[ <= ]]> cdate and log_day <![CDATA[ >= ]]> DATE_FORMAT(DATE_ADD(cdate,INTERVAL -6 DAY),'%Y%m%d')
+        )
+        ) d1,
+        (
+        SELECT COUNT(DISTINCT role_id) FROM role_login where log_day <![CDATA[ <= ]]> DATE_FORMAT(DATE_ADD(cdate,INTERVAL -7 DAY),'%Y%m%d') and log_day <![CDATA[ >= ]]> DATE_FORMAT(DATE_ADD(cdate,INTERVAL -14 DAY),'%Y%m%d')
+        ) dt1,
+        (
+        SELECT COUNT(DISTINCT role_id) FROM role_login where log_day <![CDATA[ <= ]]> DATE_FORMAT(DATE_ADD(cdate,INTERVAL -14 DAY),'%Y%m%d') and log_day <![CDATA[ >= ]]> DATE_FORMAT(DATE_ADD(cdate,INTERVAL -28 DAY),'%Y%m%d')
+        AND role_id not in (
+        SELECT role_id FROM role_login where log_day <![CDATA[ <= ]]> cdate and log_day >= DATE_FORMAT(DATE_ADD(cdate,INTERVAL -13 DAY),'%Y%m%d')
+        )
+        ) d2,
+        (
+        SELECT COUNT(DISTINCT role_id) FROM role_login where log_day <![CDATA[ <= ]]> DATE_FORMAT(DATE_ADD(cdate,INTERVAL -14 DAY),'%Y%m%d') and log_day <![CDATA[ >= ]]> DATE_FORMAT(DATE_ADD(cdate,INTERVAL -28 DAY),'%Y%m%d')
+        ) dt2,
+        (
+        SELECT COUNT(DISTINCT role_id) FROM role_login where log_day <![CDATA[ <= ]]> DATE_FORMAT(DATE_ADD(cdate,INTERVAL -30 DAY),'%Y%m%d') and log_day <![CDATA[ >= ]]> DATE_FORMAT(DATE_ADD(cdate,INTERVAL -60 DAY),'%Y%m%d')
+        AND role_id not in (
+        SELECT role_id FROM role_login where log_day <![CDATA[ <= ]]> cdate and log_day <![CDATA[ >= ]]> DATE_FORMAT(DATE_ADD(cdate,INTERVAL -29 DAY),'%Y%m%d')
+        )
+        ) d3,
+        (
+        SELECT COUNT(DISTINCT role_id) FROM role_login where log_day <![CDATA[ <= ]]> DATE_FORMAT(DATE_ADD(cdate,INTERVAL -30 DAY),'%Y%m%d') and log_day <![CDATA[ >= ]]> DATE_FORMAT(DATE_ADD(cdate,INTERVAL -60 DAY),'%Y%m%d')
+        ) dt3
+        FROM(
+        SELECT log_day cdate FROM role_login
+        WHERE log_day <![CDATA[ <= ]]> 20160607 and log_day <![CDATA[ >= ]]> 20150601
+        GROUP BY 1
+        ) as a
+    </select>
+
+
+    <!--流失用户统计 一天一天的查询，一天耗时0.846秒-->
+     <select id="churnUserByDay" resultType="java.util.HashMap">
+        SELECT cdate,
+        (
+        SELECT COUNT(DISTINCT role_id) FROM role_login where log_day <![CDATA[ <= ]]> #{oneWeek} and log_day <![CDATA[ >= ]]> #{twoWeek}
+        AND role_id not in (
+        SELECT role_id FROM role_login where log_day <![CDATA[ <= ]]> cdate and log_day <![CDATA[ >= ]]> #{six}
+        )
+        ) d1,
+        (
+        SELECT COUNT(DISTINCT role_id) FROM role_login where log_day <![CDATA[ <= ]]>  #{oneWeek} and log_day <![CDATA[ >= ]]>#{twoWeek}
+        ) dt1,
+        (
+        SELECT COUNT(DISTINCT role_id) FROM role_login where log_day <![CDATA[ <= ]]> #{twoWeek} and log_day <![CDATA[ >= ]]> #{fourWeek}
+        AND role_id not in (
+        SELECT role_id FROM role_login where log_day <![CDATA[ <= ]]> cdate and log_day >= #{thirteen}
+        )
+        ) d2,
+        (
+        SELECT COUNT(DISTINCT role_id) FROM role_login where log_day <![CDATA[ <= ]]> #{twoWeek} and log_day <![CDATA[ >= ]]> #{fourWeek}
+        ) dt2,
+        (
+        SELECT COUNT(DISTINCT role_id) FROM role_login where log_day <![CDATA[ <= ]]> #{thirty} and log_day <![CDATA[ >= ]]> #{sixty}
+        AND role_id not in (
+        SELECT role_id FROM role_login where log_day <![CDATA[ <= ]]> cdate and log_day <![CDATA[ >= ]]> #{twentyNine}
+        )
+        ) d3,
+        (
+        SELECT COUNT(DISTINCT role_id) FROM role_login where log_day <![CDATA[ <= ]]> #{thirty} and log_day <![CDATA[ >= ]]> #{sixty}
+        ) dt3
+        FROM(
+        SELECT log_day cdate FROM role_login
+        WHERE log_day = #{logDay}
+        GROUP BY 1
+        ) as a
+    </select>
+
+    <!--流失用户等级统计  这里用到了LEFT JOIN 假设周流失用户的等级不全，那么数据将不准确,分成3个SQL则不会有这样的问题-->
+    <select id="churnUserLevel" parameterType="map" resultType="map">
+        SELECT a.level,IFNULL(num1,0) num1,IFNULL(num2,0) num2,IFNULL(num3,0) num3 FROM(
+        SELECT level,count(role_id) num1 FROM (
+        SELECT role_id,max(level) level FROM role_login where log_day <![CDATA[ <= ]]> DATE_FORMAT(DATE_ADD(#{logDay},INTERVAL -7 DAY),'%Y%m%d') and log_day <![CDATA[ >= ]]> DATE_FORMAT(DATE_ADD(#{logDay},INTERVAL -14 DAY),'%Y%m%d')
+        AND role_id not in (
+        SELECT role_id FROM role_login where log_day <![CDATA[ <= ]]> #{logDay} and log_day <![CDATA[ >= ]]> DATE_FORMAT(DATE_ADD(#{logDay},INTERVAL -6 DAY),'%Y%m%d')
+        )
+        GROUP BY role_id
+        ) AS a
+        GROUP BY level
+        ) as a
+        LEFT JOIN
+        (
+        SELECT level,count(role_id) num2 FROM (
+        SELECT role_id,max(level) level FROM role_login where log_day <![CDATA[ <= ]]> DATE_FORMAT(DATE_ADD(#{logDay},INTERVAL -14 DAY),'%Y%m%d') and log_day <![CDATA[ >= ]]> DATE_FORMAT(DATE_ADD(#{logDay},INTERVAL -28 DAY),'%Y%m%d')
+        AND role_id not in (
+        SELECT role_id FROM role_login where log_day <![CDATA[ <= ]]> #{logDay} and log_day <![CDATA[ >= ]]> DATE_FORMAT(DATE_ADD(#{logDay},INTERVAL -13 DAY),'%Y%m%d')
+        )
+        GROUP BY role_id
+        ) AS a
+        GROUP BY level
+        ) as b ON a.level = b.level
+        LEFT JOIN
+        (
+        SELECT level,count(role_id) num3 FROM (
+        SELECT role_id,max(level) level FROM role_login where log_day <![CDATA[ <= ]]> DATE_FORMAT(DATE_ADD(#{logDay},INTERVAL -30 DAY),'%Y%m%d') and log_day <![CDATA[ >= ]]> DATE_FORMAT(DATE_ADD(#{logDay},INTERVAL -60 DAY),'%Y%m%d')
+        AND role_id not in (
+        SELECT role_id FROM role_login where log_day <![CDATA[ <= ]]> #{logDay} and log_day <![CDATA[ >= ]]> DATE_FORMAT(DATE_ADD(#{logDay},INTERVAL -29 DAY),'%Y%m%d')
+        )
+        GROUP BY role_id
+        ) AS a
+        GROUP BY level
+        ) as c ON a.level = c.level
+        ORDER BY 1
+    </select>
+
+    <select id="churnUserLevelWeek" parameterType="map" resultType="map">
+        SELECT level,count(role_id) num FROM (
+        SELECT role_id,max(level) level FROM role_login where log_day <![CDATA[ <= ]]> DATE_FORMAT(DATE_ADD(#{logDay},INTERVAL -7 DAY),'%Y%m%d') and log_day <![CDATA[ >= ]]> DATE_FORMAT(DATE_ADD(#{logDay},INTERVAL -14 DAY),'%Y%m%d')
+        AND role_id not in (
+        SELECT role_id FROM role_login where log_day <![CDATA[ <= ]]> #{logDay} and log_day <![CDATA[ >= ]]> DATE_FORMAT(DATE_ADD(#{logDay},INTERVAL -6 DAY),'%Y%m%d')
+        )
+        GROUP BY role_id
+        ) AS a
+        GROUP BY level
+    </select>
+
+    <select id="churnUserLevelDoubleWeek" parameterType="map" resultType="map">
+        SELECT level,count(role_id) num FROM (
+        SELECT role_id,max(level) level FROM role_login where log_day <![CDATA[ <= ]]> DATE_FORMAT(DATE_ADD(#{logDay},INTERVAL -14 DAY),'%Y%m%d') and log_day <![CDATA[ >= ]]> DATE_FORMAT(DATE_ADD(#{logDay},INTERVAL -28 DAY),'%Y%m%d')
+        AND role_id not in (
+        SELECT role_id FROM role_login where log_day <![CDATA[ <= ]]> #{logDay} and log_day <![CDATA[ >= ]]> DATE_FORMAT(DATE_ADD(#{logDay},INTERVAL -13 DAY),'%Y%m%d')
+        )
+        GROUP BY role_id
+        ) AS a
+        GROUP BY level
+    </select>
+
+    <select id="churnUserLevelMonth" parameterType="map" resultType="map">
+        SELECT level,count(role_id) num FROM (
+        SELECT role_id,max(level) level FROM role_login where log_day <![CDATA[ <= ]]> DATE_FORMAT(DATE_ADD(#{logDay},INTERVAL -30 DAY),'%Y%m%d') and log_day <![CDATA[ >= ]]> DATE_FORMAT(DATE_ADD(#{logDay},INTERVAL -60 DAY),'%Y%m%d')
+        AND role_id not in (
+        SELECT role_id FROM role_login where log_day <![CDATA[ <= ]]> #{logDay} and log_day <![CDATA[ >= ]]> DATE_FORMAT(DATE_ADD(#{logDay},INTERVAL -29 DAY),'%Y%m%d')
+        )
+        GROUP BY role_id
+        ) AS a
+        GROUP BY level
+    </select>
+
+    <!--回流用户-->
+   <select id="refluxUser"  resultType="map">
+       SELECT cdate,
+        (
+        SELECT COUNT(DISTINCT role_id) FROM role_login where  reg_day <![CDATA[ < ]]> #{twoWeek}  AND log_day  <![CDATA[ <= ]]>  cdate and log_day  <![CDATA[ >= ]]>  #{six}
+        AND role_id not in (
+        SELECT DISTINCT role_id FROM role_login where reg_day <![CDATA[ < ]]> #{logDay} AND  log_day  <![CDATA[ <= ]]>  #{oneWeek} and log_day  <![CDATA[ >= ]]> #{twoWeek}
+        )
+        ) d1,
+        (
+        SELECT COUNT(DISTINCT role_id) FROM role_login where reg_day <![CDATA[ < ]]> #{logDay} AND log_day  <![CDATA[ <= ]]>  cdate and log_day  <![CDATA[ >= ]]>   #{six}
+        ) dt1,
+        (
+        SELECT COUNT(DISTINCT role_id) FROM role_login where reg_day <![CDATA[ < ]]>  #{fourWeek}  AND log_day<![CDATA[ <= ]]>  cdate and log_day <![CDATA[ >= ]]> #{thirteen}
+        AND role_id not in (
+        SELECT DISTINCT role_id FROM role_login where reg_day <![CDATA[ < ]]> #{logDay} AND log_day  <![CDATA[ <= ]]> #{twoWeek}  and log_day  <![CDATA[ >= ]]>  #{fourWeek}
+        )
+        ) d2,
+        (
+        SELECT COUNT(DISTINCT role_id) FROM role_login where reg_day <![CDATA[ < ]]> #{logDay} AND log_day  <![CDATA[ <= ]]>  cdate and log_day <![CDATA[ >= ]]> #{thirteen }
+        ) dt2,
+        (
+        SELECT COUNT(DISTINCT role_id) FROM role_login where reg_day <![CDATA[ < ]]> #{sixty}  AND log_day <![CDATA[ <= ]]>  cdate and log_day  <![CDATA[ >= ]]> #{twentyNine}
+         AND role_id not in (
+        SELECT DISTINCT role_id FROM role_login where reg_day <![CDATA[ < ]]> #{logDay} AND log_day  <![CDATA[ <= ]]> #{thirty}  and log_day  <![CDATA[ >= ]]> #{sixty}
+        )
+        ) d3,
+        (
+        SELECT COUNT(DISTINCT role_id) FROM role_login where reg_day <![CDATA[ < ]]> #{logDay} AND log_day <![CDATA[ <= ]]>  cdate and log_day  <![CDATA[ >= ]]>  #{twentyNine}
+        ) dt3
+        FROM(
+        SELECT log_day cdate FROM role_login
+        WHERE log_day = #{logDay}
+        GROUP BY 1
+        ) as a       
+    </select>
+
+
+
+    <select id="refluxUserLevelWeek" parameterType="map" resultType="map">
+        SELECT level,count(role_id) num FROM (
+        SELECT role_id,max(level) level FROM role_login where reg_day <![CDATA[ <> ]]> #{logDay} AND log_day <![CDATA[ <= ]]> #{logDay} and log_day <![CDATA[ >= ]]> DATE_FORMAT(DATE_ADD(#{logDay},INTERVAL -6 DAY),'%Y%m%d')
+        AND role_id not in (
+        SELECT role_id FROM role_login where reg_day <![CDATA[ <> ]]> #{logDay} AND log_day <![CDATA[ <= ]]> DATE_FORMAT(DATE_ADD(#{logDay},INTERVAL -7 DAY),'%Y%m%d') and log_day <![CDATA[ >= ]]> DATE_FORMAT(DATE_ADD(#{logDay},INTERVAL -14 DAY),'%Y%m%d')
+        )
+        GROUP BY role_id
+        ) AS a
+        GROUP BY level
+    </select>
+
+    <select id="refluxUserLevelDoubleWeek" parameterType="map" resultType="map">
+        SELECT level,count(role_id) num FROM (
+        SELECT role_id,max(level) level FROM role_login where reg_day <![CDATA[ <> ]]> #{logDay} AND log_day <![CDATA[ <= ]]> #{logDay} and log_day <![CDATA[ >= ]]> DATE_FORMAT(DATE_ADD(#{logDay},INTERVAL -13 DAY),'%Y%m%d')
+        AND role_id not in (
+        SELECT role_id FROM role_login where reg_day <![CDATA[ <> ]]> #{logDay} AND log_day <![CDATA[ <= ]]> DATE_FORMAT(DATE_ADD(#{logDay},INTERVAL -14 DAY),'%Y%m%d') and log_day <![CDATA[ >= ]]> DATE_FORMAT(DATE_ADD(#{logDay},INTERVAL -28 DAY),'%Y%m%d')
+        )
+        GROUP BY role_id
+        ) AS a
+        GROUP BY level
+    </select>
+
+    <select id="refluxUserLevelMonth" parameterType="map" resultType="map">
+        SELECT level,count(role_id) num FROM (
+        SELECT role_id,max(level) level FROM role_login where reg_day <![CDATA[ <> ]]> #{logDay} AND log_day <![CDATA[ <= ]]> #{logDay} and log_day <![CDATA[ >= ]]> DATE_FORMAT(DATE_ADD(#{logDay},INTERVAL -29 DAY),'%Y%m%d')
+        AND role_id not in (
+        SELECT role_id FROM role_login where reg_day <![CDATA[ <> ]]> #{logDay} AND log_day <![CDATA[ <= ]]> DATE_FORMAT(DATE_ADD(#{logDay},INTERVAL -30 DAY),'%Y%m%d') and log_day <![CDATA[ >= ]]> DATE_FORMAT(DATE_ADD(#{logDay},INTERVAL -60 DAY),'%Y%m%d')
+        )
+        GROUP BY role_id
+        ) AS a
+        GROUP BY level
+    </select>
+	<select id="roleLoginIp" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	<!-- IP查询用户 -->
+        SELECT DISTINCT 
+            role_login.user_id userId,
+            role_login.role_id roleId,
+            role_login.role_name roleName,
+            role_login.server_id serverId,
+            role_login.ip
+        FROM role_login WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(filter)">${filter} </if>
+        <if test="@Ognl@isNotBlank(ip)">and ip = #{ip} </if>
+        <if test="@Ognl@isNotBlank(currentServerId)">and server_id = #{currentServerId} </if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]> #{endDate}</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]> #{startDate}</if>
+    </select>
+    <select id="getRegister" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select pid, server_id, sum(num) num   from
+      (
+       SELECT 
+                 count( role_id)  num,
+                 pid, 
+                 server_id
+       FROM  (
+       select pid,server_id,role_id from role_registration where
+       server_id = #{currentServerId}
+		<if test="@Ognl@isNotBlank(filter)">${filter} </if>
+        <if test="@Ognl@isNotBlank(logDay)">and log_day <![CDATA[ = ]]>#{logDay}</if>
+         GROUP BY role_id)  a GROUP BY  pid
+         ) c  GROUP BY  pid
+    </select>
+    
+      <select id="getLogin" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+         select pid,count( role_id) num from 
+         (select pid,server_id,role_id from role_login where 
+        server_id = #{currentServerId}
+		<if test="@Ognl@isNotBlank(filter)">${filter} </if>
+        <if test="@Ognl@isNotBlank(logDay)">and log_day <![CDATA[ = ]]>#{logDay}</if>
+        GROUP BY role_id)  a  GROUP BY  pid
+    </select>
+    
+	<select id="dayActiveUserLevel" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+    <!-- 日活跃用户等级分布统计 -->
+		select level,count(level) cou from (
+			select CASE
+				WHEN level BETWEEN 1 and 10 then 'level01'
+				WHEN level BETWEEN 11 and 20 then 'level02'
+				WHEN level BETWEEN 21 and 30 then 'level03'
+				WHEN level BETWEEN 31 and 40 then 'level04'
+				WHEN level BETWEEN 41 and 50 then 'level05'
+				WHEN level BETWEEN 51 and 60 then 'level06'
+				WHEN level BETWEEN 61 and 70 then 'level07'
+				WHEN level BETWEEN 71 and 80 then 'level08'
+				WHEN level BETWEEN 81 and 90 then 'level09'
+				WHEN level BETWEEN 91 and 100 then 'level10'
+				WHEN level BETWEEN 101 and 110 then 'level11'
+				WHEN level BETWEEN 111 and 120 then 'level12'
+			end level
+			from (
+				select role_id,max(level) level 
+				from role_login 
+				where 1=1
+				<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+				<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+				<if test="@Ognl@isNotBlank(serverIdList)">
+				AND server_id IN
+					<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+						#{item}
+					</foreach> 
+				</if>
+				GROUP BY role_id
+				) a
+		) b 
+		GROUP BY level 
+		ORDER BY level
+	</select>
+</mapper>

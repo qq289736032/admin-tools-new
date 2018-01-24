@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="chuangqu">
+
+    <select id="findlogin" parameterType="com.mokylin.cabal.modules.chuangqu.entity.ChuangquRequest" resultType="java.util.HashMap">
+        select user_id+"" as uid, server_id+"" as sid, FROM_UNIXTIME(login_time/1000,'%Y-%m-%d %H:%i:%s') as login_time,user_id as username,
+        		FROM_UNIXTIME(reg_time/1000,'%Y-%m-%d %H:%i:%s') as register_time,pid as platform,ip as ip,pid as via
+        from role_login
+        WHERE 1 = 1        
+        <if test="@Ognl@isNotBlank(start_time)">
+        	AND login_time <![CDATA[ >= ]]> #{start_time} 
+		</if>
+		<if test="@Ognl@isNotBlank(end_time)">
+        	AND login_time <![CDATA[ <= ]]> #{end_time} 
+		</if>
+		<if test="@Ognl@isNotBlank(sid)">
+        	AND server_id = #{sid} 
+		</if>
+		 limit #{cursor},#{limit}
+    </select>
+	
+	<select id="findregister" parameterType="com.mokylin.cabal.modules.chuangqu.entity.ChuangquRequest" resultType="java.util.HashMap">
+        select user_id+"" as uid, server_id+"" as sid,user_id as username,
+        		FROM_UNIXTIME(registration_time/1000,'%Y-%m-%d %H:%i:%s') as register_time,pid as platform,"" as ip,pid as via
+        from role_registration
+        WHERE 1 = 1        
+        <if test="@Ognl@isNotBlank(start_time)">
+        	AND registration_time <![CDATA[ >= ]]> #{start_time} 
+		</if>
+		<if test="@Ognl@isNotBlank(end_time)">
+        	AND registration_time <![CDATA[ <= ]]> #{end_time} 
+		</if>
+		<if test="@Ognl@isNotBlank(sid)">
+        	AND server_id = #{sid} 
+		</if>
+		 limit #{cursor},#{limit}
+    </select>
+    
+    <select id="findcreate" parameterType="com.mokylin.cabal.modules.chuangqu.entity.ChuangquRequest" resultType="java.util.HashMap">
+       select user_id+"" as uid, server_id+"" as sid,role_id+"" as role_id,role_name as role_name,
+        	FROM_UNIXTIME(registration_time/1000,'%Y-%m-%d %H:%i:%s') as create_time,pid as platform,"" as ip,"1" as level,pid as via
+        from role_registration
+        WHERE 1 = 1        
+        <if test="@Ognl@isNotBlank(start_time)">
+        	AND registration_time <![CDATA[ >= ]]> #{start_time} 
+		</if>
+		<if test="@Ognl@isNotBlank(end_time)">
+        	AND registration_time <![CDATA[ <= ]]> #{end_time} 
+		</if>
+		<if test="@Ognl@isNotBlank(sid)">
+        	AND server_id = #{sid} 
+		</if>
+		 limit #{cursor},#{limit}
+    </select>
+    
+    <select id="findonline" parameterType="com.mokylin.cabal.modules.chuangqu.entity.ChuangquRequest" resultType="java.util.HashMap">
+        select server_id+"" as sid, count+"" as online_num,vip_count+"" as online_pay_num,
+        		FROM_UNIXTIME(log_time/1000,'%Y-%m-%d %H:%i:%s') as update_at,pid as platform
+        from role_online
+        WHERE 1 = 1        
+        <if test="@Ognl@isNotBlank(start_time)">
+        	AND log_time <![CDATA[ >= ]]> #{start_time} 
+		</if>
+		<if test="@Ognl@isNotBlank(end_time)">
+        	AND log_time <![CDATA[ <= ]]> #{end_time} 
+		</if>
+		<if test="@Ognl@isNotBlank(sid)">
+        	AND server_id = #{sid} 
+		</if>
+		 limit #{cursor},#{limit}
+    </select>
+
+    <select id="findrecharge" parameterType="com.mokylin.cabal.modules.chuangqu.entity.ChuangquRequest" resultType="java.util.HashMap">
+        select server_id+"" as sid,user_id+"" as uid,user_id as username,role_id+"" as role_id,role_name as role_name,
+        		level+"" as level,order_id as orderno,"RMB" as currency,"" as pay_way, rmb_amount+"" as money,treasure_amount+"" as coin,
+        		CASE recharge_type WHEN 3 THEN "0" WHEN 2 THEN "1" WHEN 1 THEN "2" ELSE "3" END as exchange_type,
+						CASE is_finish WHEN 1 THEN "0" ELSE "1" END as state,FROM_UNIXTIME(recharge_time/1000,'%Y-%m-%d %H:%i:%s') as pay_time,FROM_UNIXTIME(recharge_time/1000,'%Y-%m-%d %H:%i:%s') as create_at,
+        		pid as platform,"" as mark,"" as deduction,surplus_treasure+"" as surplus_coin,vip_level+"" as vip_level
+        from role_recharge
+        WHERE 1 = 1        
+        <if test="@Ognl@isNotBlank(start_time)">
+        	AND recharge_time <![CDATA[ >= ]]> #{start_time} 
+		</if>
+		<if test="@Ognl@isNotBlank(end_time)">
+        	AND recharge_time <![CDATA[ <= ]]> #{end_time} 
+		</if>
+		<if test="@Ognl@isNotBlank(sid)">
+        	AND server_id = #{sid} 
+		</if>
+		 limit #{cursor},#{limit}
+    </select>
+    
+	<select id="selectPlayerLevel" parameterType="com.mokylin.cabal.modules.chuangqu.entity.ChuangquRequest" resultType="java.util.HashMap">
+		select server_id+"" as sid,user_id+"" as uid,user_id as username,role_id+"" as role_id,role_name as role_name,
+				FROM_UNIXTIME(upgrade_time/1000,'%Y-%m-%d %H:%i:%s') as update_at, pid as platform,
+				min(level) as before_level, max(level) as after_level
+		from role_upgrade
+		WHERE 1 = 1        
+		<if test="@Ognl@isNotBlank(start_time)">
+			AND upgrade_time <![CDATA[ >= ]]> #{start_time} 
+		</if>
+		<if test="@Ognl@isNotBlank(end_time)">
+			AND upgrade_time <![CDATA[ <= ]]> #{end_time} 
+		</if>
+		<if test="@Ognl@isNotBlank(sid)">
+			AND server_id = #{sid} 
+		</if>
+		  group by role_id limit #{cursor},#{limit}
+    </select>
+	
+	<select id="selectTask" parameterType="com.mokylin.cabal.modules.chuangqu.entity.ChuangquRequest" resultType="java.util.HashMap">
+		select server_id+"" as sid,user_id+"" as uid,user_id as username,role_id+"" as role_id,role_name as role_name,
+				FROM_UNIXTIME(event_time/1000,'%Y-%m-%d %H:%i:%s') as update_at, pid as platform,
+				task_id, task_id as task_name, "1" as status
+		from role_task_end
+		WHERE 1 = 1        
+		<if test="@Ognl@isNotBlank(start_time)">
+			AND event_time <![CDATA[ >= ]]> #{start_time} 
+		</if>
+		<if test="@Ognl@isNotBlank(end_time)">
+			AND event_time <![CDATA[ <= ]]> #{end_time} 
+		</if>
+		<if test="@Ognl@isNotBlank(sid)">
+			AND server_id = #{sid} 
+		</if>
+		 limit #{cursor},#{limit}
+    </select>
+	
+	<select id="selectItemLog" parameterType="com.mokylin.cabal.modules.chuangqu.entity.ChuangquRequest" resultType="java.util.HashMap">
+		select area_id+"" as sid,user_id+"" as uid,role_id+"" as role_id,
+				item_id, value as num, flow_type as type
+				FROM_UNIXTIME(log_time/1000,'%Y-%m-%d %H:%i:%s') as update_at, pid as platform
+		from goods_flow_log_${log_date}
+		WHERE 1 = 1        
+		<if test="@Ognl@isNotBlank(start_time)">
+			AND log_time <![CDATA[ >= ]]> #{start_time} 
+		</if>
+		<if test="@Ognl@isNotBlank(end_time)">
+			AND log_time <![CDATA[ <= ]]> #{end_time} 
+		</if>
+		<if test="@Ognl@isNotBlank(sid)">
+			AND area_id = #{sid} 
+		</if>
+		 limit #{cursor},#{limit}
+    </select>
+	<select id="selectOnlineUserTime" parameterType="com.mokylin.cabal.modules.chuangqu.entity.ChuangquRequest" resultType="java.util.HashMap">
+		select server_id+"" as sid,user_id+"" as uid,user_id as username,role_id+"" as role_id,role_name as role_name,
+				FROM_UNIXTIME(log_update_time/1000,'%Y-%m-%d %H:%i:%s') as update_at, pid as platform,
+				level, online_time_all+"" as total_online, (UNIX_TIMESTAMP(last_logout_time)-UNIX_TIMESTAMP(last_login_time)) as current_online
+		from role
+		WHERE 1 = 1        
+		<if test="@Ognl@isNotBlank(start_time)">
+			AND log_update_time <![CDATA[ >= ]]> #{start_time} 
+		</if>
+		<if test="@Ognl@isNotBlank(end_time)">
+			AND log_update_time <![CDATA[ <= ]]> #{end_time} 
+		</if>
+		<if test="@Ognl@isNotBlank(sid)">
+			AND server_id = #{sid} 
+		</if>
+		 limit #{cursor},#{limit}
+    </select>
+	<select id="selectMoneyConsume" parameterType="com.mokylin.cabal.modules.chuangqu.entity.ChuangquRequest" resultType="java.util.HashMap">
+		select area_id+"" as sid,user_id+"" as uid,user_id as username,role_id+"" as role_id,role_name as role_name,
+				FROM_UNIXTIME(log_time/1000,'%Y-%m-%d %H:%i:%s') as update_at, pid as platform,
+				money_type as type, value as num, before_value as befor_num, after_value as after_num,
+				CASE money_type WHEN 1 THEN "0" WHEN 3 THEN "2" WHEN 2 THEN "2" END as type,				
+		from goods_flow_log_${log_date}
+		WHERE 1 = 1        
+		<if test="@Ognl@isNotBlank(start_time)">
+			AND log_time <![CDATA[ >= ]]> #{start_time} 
+		</if>
+		<if test="@Ognl@isNotBlank(end_time)">
+			AND log_time <![CDATA[ <= ]]> #{end_time} 
+		</if>
+		<if test="@Ognl@isNotBlank(sid)">
+			AND area_id = #{sid} 
+		</if>
+		 limit #{cursor},#{limit}
+    </select>
+	<select id="selectLoading" parameterType="com.mokylin.cabal.modules.chuangqu.entity.ChuangquRequest" resultType="java.util.HashMap">
+        select server_id+"" as sid, FROM_UNIXTIME(registration_time/1000,'%Y-%m-%d %H:%i:%s') as update_at,
+        pid as platform,user_id as openid, "4" as type
+        from role_registration
+        WHERE 1 = 1        
+        <if test="@Ognl@isNotBlank(start_time)">
+        	AND registration_time <![CDATA[ >= ]]> #{start_time} 
+		</if>
+		<if test="@Ognl@isNotBlank(end_time)">
+        	AND registration_time <![CDATA[ <= ]]> #{end_time} 
+		</if>
+		<if test="@Ognl@isNotBlank(sid)">
+        	AND server_id = #{sid} 
+		</if>
+		 limit #{cursor},#{limit}
+    </select>
+	
+</mapper>

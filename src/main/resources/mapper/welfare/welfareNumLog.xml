@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="welfareNumLog">
+
+	<select id="paging"
+		resultType="com.mokylin.cabal.modules.welfare.entity.WelfareNumLog"
+		parameterType="java.util.HashMap">
+		select * from welfare_num_log where 1=1
+		<if test="@Ognl@isNotBlank(platName)">and plat_name = #{platName}</if>
+		<if test="@Ognl@isNotBlank(serverId)">and server_id = #{serverId}</if>
+		<if test="@Ognl@isNotBlank(editType)">and edit_type = #{editType}</if>
+		
+		<if test="@Ognl@isNotBlank(startTime)">and create_date &gt;= #{startTime}</if>
+		<if test="@Ognl@isNotBlank(endTime)">and create_date &lt;= #{endTime}</if>
+		order by create_date desc
+	</select>
+	
+	<select id="count"
+		resultType="java.lang.Integer"
+		parameterType="java.util.HashMap">
+		select count(*) from welfare_num_log where 1=1
+		<if test="@Ognl@isNotBlank(platName)">and plat_name = #{platName}</if>
+		<if test="@Ognl@isNotBlank(serverId)">and server_id = #{serverId}</if>
+		<if test="@Ognl@isNotBlank(editType)">and edit_type = #{editType}</if>
+		<if test="@Ognl@isNotBlank(startTime)">and create_date &gt;= #{startTime}</if>
+		<if test="@Ognl@isNotBlank(endTime)">and create_date &lt;= #{endTime}</if>
+	</select>
+
+	<insert id="insert"
+		parameterType="java.util.HashMap">
+		insert into welfare_num_log(
+			id,
+			plat_name,
+			server_name,
+			server_id,
+			role_name,
+			user_id,
+			role_id,
+			use_people,
+			use_people_post,
+			edit_type,
+			create_name,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag,
+			status
+		)
+		values
+
+		(
+			#{id},
+			#{platName},
+			#{serverName},
+			#{serverId},
+			#{roleName},
+			#{userId},
+			#{roleId},
+			#{usePeople},
+			#{usePeoplePost},
+			#{editType},
+			#{createName},
+			#{createBy},
+			now(),
+			#{updateBy},
+			now(),
+			0,
+			#{status}
+		)
+
+	</insert>
+
+	<insert id="batchInsert" parameterType="java.util.List">
+		insert into welfare_num_log(
+			id,
+			plat_name,
+			server_name,
+			server_id,
+			role_name,
+			user_id,
+			role_id,
+			use_people,
+			use_people_post,
+			edit_type,
+			create_name,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag,
+			status
+		)
+		values
+		<foreach item="item" index="index" collection="list"
+			separator=",">
+			(
+			#{item.id},
+			#{item.platName},
+			#{item.serverName},
+			#{item.serverId},
+			#{item.roleName},
+			#{item.userId},
+			#{item.roleId},
+			#{item.usePeople},
+			#{item.usePeoplePost},
+			#{item.editType},
+			#{item.createName},
+			#{item.createBy},
+			now(),
+			#{item.updateBy},
+			now(),
+			0,
+			#{item.status}
+			)
+		</foreach>
+	</insert>
+</mapper>

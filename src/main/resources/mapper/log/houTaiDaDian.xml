@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="houtaidadian">
+
+<!--每日注册转化分服  -->
+<select id="regDailyConvertionRealTime" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select pid as pid,
+			   server_id as serverId,
+			   sum(role_jinrugame) as step1,           	  <!-- 已进入游戏首页   -->
+			   sum(role_flashfinish) as step2,		  	  <!-- 加载Flash主程序完成    -->
+			   sum(role_jiazaiconfig) as step3, 	  	  <!-- 加载创角配置文件完成 -->
+			   sum(create_jiemian) as step4,			  <!-- 到创角界面完成 -->			
+			   sum(jiazai_ui) as visit_times,			  <!-- 加载创角UI文件完成(创角页访问次数) -->	
+			   SUM(create_role) as createRole,			  <!-- 角色创建成功的数量 -->	
+			   SUM(jiru_firststage) as firststage,		  <!-- 初始场景登陆次数 -->
+			   sum(name_box) as nameBox,				  <!-- 角色输入框点击次数 -->
+			   sum(name_button) as nameBuggon,			  <!-- 随即按钮点击次数 -->
+			   sum(create_button) as createButton,		  <!-- 创角按钮点击次数 -->
+			   log_day  as logDay
+		from houtai_dadian_${table}
+		where 1 = 1
+		<if test="@Ognl@isNotBlank(serverIdList)">
+					AND server_id IN
+					<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+							#{item}
+					</foreach>
+		</if>
+		and log_day <![CDATA[ = ]]> replace(#{createDateStart},'-','')
+	    group by pid,server_id,log_day
+</select>
+
+<!-- 每日注册转化 统计 -->
+<select id="regDailyConvertion" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+			select
+	           pid as pid,
+			   server_id as serverId,
+			   sum(role_jinrugame) as step1,           	  <!-- 已进入游戏首页   -->
+			   sum(role_flashfinish) as step2,		  	  <!-- 加载Flash主程序完成    -->
+			   sum(role_jiazaiconfig) as step3, 	  	  <!-- 加载创角配置文件完成 -->
+			   sum(create_jiemian) as step4,			  <!-- 到创角界面完成 -->			
+			   sum(jiazai_ui) as visit_times,			  <!-- 加载创角UI文件完成(创角页访问次数) -->	
+			   SUM(create_role) as createRole,			  <!-- 角色创建成功的数量 -->	
+			   SUM(jiru_firststage) as firststage,		  <!-- 初始场景登陆次数 -->
+			   sum(name_box) as nameBox,				  <!-- 角色输入框点击次数 -->
+			   sum(name_button) as nameBuggon,			  <!-- 随即按钮点击次数 -->
+			   sum(create_button) as createButton,		  <!-- 创角按钮点击次数 -->
+			   log_day  as logDay
+		from houtai_dadian_${table}
+		where 1 = 1
+		<if test="@Ognl@isNotBlank(serverIdList)">
+					AND server_id IN
+					<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+							#{item}
+					</foreach>
+		</if>
+		and log_day <![CDATA[ = ]]> replace(#{createDateStart},'-','')
+	    group by pid,server_id,log_day
+</select>
+</mapper>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- status=debug 可以查看log4j的装配过程 -->
+<configuration status="debug" monitorInterval="30">
+	<properties>
+		<property name="LOG_HOME">/data/log/admin</property>
+	</properties>
+	
+	<appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+      		<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss SSS} [%t] %-5level %logger{36} - %msg%n"/>
+    	</Console>
+    	<!-- 错误日志 -->
+    	<RollingFile name="error_appender" fileName="${LOG_HOME}/error.log" filePattern="${LOG_HOME}/error-%d{yyyy-MM-dd}-%i.log.gz">
+    		<PatternLayout pattern="%-d{yyyy-MM-dd HH:mm:ss} [%thread] %m%n"/>
+    		<SizeBasedTriggeringPolicy size="100 MB" />
+    	</RollingFile>
+
+		<!-- 访问日志 -->
+		<RollingFile name="access_appender" fileName="${LOG_HOME}/admin-access.log" filePattern="${LOG_HOME}/admin-access-%d{yyyy-MM-dd}-%i.log.gz">
+			<PatternLayout pattern="%-d{yyyy-MM-dd HH:mm:ss} [%thread] %m%n"/>
+			<SizeBasedTriggeringPolicy size="100 MB" />
+		</RollingFile>
+
+		<!-- 耗时日志 -->
+		<RollingFile name="time_appender" fileName="${LOG_HOME}/admin-time.log" filePattern="${LOG_HOME}/admin-time-%d{yyyy-MM-dd}-%i.log.gz">
+			<PatternLayout pattern="%-d{yyyy-MM-dd HH:mm:ss} [%thread] %m%n"/>
+			<SizeBasedTriggeringPolicy size="100 MB" />
+		</RollingFile>
+
+	</appenders>
+	
+	<loggers>
+	 	<logger name="org.springframework" level="warn"/>
+		<!--<logger name="org.apache.mina" level="warn"/>-->
+		<!--<logger name="org.apache.http" level="warn"/>-->
+		<!--<logger name="org.apache.commons" level="warn"/>-->
+		<!--<logger name="com.mchange.v2" level="error"/>-->
+		<logger name="com.ibatis" level="warn"/>
+		<logger name="java.sql" level="info"/>
+		<logger name="org.quartz" level="warn"/>
+		<!--<logger name="com.opensymphony" level="warn"/>-->
+		<!--<logger name="com.sun.xml.internal.ws" level="warn"/>-->
+
+		<logger name="error_logger" level="DEBUG" additivity="true">
+			<AppenderRef ref="error_appender" />
+		</logger>
+
+		<logger name="time_logger" level="DEBUG" additivity="false">
+			<AppenderRef ref="time_appender" />
+		</logger>
+
+		<logger name="admin-access" level="DEBUG" additivity="false">
+			<AppenderRef ref="access_appender" />
+		</logger>
+
+		<root level="DEBUG">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="error_appender" />
+		</root>
+	</loggers>
+
+</configuration>

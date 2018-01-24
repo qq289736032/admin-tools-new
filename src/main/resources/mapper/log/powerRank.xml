@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="powerRank">
+
+    <select id="paging" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select pid,area_id, role_id, role_name,today_max_power,his_max_power,vip_level,
+        		tra, seven_day_recharge, thirty_day_recharge,create_role_time,last_login_time
+        from power_rank_${suffix} where 1 =1 
+        <if test="@Ognl@isNotBlank(startDate)">and log_day <![CDATA[ = ]]>replace(#{startDate},'-','')</if>
+       <if test="@Ognl@isNotBlank(serverIdList)"> 
+		 	and  area_id in 
+		 <foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+	           #{item}
+	     </foreach>
+	    </if>
+        order by today_max_power desc
+    </select>
+    
+     <select id="singlePower" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select area_id, role_id, role_name,today_max_power,his_max_power,vip_level,
+        tra, seven_day_recharge, thirty_day_recharge,create_role_time,last_login_time
+        from power_rank_${suffix} where 1 =1
+        <if test="@Ognl@isNotBlank(startDate)">and log_day <![CDATA[ = ]]>replace(#{startDate},'-','')</if>
+        and area_id = #{currentServerId}
+        order by today_max_power desc
+    </select>
+
+    <select id="pageMax" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+         select
+        pid,area_id,
+        count(case when today_max_power  <![CDATA[ >= ]]>   300000  and  today_max_power<![CDATA[ < ]]>  500000 then id  else null end ) pageMaxOne,
+        count(case when today_max_power  <![CDATA[ >= ]]>   500000  and  today_max_power<![CDATA[ < ]]>  800000 then id  else null end ) pageMaxTwo,
+        count(case when today_max_power  <![CDATA[ >= ]]>  800000  and  today_max_power<![CDATA[ < ]]>  1000000 then id  else null end ) pageMaxThree,
+		count(case when today_max_power  <![CDATA[ >= ]]>   1000000  and  today_max_power<![CDATA[ < ]]>  2000000 then id  else null end ) pageMaxFour,
+		count(case when today_max_power  <![CDATA[ >= ]]>   2000000  and  today_max_power<![CDATA[ < ]]>  5000000 then id else null end ) pageMaxFive,
+		count(case when today_max_power  <![CDATA[ > ]]>  5000000 then id else null end ) maxFive
+       from    power_rank_${suffix}  a where 1=1 
+       <if test="@Ognl@isNotBlank(serverIdList)"> 
+		 	and  area_id in 
+		 <foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+	           #{item}
+	     </foreach>
+	    </if>
+	    GROUP BY  pid,area_id
+    </select>
+    
+     <select id="pageWorld" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select
+        pid,world_id,
+        count(case when today_max_power  <![CDATA[ >= ]]>   300000  and  today_max_power<![CDATA[ < ]]>  500000 then id  else null end ) pageMaxOne,
+        count(case when today_max_power  <![CDATA[ >= ]]>   500000  and  today_max_power<![CDATA[ < ]]>  800000 then id  else null end ) pageMaxTwo,
+        count(case when today_max_power  <![CDATA[ >= ]]>  800000  and  today_max_power<![CDATA[ <]]>  1000000 then id  else null end ) pageMaxThree,
+		count(case when today_max_power  <![CDATA[ >= ]]>   1000000  and  today_max_power<![CDATA[ < ]]>  2000000 then id  else null end ) pageMaxFour,
+		count(case when today_max_power  <![CDATA[ >= ]]>   2000000  and  today_max_power<![CDATA[ < ]]>  5000000 then id else null end ) pageMaxFive,
+		count(case when today_max_power  <![CDATA[ > ]]>  5000000 then id else null end ) maxFive
+       from    power_rank_${suffix}  a where 1=1
+       <if test="@Ognl@isNotBlank(serverIdList)"> 
+		 	and  area_id in 
+		 <foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+	           #{item}
+	     </foreach>
+	    </if>
+	    GROUP BY  pid,world_id
+    </select>
+</mapper>

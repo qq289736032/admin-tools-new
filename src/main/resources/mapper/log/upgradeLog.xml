@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="upgradeLog">
+    <select id="findUpgradeLogReport" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+	    SELECT
+			u.role_name role_name,
+			u.operation_type operation_type,
+			u.equip_name equip_name,
+			u.item_name item_name,
+			u.num AS num,
+			u.before_level before_level,
+			u.after_level after_level,
+		    DATE_FORMAT(u.log_day,'%Y-%m-%d %H:%m:%s') log_day,
+			u.log_minute log_time
+		FROM
+			upgrade_log_${suffix} u
+		WHERE
+			1 = 1
+			<if test="@Ognl@isNotBlank(roleName)">and u.role_name like concat('%',#{roleName},'%')</if>
+			<if test="@Ognl@isNotBlank(operateType)">and u.operation_type <![CDATA[ = ]]>#{operateType}</if>
+			<if test="@Ognl@isNotBlank(createDateStart)">and u.log_day <![CDATA[ >= ]]>replace(replace(#{createDateStart},'-',''),' ','')</if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and u.log_day <![CDATA[ <= ]]>replace(replace(#{createDateEnd},'-',''),' ','')</if>
+		ORDER BY
+			u.log_time DESC
+    </select>
+</mapper>

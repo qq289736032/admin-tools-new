@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="daoLiang">
+    <select id="findDaoLiangByPid" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		SELECT
+			sys_daoliang.id id,
+			sys_daoliang.cpa cpa,
+			sys_daoliang.pid pid
+		FROM
+			sys_daoliang
+		WHERE
+			sys_daoliang.pid = #{pid}
+    </select>
+    <select id="findDaoLiang" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		SELECT
+			sys_daoliang.id id,
+			sys_daoliang.cpa cpa,
+			sys_daoliang.pid pid
+		FROM
+			sys_daoliang
+    </select>
+    <insert id="insert" parameterType="java.util.HashMap">
+        insert into sys_daoliang(id,cpa,pid)
+       					  values(#{id}, #{cpa}, #{pid})
+    </insert>
+    
+    <update id="update" parameterType="java.util.HashMap">
+        UPDATE 
+        	sys_daoliang 
+        SET 
+        	cpa = #{cpa}
+        WHERE 
+        	pid = #{pid}
+    </update>
+</mapper>

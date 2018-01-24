@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="honorBattleground">
+	
+	<select id="honorBattlegroundJoin" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		<!-- 荣耀战场参加人数	-->
+		select count(role_id) cou from (
+		<foreach collection="list" item="items" index="index" separator="UNION ALL"> 
+			select role_id from enter_map_log_${items} where map_id=56 
+			<if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach> 
+			</if>
+			GROUP BY role_id
+		</foreach>
+		) a
+	</select>
+	
+	<select id="honorBattlegroundDead" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		<!-- 荣耀战场死亡次数 -->	
+		
+		select sum(num) num from(
+		<foreach collection="list" item="items" index="index" separator="UNION ALL">
+		SELECT count(role_id) num FROM dead_log_${items} m where stage_id=56
+		<if test="@Ognl@isNotBlank(serverIdList)">
+		AND server_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach> 
+		</if>
+		</foreach>
+		) a	
+		
+	</select>
+	
+</mapper>

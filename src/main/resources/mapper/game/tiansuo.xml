@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="tiansuo">
+
+    <select id="paging" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT
+            role_tiansuo.id,
+            role_tiansuo.roleid,
+            role_tiansuo.rank,
+            role_tiansuo.star,
+            role_tiansuo.zhufuzhi,
+            role_tiansuo.create_time,
+            role_tiansuo.count,
+            role_tiansuo.state,
+            role_tiansuo.curhp,
+            role_tiansuo.likai,
+            role_tiansuo.siwang,
+            role_tiansuo.update_time,
+            role_tiansuo.max_rank maxRank
+        FROM `role_tiansuo`
+        WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(id)">and role_id = #{id}</if>
+        order by create_time desc
+    </select>
+
+    <select id="findByRoleId" resultType="java.util.HashMap">
+       SELECT
+            role_tiansuo.id,
+            role_tiansuo.role_id,
+            role_tiansuo.rank,
+            role_tiansuo.star,
+            role_tiansuo.zhufuzhi,
+            role_tiansuo.create_time,
+            role_tiansuo.count,
+            role_tiansuo.state,
+            role_tiansuo.curhp,
+            role_tiansuo.likai,
+            role_tiansuo.siwang,
+            role_tiansuo.update_time,
+            role_tiansuo.max_rank maxRank
+        FROM `role_tiansuo`
+        WHERE role_id = #{id}
+    </select>
+</mapper>

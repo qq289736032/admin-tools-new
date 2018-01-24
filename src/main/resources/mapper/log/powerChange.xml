@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="powerChange">
+	<select id="findPowerChange" parameterType="java.util.HashMap"
+		resultType="java.util.HashMap">
+		SELECT
+			id,
+			pid,
+			server_id,
+			user_id,
+			role_id,
+			role_name,
+			operate_type,
+			event_id,
+			`before`,
+			`after`,
+			`value`,
+			type,
+			log_day,
+			log_hour,
+			log_minute,
+			add_time
+		FROM  power_change_log_${suffix}
+		where server_id = #{currentServerId}
+		<if test="@Ognl@isNotBlank(roleName)"> and role_name= #{roleName} </if>
+		<if test="@Ognl@isNotBlank(roleId)"> and role_id= #{roleId} </if>
+		<if test="@Ognl@isNotBlank(operaTypeList)"> 
+	        and  operate_type in 
+	    <foreach item="item" index="index" collection="operaTypeList" open="(" separator="," close=")">
+            #{item}
+      	</foreach>
+      	</if>
+		ORDER BY log_day DESC
+	</select>
+
+</mapper>

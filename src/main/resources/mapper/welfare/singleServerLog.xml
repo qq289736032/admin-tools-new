@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="singleServerLog">
+
+
+	<select id="paging"
+		resultType="com.mokylin.cabal.modules.welfare.entity.SingleServerLog"
+		parameterType="java.util.HashMap">
+		select * from single_server_log where del_flag = 0
+		<if test="@Ognl@isNotBlank(pid)">and pid = #{pid}</if>
+		<if test="@Ognl@isNotBlank(serverId)">and server_id = #{serverId}</if>
+		<if test="@Ognl@isNotBlank(startTime)">and create_date &gt;= #{startTime}</if>
+		<if test="@Ognl@isNotBlank(endTime)">and create_date &lt;= #{endTime}</if>
+		order by create_date desc
+	</select>
+	
+	
+	<select id="count"
+		resultType="java.lang.Integer"
+		parameterType="java.util.HashMap">
+		select count(*) from single_server_log where del_flag = 0
+		<if test="@Ognl@isNotBlank(pid)">and pid = #{pid}</if>
+		<if test="@Ognl@isNotBlank(serverId)">and server_id = #{serverId}</if>
+		<if test="@Ognl@isNotBlank(startTime)">and create_date &gt;= #{startTime}</if>
+		<if test="@Ognl@isNotBlank(endTime)">and create_date &lt;= #{endTime}</if>
+	</select>
+	
+	
+
+	<insert id="insert" parameterType="com.mokylin.cabal.modules.welfare.entity.SingleServerLog">
+        insert into single_server_log(
+           	id,
+			new_service_gold,
+			r_resource_amount,
+			r_resource_ratio,
+			single_charge_ratio,
+			top_charge,
+			top_gold_day,
+			top_hold_gold,
+			top_internal_number,
+			add_time_limit,
+			plat_name,
+			pid,
+			server_id,
+			server_name,
+			create_name,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag,
+			edit_type,
+			is_influence
+		)
+		values(
+		    #{id},
+			#{newServiceGold},
+			#{RResourceAmount},
+			#{RResourceRatio},
+			#{singleChargeRatio},
+			#{topCharge},
+			#{topGoldDay},
+			#{topHoldGold},
+			#{topInternalNumber},
+			#{addTimeLimit},
+			#{platName},
+			#{pid},
+			#{serverId},
+			#{serverName},
+			#{createName},
+			#{createBy},
+			now(),
+			#{updateBy},
+			now(),
+			0,
+			#{editType},
+			#{isInfluence}
+		)
+    </insert>
+    
+    	<insert id="batchInsert" parameterType="java.util.HashMap">
+        insert into single_server_log(
+            id,
+			new_service_gold,
+			r_resource_amount,
+			r_resource_ratio,
+			single_charge_ratio,
+			top_charge,
+			top_gold_day,
+			top_hold_gold,
+			top_internal_number,
+			add_time_limit,
+			plat_name,
+			pid,
+			server_id,
+			server_name,
+			create_name,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag,
+			edit_type,
+			is_influence
+		)
+		values
+		<foreach item="item" index="index" collection="list" separator=",">
+		(
+		    #{item.id},
+			#{item.newServiceGold},
+			#{item.RResourceAmount},
+			#{item.RResourceRatio},
+			#{item.singleChargeRatio},
+			#{item.topCharge},
+			#{item.topGoldDay},
+			#{item.topHoldGold},
+			#{item.topInternalNumber},
+			#{item.addTimeLimit},
+			#{item.platName},
+			#{item.pid},
+			#{item.serverId},
+			#{item.serverName},
+			#{item.createName},
+			#{item.createBy},
+			now(),
+			#{item.updateBy},
+			now(),
+			0,
+			#{item.editType},
+			#{item.isInfluence}
+		)
+		</foreach>
+    </insert>
+</mapper>

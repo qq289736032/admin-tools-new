@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="monthRevenue">
+
+<!--月营收预估列表 -->
+<select id="index"  resultType="java.util.HashMap">
+        select id as id,
+               month as month,
+               newUser as newUser,
+               oldUser as oldUser,
+               month_active as active,
+               payNum as payNum,
+               payingrate as payrate,
+               arpu as arpu,
+               income as income
+        from month_revenue_estimate 
+        order by month desc
+</select>
+
+<!-- 月营收预估 添加-->
+<insert id="insert" parameterType="java.util.HashMap">
+        insert into month_revenue_estimate(
+            month,
+            newUser,
+            oldUser,
+            month_active,
+            payNum,
+            payingrate,
+            arpu,
+            income,
+            log_time
+            )values(
+                #{month},
+                #{newUser},
+                #{oldUser},
+                #{active},
+                #{payNum},
+                #{payment},
+                #{arpu},
+                #{income},
+                now()
+            )
+</insert>
+
+<select id="selectOneById" parameterType="java.lang.String" resultType="com.mokylin.cabal.modules.tools.entity.mothRevenue">
+       select month as month,
+        	  newUser as newUser,
+        	  oldUser as oldUser,
+        	  month_active as active,
+        	  payNum as chargeNum,
+        	  income as income
+        from month_revenue_estimate
+        where id=#{id} 
+</select>
+
+<update id="updateRevenue" parameterType="java.util.HashMap">
+       update month_revenue_estimate set 
+          	  month=#{month},
+         	  newUser=#{newUser},
+     	 	  oldUser=#{oldUser},
+     		  month_active=#{active},
+    	 	  payNum=#{payNum},
+    	 	  payingrate=#{payment},
+         	  arpu=#{arpu},
+      	 	  income=#{income},
+    	 	  log_time=now()
+    	where id=#{id} 	 
+</update>
+    
+<!-- 按照月份查询预估 -->
+<select id="selectMonth" parameterType="java.util.HashMap" resultType="com.mokylin.cabal.modules.tools.entity.mothRevenue">  
+       select  month as month,
+               newUser as newUser,
+               oldUser as oldUser,
+               month_active as active,
+               payingrate as payrate,
+               arpu as arpu,
+               income as income
+      from month_revenue_estimate 
+      where month =#{month}
+</select>  
+</mapper>

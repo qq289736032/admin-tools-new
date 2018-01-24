@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="rebateStatisticRechargeMapper">
+  <resultMap id="BaseResultMap" type="com.mokylin.cabal.modules.rebate.entity.RebateStatisticRecharge">
+    <result column="id" jdbcType="VARCHAR" property="id" />
+    <result column="user_id" jdbcType="VARCHAR" property="userId" />
+    <result column="role_id" jdbcType="BIGINT" property="roleId" />
+    <result column="statistic_date" jdbcType="DATE" property="statisticDate" />
+    <result column="sum_money" jdbcType="BIGINT" property="sumMoney" />
+    <result column="recharge_times" jdbcType="INTEGER" property="rechargeTimes" />
+    <result column="rebate_ratio" jdbcType="INTEGER" property="rebateRatio" />
+    <result column="rebate_gold" jdbcType="BIGINT" property="rebateGold" />
+    <result column="create_name" jdbcType="VARCHAR" property="createName" />
+    <result column="create_by" jdbcType="VARCHAR" property="createBy" />
+    <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
+    <result column="update_by" jdbcType="VARCHAR" property="updateBy" />
+    <result column="update_date" jdbcType="TIMESTAMP" property="updateDate" />
+    <result column="del_flag" jdbcType="INTEGER" property="delFlag" />
+    <result column="server_id" jdbcType="VARCHAR" property="serverId" />
+    <result column="pid" jdbcType="VARCHAR" property="pid" />
+  </resultMap>
+    <select id="sumByRoleId" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+  	select IFNULL(sum(rebate_gold),0) as sumMoney,role_id as roleId,user_id as userId,pid,server_id as serverId,server_name as serverName
+  	,role_name as roleName
+  	from rebate_statistic_recharge where
+  	statistic_date &gt;= #{statisticDate}
+  	and statistic_date &lt;= #{endDate}
+  	<if test="@Ognl@isNotBlank(pid)">and pid = #{pid}</if>
+  	<if test="@Ognl@isNotBlank(serverId)">and server_id = #{serverId}</if>
+  	<if test="@Ognl@isNotBlank(roleName)">and role_name = #{roleName}</if>
+  	<if test="@Ognl@isNotBlank(userId)">and user_id = #{userId}</if>
+  	<if test="@Ognl@isNotBlank(roleId)">and role_id = #{roleId}</if>
+  	 group by role_id 
+  	 order by pid,server_id,sumMoney desc
+  </select>
+  
+      <select id="count" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+  	select count(*) as count
+  	from rebate_statistic_recharge where
+  	statistic_date &gt;= #{statisticDate}
+  	and statistic_date &lt;= #{endDate}
+  	<if test="@Ognl@isNotBlank(pid)">and pid = #{pid}</if>
+  	<if test="@Ognl@isNotBlank(serverId)">and server_id = #{serverId}</if>
+  	<if test="@Ognl@isNotBlank(roleName)">and role_name = #{roleName}</if>
+  	<if test="@Ognl@isNotBlank(userId)">and user_id = #{userId}</if>
+  	<if test="@Ognl@isNotBlank(roleId)">and role_id = #{roleId}</if>
+  </select>
+  
+  <select id="findByRoleIdAndDate" resultType="com.mokylin.cabal.modules.rebate.entity.RebateStatisticRecharge" parameterType="java.util.HashMap">
+  	select *
+  	from rebate_statistic_recharge where
+  	statistic_date = #{statisticDate} and role_id = #{roleId}
+  	
+  </select>
+  
+      <select id="findAll" resultType="com.mokylin.cabal.modules.rebate.entity.RebateStatisticRecharge" parameterType="java.util.HashMap">
+  	select *
+  	from rebate_statistic_recharge where
+  	statistic_date &gt;= #{statisticDate}
+  
+  	<if test="@Ognl@isNotBlank(roleId)">and role_id = #{roleId}</if>
+  	 order by statistic_date desc
+  </select>
+  
+  <insert id="insert" parameterType="com.mokylin.cabal.modules.rebate.entity.RebateStatisticRecharge">
+    insert into rebate_statistic_recharge (id, user_id, role_id, 
+      statistic_date, sum_money, recharge_times, 
+      rebate_ratio, rebate_gold, create_name, 
+      create_by, create_date, update_by, 
+      update_date, del_flag, server_id,pid,server_name,plat_name,role_name
+      )
+    values (#{id,jdbcType=VARCHAR}, #{userId,jdbcType=VARCHAR}, #{roleId,jdbcType=BIGINT}, 
+      #{statisticDate,jdbcType=DATE}, #{sumMoney,jdbcType=BIGINT}, #{rechargeTimes,jdbcType=INTEGER}, 
+      #{rebateRatio,jdbcType=INTEGER}, #{rebateGold,jdbcType=BIGINT}, #{createName,jdbcType=VARCHAR}, 
+      #{createBy,jdbcType=VARCHAR}, #{createDate,jdbcType=TIMESTAMP}, #{updateBy,jdbcType=VARCHAR}, 
+      #{updateDate,jdbcType=TIMESTAMP}, 0, #{serverId,jdbcType=VARCHAR},#{pid},#{serverName},#{platName}
+      ,#{roleName}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.mokylin.cabal.modules.rebate.entity.RebateStatisticRecharge">
+    insert into rebate_statistic_recharge
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="userId != null">
+        user_id,
+      </if>
+      <if test="roleId != null">
+        role_id,
+      </if>
+      <if test="statisticDate != null">
+        statistic_date,
+      </if>
+      <if test="sumMoney != null">
+        sum_money,
+      </if>
+      <if test="rechargeTimes != null">
+        recharge_times,
+      </if>
+      <if test="rebateRatio != null">
+        rebate_ratio,
+      </if>
+      <if test="rebateGold != null">
+        rebate_gold,
+      </if>
+      <if test="createName != null">
+        create_name,
+      </if>
+      <if test="createBy != null">
+        create_by,
+      </if>
+      <if test="createDate != null">
+        create_date,
+      </if>
+      <if test="updateBy != null">
+        update_by,
+      </if>
+      <if test="updateDate != null">
+        update_date,
+      </if>
+      <if test="delFlag != null">
+        del_flag,
+      </if>
+      <if test="serverId != null">
+        server_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null">
+        #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="roleId != null">
+        #{roleId,jdbcType=BIGINT},
+      </if>
+      <if test="statisticDate != null">
+        #{statisticDate,jdbcType=DATE},
+      </if>
+      <if test="sumMoney != null">
+        #{sumMoney,jdbcType=BIGINT},
+      </if>
+      <if test="rechargeTimes != null">
+        #{rechargeTimes,jdbcType=INTEGER},
+      </if>
+      <if test="rebateRatio != null">
+        #{rebateRatio,jdbcType=INTEGER},
+      </if>
+      <if test="rebateGold != null">
+        #{rebateGold,jdbcType=BIGINT},
+      </if>
+      <if test="createName != null">
+        #{createName,jdbcType=VARCHAR},
+      </if>
+      <if test="createBy != null">
+        #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null">
+        #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null">
+        #{updateBy,jdbcType=VARCHAR},
+      </if>
+      <if test="updateDate != null">
+        #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="delFlag != null">
+        #{delFlag,jdbcType=INTEGER},
+      </if>
+      <if test="serverId != null">
+        #{serverId,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+</mapper>

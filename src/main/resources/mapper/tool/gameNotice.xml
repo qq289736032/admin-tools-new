@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="gameNotice">
+	<!--<select id="queryPage" resultType="com.mokylin.cabal.modules.sys.entity.User" parameterType="com.mokylin.cabal.common.persistence.Page">-->
+        <!--select * from sys_user -->
+	<!--</select>-->
+
+    <select id="paging" resultType="com.mokylin.cabal.modules.tools.entity.GameNotice" parameterType="java.util.HashMap">
+        select * from game_notice where 1=1
+        <if test="@Ognl@isNotBlank(content)">and content like concat('%',#{content},'%')</if>
+        <if test="@Ognl@isNotBlank(noticeStatus)">and notice_status =#{noticeStatus}</if>
+        <if test="@Ognl@isNotBlank(stepTime)">and step_time =#{stepTime}</if>
+        <if test="@Ognl@isNotBlank(startTimeEnd)">and start_time <![CDATA[ < ]]> DATE_ADD(#{startTimeEnd},INTERVAL 1 day)</if>
+        <if test="@Ognl@isNotBlank(startTimeStart)">and start_time <![CDATA[ >= ]]> #{startTimeStart} </if>
+        <if test="isGlobalPlatformPermission == false">
+            and create_by in
+            <foreach item="item" index="index" collection="roleUserIdList" open="(" separator="," close=")">
+                #{item,jdbcType=VARCHAR}
+            </foreach>
+        </if>
+        order by start_time desc
+    </select>
+
+    <select id="selectOneById" resultType="com.mokylin.cabal.modules.tools.entity.GameNotice" parameterType="java.lang.String">
+        select * from game_notice where id = #{id}
+    </select>
+
+    <update id="delete" parameterType="java.lang.String">
+        delete  from game_notice  where id = #{id}
+    </update>
+
+    <insert id="insert" parameterType="java.util.HashMap">
+        insert into game_notice(
+            id,
+			content,
+			server_ids,
+			start_time,
+			finish_time,
+			step_time,
+			repeat_count,
+			is_global,
+			game_platform_id,
+			notice_status,
+			create_date,
+			notice_type,
+			create_by,
+			create_name
+		)
+		values(
+		    #{id},
+			#{content},
+			#{serverIds},
+			#{startTime},
+			#{finishTime},
+			#{stepTime},
+			(unix_timestamp(#{finishTime}) - unix_timestamp(#{startTime}) ) div (60 * #{stepTime}),
+			#{isGlobal},
+			#{gamePlatformId},
+			#{noticeStatus},
+			now(),
+			#{noticeType},
+			#{currentUser.id},
+			#{currentUser.loginName}
+		)
+    </insert>
+
+    <update id="updateStatus" parameterType="com.mokylin.cabal.modules.tools.entity.GameNotice">
+        update game_notice set notice_status = #{noticeStatus} where id = #{id}
+    </update>
+</mapper>

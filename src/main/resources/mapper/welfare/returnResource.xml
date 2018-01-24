@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="returnResource">
+	
+	<select id="selectOneByPidAndServerId"
+		resultType="com.mokylin.cabal.modules.welfare.entity.ReturnResource"
+		parameterType="java.util.HashMap">
+		select * from return_resource where pid = #{pid} and server_id = #{serverId}
+	</select>
+	<select id="sum"
+		resultType="java.util.HashMap"
+		parameterType="java.util.HashMap">
+		select IFNULL(sum(dr_amount),0) as drSum,IFNULL(sum(single_server_amount),0) as singleSum
+		 from return_resource 
+		 where pid = #{pid} and server_id = #{serverId}
+	</select>
+	<insert id="insert"
+		parameterType="java.util.HashMap">
+		insert into return_resource(
+			id,
+			dr_amount,
+			single_server_amount,
+			pid,
+			role_id,
+			server_id,
+			create_name,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag,
+			user_id,
+			order_id
+		)
+		values
+
+		(
+			#{id},
+			#{drAmount},
+			#{singleServerAmount},
+			#{pid},
+			#{roleId},
+			#{serverId},
+			#{createName},
+			#{createBy},
+			now(),
+			#{updateBy},
+			now(),
+			0,
+			#{userId},
+			#{orderId}
+		)
+
+	</insert>
+
+
+</mapper>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="statLevelOnlineDistribution">
+    <!-- 在线时长区间人数分布-表格和饼图 -->
+    <select id="findOnLineTimeAreaReport" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		SELECT
+			SUM(stat_level_online_distribution.section_1) AS in5,
+			SUM(stat_level_online_distribution.section_2) AS in10,
+			SUM(stat_level_online_distribution.section_3) AS in15,
+			SUM(stat_level_online_distribution.section_4) AS in20,
+			SUM(stat_level_online_distribution.section_5) AS in25,
+			SUM(stat_level_online_distribution.section_6) AS in30,
+			SUM(stat_level_online_distribution.section_7) AS in60,
+			SUM(stat_level_online_distribution.section_8) AS in90,
+			SUM(stat_level_online_distribution.section_9) AS in120,
+			SUM(stat_level_online_distribution.section_10) AS in150,
+			SUM(stat_level_online_distribution.section_11) AS in180,
+			SUM(stat_level_online_distribution.section_12) AS in240,
+			SUM(stat_level_online_distribution.section_13) AS in300,
+			SUM(stat_level_online_distribution.section_14) AS in360,
+			SUM(stat_level_online_distribution.section_15) AS big360
+		FROM
+			stat_level_online_distribution
+		WHERE
+			1 = 1
+			<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+		    <if test="@Ognl@isNotBlank(serverIdList)">
+				AND area_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+						#{item}
+				</foreach>
+			</if>			
+    </select>
+</mapper>

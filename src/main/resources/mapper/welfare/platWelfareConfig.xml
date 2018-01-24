@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="platWelfareConfig">
+
+
+	<select id="condition"
+		resultType="com.mokylin.cabal.modules.welfare.entity.PlatWelfareConfig"
+		parameterType="com.mokylin.cabal.modules.welfare.entity.PlatWelfareConfig">
+		select * from plat_welfare_config where 1=1
+		<if test="@Ognl@isNotBlank(pid)">and pid = #{pid}</if>
+		<if test="@Ognl@isNotBlank(status)">and status = #{status}</if>
+		<if test="@Ognl@isNotBlank(goldPoolCategory)">and gold_pool_category = #{goldPoolCategory}</if>
+		<if test="@Ognl@isNotBlank(platNature)">and plat_nature = #{platNature}</if>
+		<if test="@Ognl@isNotBlank(ids)">
+				and id in
+				<foreach collection="ids" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+		</if>
+	</select>
+	
+	<select id="selectOneById"
+		resultType="com.mokylin.cabal.modules.welfare.entity.PlatWelfareConfig"
+		parameterType="java.lang.Integer">
+		select * from plat_welfare_config where id = #{id}
+	</select>
+	
+	<select id="selectOneByPid"
+		resultType="com.mokylin.cabal.modules.welfare.entity.PlatWelfareConfig"
+		parameterType="java.util.HashMap">
+		select * from plat_welfare_config where pid = #{pid} and gold_pool_category = #{goldPoolCategory}
+	</select>
+	
+	<update id="updateStatus" parameterType="java.util.HashMap">
+		UPDATE
+			plat_welfare_config
+		SET
+			status = #{status},
+			update_date = now(),
+	    	update_by =  #{updateBy}
+		WHERE
+			id = #{id}
+	</update>
+	
+	<update id="updatePlatNature" parameterType="java.util.HashMap">
+		UPDATE
+			plat_welfare_config
+		SET
+			plat_nature = #{platNature},
+			update_date = now(),
+	    	update_by =  #{updateBy}
+		WHERE
+			1 = 1 
+			<if test="@Ognl@isNotBlank(pid)">and pid = #{pid}</if>
+	</update>
+	
+	<update id="updateData" parameterType="java.util.HashMap">
+		UPDATE
+			plat_welfare_config
+		SET
+			new_service_gold = #{newServiceGold},
+			r_resource_amount = #{RResourceAmount},
+			r_resource_ratio = #{RResourceRatio},
+			single_charge_ratio = #{singleChargeRatio},
+			top_charge = #{topCharge},
+			top_gold_day = #{topGoldDay},
+			top_hold_gold = #{topHoldGold},
+			top_internal_number = #{topInternalNumber},
+			add_time_limit = #{addTimeLimit},
+			update_date = now(),
+	    	update_by =  #{updateBy}
+		WHERE
+			1 = 1 
+			<if test="@Ognl@isNotBlank(pid)">and pid = #{pid}</if>
+			<if test="@Ognl@isNotBlank(goldPoolCategory)">and gold_pool_category = #{goldPoolCategory}</if>
+			<if test="@Ognl@isNotBlank(ids)">
+				and id in
+				<foreach collection="ids" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+	</update>
+	
+	<insert id="insert" parameterType="java.util.HashMap">
+        insert into plat_welfare_config(
+            id,
+			plat_name,
+			plat_nature,
+			gold_pool_category,
+			new_service_gold,
+			r_resource_amount,
+			r_resource_ratio,
+			single_charge_ratio,
+			top_charge,
+			top_gold_day,
+			top_hold_gold,
+			top_internal_number,
+			add_time_limit,
+			status,
+			pid,
+			create_name,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag
+		)
+		values(
+		    #{id},
+			#{platName},
+			#{platNature},
+			#{goldPoolCategory},
+			#{newServiceGold},
+			#{RResourceAmount},
+			#{RResourceRatio},
+			#{singleChargeRatio},
+			#{topCharge},
+			#{topGoldDay},
+			#{topHoldGold},
+			#{topInternalNumber},
+			#{addTimeLimit},
+			#{status},
+			#{pid},
+			#{createName},
+			#{createBy},
+			now(),
+			#{updateBy},
+			now(),
+			0
+		)
+    </insert>
+</mapper>

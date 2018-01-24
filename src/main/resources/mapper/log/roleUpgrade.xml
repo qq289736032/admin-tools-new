@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="roleUpgrade">
+    <select id="findLevelLogReport" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+    	SELECT
+			role_upgrade.role_id role_id,
+			role_upgrade.role_name role_name,
+			role_upgrade.`level` `level`,
+			role_upgrade.upgrade_time upgrade_time,
+			role_upgrade.log_day log_day
+		FROM
+			role_upgrade
+		WHERE
+			1 = 1
+			<if test="@Ognl@isNotBlank(currentServerId)">and server_id = #{currentServerId} </if>
+			<if test="@Ognl@isNotBlank(roleName)">and role_name like #{roleName}</if>
+			<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+		ORDER BY
+			role_upgrade.`level` DESC
+    </select>
+    
+    <!--用户升级时长 -->
+    <select id="roleUpgradeTime" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+      select level as level, 
+             format(sum(upgrade_cost_time)/60000,2) as time,
+             format(avg(upgrade_cost_time)/60000,2) as avgTime
+	  from role_upgrade 
+      where 1=1
+      <if test="@Ognl@isNotBlank(viplevel)">
+      <choose>
+        <when test="viplevel == 0">and vip_level <![CDATA[ >= ]]> 0</when>
+        <otherwise>and vip_level = #{viplevel}</otherwise>
+      </choose>
+      </if>
+      <if test="@Ognl@isNotBlank(createDate)">and log_day <![CDATA[ <= ]]> replace(#{createDate},'-','')</if>
+      <if test="@Ognl@isNotBlank(serverIdList)"> 
+	 	and  server_id in 
+	 <foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+            #{item}
+     </foreach>
+     </if>
+    
+	  GROUP BY level
+      ORDER BY level ASC 
+      
+    </select>   
+
+    <select id="levelDistribution" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select roleLevel, count(*) num from
+        (select max(level) roleLevel, role_id from role_upgrade
+        WHERE 1 =1
+        <if test="@Ognl@isNotBlank(viplevel)">
+            <choose>
+                <when test="viplevel == 0">and vip_level <![CDATA[ >= ]]> 0</when>
+                <when test="viplevel ==01">and is_3d <![CDATA[ = ]]> 1</when>
+                <when test="viplevel ==02">and is_3d <![CDATA[ = ]]> 0</when>
+                <otherwise>and vip_level = #{viplevel}</otherwise>
+            </choose>
+        </if>
+        <if test="@Ognl@isNotBlank(serverIdList)">
+            and  server_id in
+            <foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="@Ognl@isNotBlank(startDate)">
+        	AND log_day <![CDATA[ <= ]]> #{logDay} 
+		</if>
+		group by role_id) a
+        group by roleLevel
+        order by roleLevel asc;
+    </select>
+
+</mapper>

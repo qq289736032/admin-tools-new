@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="consumeDistribution">
+<!-- 资源线元宝消耗分布 -->
+<select id="resLineYbDisList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+    select resource_line as res_line,
+           sum(consume_treasure) as yb,
+           sum(consume_treasure_account) as num,
+           sum(consume_banding_treasure) as bind_yb,
+           sum(consume_banding_account) as bind_num  
+	from stat_consume_distribution
+	where 1=1
+	<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+    <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+	<if test="@Ognl@isNotBlank(serverIdList)">
+		AND area_id IN
+		<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+		</foreach>
+	</if>
+	GROUP BY resource_line
+	ORDER BY resource_line ASC
+</select>
+<!-- 资源线统计元宝消耗分布服务器统计展示 -->
+<select id="resLineServersList" resultType="java.util.HashMap">
+    select resource_line as res_line,
+           sum(consume_treasure) as yb,
+           sum(consume_treasure_account) as num,
+           sum(consume_banding_treasure) as bind_yb,
+           sum(consume_banding_account) as bind_num,
+           area_id  
+	from stat_consume_distribution
+	where resource_line=#{id}
+	and log_day <![CDATA[ <= ]]>replace(#{DateEnd},'-','')
+	and log_day <![CDATA[ >= ]]>replace(#{DateStart},'-','')
+	<if test="@Ognl@isNotBlank(serverIdList)">
+	and area_id in 
+	<foreach collection="list" item="item" index="index" open="(" separator="," close=")">  
+        	#{item} 
+    </foreach> 
+    </if>
+	GROUP BY area_id
+</select>
+
+<!-- 活动面板消费分布 -->
+<select id="activePanelList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+     select active_panel as active_panel,
+            sum(consume_treasure) as yb,
+            sum(consume_treasure_account) as num,
+            sum(consume_banding_treasure) as bind_yb,
+            sum(consume_banding_account) as bind_num  
+	from stat_consume_distribution
+	where 1=1
+	<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+    <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+	<if test="@Ognl@isNotBlank(serverIdList)">
+		AND area_id IN
+		<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+		</foreach>
+	</if>
+	GROUP BY active_panel
+	ORDER BY active_panel ASC
+</select>
+
+<!-- 查询消耗元总数，消耗总人数（包括元宝和绑定元宝） -->
+<select id="selectTotal" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	select sum(consume_treasure) as total_yb,
+	 	   sum(consume_treasure_account) as yb_num,
+	       sum(consume_banding_treasure) as total_bind,
+	       sum(consume_banding_account) as bind_num
+	from stat_consume_distribution
+	where 1=1
+	<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+    <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+	<if test="@Ognl@isNotBlank(serverIdList)">
+		AND area_id IN
+		<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+		</foreach>
+	</if>
+</select>
+</mapper>

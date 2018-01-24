@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="roleRecharge">
+
+    <select id="paging" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT
+--         role_recharge.id,
+        role_recharge.user_id userId,
+        role_recharge.role_id roleId,
+        role_recharge.role_name roleName,
+        role_recharge.treasure_amount,
+        FORMAT(role_recharge.rmb_amount/100, 2) as rmb_amount,
+        role_recharge.recharge_type rechargeType,
+        role_recharge.money_type moneyType,
+        role_recharge.order_id orderId,
+        role_recharge.is_finish,
+        role_recharge.pid,
+        role_recharge.server_id,
+        role_recharge.total_treasure_amount,
+        role_recharge.recharge_time,
+        role_recharge.is_first_recharge,
+        role_recharge.registration_days,
+        role_recharge.recharge_count count,
+        role_recharge.log_month,
+        role_recharge.log_day,
+        role_recharge.log_hour
+        FROM `role_recharge`
+        WHERE 1 = 1
+        and   recharge_type = 3
+        <if test="@Ognl@isNotBlank(filter)">${filter} </if>
+        <if test="@Ognl@isNotBlank(userId)">and user_id = #{userId}</if>
+        <if test="@Ognl@isNotBlank(roleName)">and role_name = #{roleName}</if>
+        <if test="@Ognl@isNotBlank(roleId)">and role_id = #{roleId}</if>
+        <if test="@Ognl@isNotBlank(orderId)">and order_id = #{orderId}</if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate} </if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+        order by recharge_time desc
+    </select>
+    
+
+    <select id="chargeStatistics" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT a.user_id,a.role_id,role_name,level,
+        FORMAT(total_rmb_amount/100, 2) as total_rmb_amount,recharge_count,FORMAT(max_rmb_amount/100, 2) as max_rmb_amount,surplus_treasure,a.recharge_time lastChargeTime,last_login_time
+        FROM role_recharge a ,(
+        SELECT role_id,MAX(recharge_time) recharge_time FROM role_recharge   where   recharge_type = 3
+         <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+         <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+        GROUP BY role_id
+        ) b
+        WHERE a.role_id = b.role_id AND a.recharge_time = b.recharge_time   and   a.recharge_type = 3
+
+        <if test="@Ognl@isNotBlank(filter)">${filter} </if>
+
+        <if test="@Ognl@isNotBlank(roleName)">and role_name = #{roleName}</if>
+        <if test="@Ognl@isNotBlank(userId)">and user_id = #{userId}</if>
+        <if test="@Ognl@isNotBlank(roleId)">and a.role_id = #{roleId}</if>
+        <!-- 如果精确时间 到时候再用recharge_time比较 -->
+         <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+         <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+        ORDER BY a.total_rmb_amount desc,a.recharge_time desc
+    </select>
+
+    <select id="singleChargeStatistics" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT a.user_id,a.role_id,role_name,level,
+        FORMAT(total_rmb_amount/100, 2) as total_rmb_amount,recharge_count,FORMAT(max_rmb_amount/100, 2) as max_rmb_amount,surplus_treasure,a.recharge_time lastChargeTime,last_login_time
+        FROM role_recharge a ,(
+        SELECT role_id,MAX(recharge_time) recharge_time FROM role_recharge   where   recharge_type = 3
+         <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+         <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+        GROUP BY role_id
+        ) b
+        WHERE a.role_id = b.role_id AND a.recharge_time = b.recharge_time  and   a.recharge_type = 3
+        and a.server_id = #{currentServerId}
+        <if test="@Ognl@isNotBlank(roleName)">and role_name = #{roleName}</if>
+        <if test="@Ognl@isNotBlank(userId)">and user_id = #{userId}</if>
+        <if test="@Ognl@isNotBlank(roleId)">and a.role_id = #{roleId}</if>
+        <!-- 如果精确时间 到时候再用recharge_time比较 -->
+          <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+         <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+        ORDER BY a.total_rmb_amount desc,a.recharge_time desc
+    </select>
+
+    <select id="findRechargeOldActiveDistributionByPid" parameterType="java.util.HashMap"
+            resultType="java.util.HashMap">
+        SELECT count(DISTINCT role_id) oau_recharge_count
+        from role_recharge
+        WHERE pid = #{pid}
+        and   recharge_type = 3
+        and registration_time <![CDATA[ < ]]> replace(#{createDateStart},'-','')
+        and role_id in
+        (SELECT role_id
+        from role_recharge
+        WHERE 1 = 1   and   recharge_type = 3
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+        GROUP BY role_id
+        HAVING SUM(rmb_amount) <![CDATA[>]]> #{amountStart}
+        <if test="@Ognl@isNotBlank(amountEnd)">and SUM(rmb_amount) <![CDATA[ <= ]]>#{amountEnd}</if>
+        );
+    </select>
+
+    <select id="findMpuByServerId" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT count(DISTINCT role_id) mpu
+        from role_recharge
+        WHERE 1 = 1   and   recharge_type = 3
+        <if test="@Ognl@isNotBlank(curMonth)">and log_day <![CDATA[ <= ]]>replace(#{curMonth},'-','')</if>
+        <if test="@Ognl@isNotBlank(beginMonth)">and log_day <![CDATA[ >= ]]>replace(#{beginMonth},'-','')</if>
+        <if test="@Ognl@isNotBlank(month)">and log_month = #{month}</if>
+        <if test="@Ognl@isNotBlank(serverIdList)">
+            AND server_id IN
+            <foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="findIncomeByServerId" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT sum(rmb_amount) income
+        from role_recharge
+        WHERE 1 = 1  and   recharge_type = 3
+        <if test="@Ognl@isNotBlank(curMonth)">and log_day <![CDATA[ <= ]]>replace(#{curMonth},'-','')</if>
+        <if test="@Ognl@isNotBlank(beginMonth)">and log_day <![CDATA[ >= ]]>replace(#{beginMonth},'-','')</if>
+        <if test="@Ognl@isNotBlank(month)">and log_month = #{month}</if>
+        <if test="@Ognl@isNotBlank(serverIdList)">
+            AND server_id IN
+            <foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+
+    <select id="findMPUAndIncomeByMonth" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT count(DISTINCT role_id) mpu,sum(rmb_amount) income
+        from role_recharge
+        WHERE 1 = 1   and   recharge_type = 3
+        <if test="@Ognl@isNotBlank(month)">and log_month = #{month}</if>
+        <if test="@Ognl@isNotBlank(serverIdList)">
+            AND server_id IN
+            <foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+    
+    <select id="export" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+        select  
+           user_id   userId,
+	       role_id roleId,
+	       role_name roleName,
+	       order_id orderId,
+	       recharge_type rechargeType,
+	       money_type moneyType,
+	       rmb_amount,
+	       treasure_amount,
+	       is_finish,
+	   recharge_time
+          from  role_recharge  where 1 = 1   and   recharge_type = 3
+
+        <if test="@Ognl@isNotBlank(filter)">${filter} </if>
+        <if test="@Ognl@isNotBlank(userId)">and user_id = #{userId}</if>
+        <if test="@Ognl@isNotBlank(roleName)">and role_name = #{roleName}</if>
+        <if test="@Ognl@isNotBlank(roleId)">and role_id = #{roleId}</if>
+        <if test="@Ognl@isNotBlank(orderId)">and order_id = #{orderId}</if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate} </if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+
+        order by recharge_time desc
+    </select>
+     
+    <select id="chargeExport" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+     	SELECT a.user_id,a.role_id,role_name,level,
+        	total_rmb_amount,recharge_count,max_rmb_amount,surplus_treasure,a.recharge_time lastChargeTime,last_login_time,
+	       recharge_time 	lastChargeTime2,	
+	       last_login_time lastLoginTime2
+          FROM role_recharge a ,(
+        SELECT role_id,MAX(recharge_time) recharge_time1 FROM role_recharge    where    recharge_type = 3
+         <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+         <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+        GROUP BY role_id
+        ) b
+        WHERE a.role_id = b.role_id AND a.recharge_time = b.recharge_time1  and   a.recharge_type = 3
+        <if test="@Ognl@isNotBlank(filter)">${filter} </if>
+        <if test="@Ognl@isNotBlank(roleName)">and role_name = #{roleName}</if>
+        <if test="@Ognl@isNotBlank(userId)">and user_id = #{userId}</if>
+        <if test="@Ognl@isNotBlank(roleId)">and a.role_id = #{roleId}</if>
+        <!-- 如果精确时间 到时候再用recharge_time比较 -->
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+        ORDER BY a.total_rmb_amount desc,a.recharge_time desc
+    </select>
+    
+    <select id="singleChargeExport" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+        SELECT a.user_id,a.role_id,role_name,level,
+        total_rmb_amount,recharge_count,max_rmb_amount,surplus_treasure,a.recharge_time lastChargeTime,last_login_time,
+        recharge_time 	lastChargeTime2,	
+	    last_login_time lastLoginTime2
+        FROM role_recharge a ,(
+        SELECT role_id,MAX(recharge_time) recharge_time1 FROM role_recharge    where     recharge_type = 3
+        GROUP BY role_id
+        ) b
+        WHERE a.role_id = b.role_id AND a.recharge_time = b.recharge_time1  and   a.recharge_type = 3
+        and a.server_id = #{currentServerId}
+        <if test="@Ognl@isNotBlank(roleName)">and role_name = #{roleName}</if>
+        <if test="@Ognl@isNotBlank(userId)">and user_id = #{userId}</if>
+        <if test="@Ognl@isNotBlank(roleId)">and a.role_id = #{roleId}</if>
+        <!-- 如果精确时间 到时候再用recharge_time比较 -->
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+        ORDER BY a.total_rmb_amount desc,a.recharge_time desc
+    </select>
+    <select id="getRecharge" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+       SELECT
+         pid, server_id, log_day,
+       (
+		SELECT COUNT(role_id)
+		FROM (
+					SELECT pid, server_id, role_id
+						FROM role_recharge
+						WHERE  server_id = #{currentServerId}
+					  <if test="@Ognl@isNotBlank(filter)">${filter} </if>
+                      <if test="@Ognl@isNotBlank(logDay)">and log_day <![CDATA[ = ]]>#{logDay}</if>
+                         AND is_finish = 1
+		   				AND money_type = 2
+		 				AND recharge_type = 3
+						GROUP BY role_id
+			    ) roldRen
+		)  ren,
+	    (
+		SELECT SUM(rmb_amount)
+		FROM role_recharge
+		WHERE 
+		 server_id = #{currentServerId}
+		<if test="@Ognl@isNotBlank(filter)">${filter} </if>
+        <if test="@Ognl@isNotBlank(logDay)">and log_day <![CDATA[ = ]]>#{logDay}</if>
+			AND is_finish = 1
+			AND money_type = 2
+			AND recharge_type = 3
+			
+		) AS amount,
+		(
+			SELECT SUM(recharge_count)
+			FROM role_recharge
+			WHERE 
+			 server_id = #{currentServerId}
+			<if test="@Ognl@isNotBlank(filter)">${filter} </if>
+           <if test="@Ognl@isNotBlank(logDay)">and log_day <![CDATA[ = ]]>#{logDay}</if>
+				AND is_finish = 1
+				AND money_type = 2
+				AND recharge_type = 3
+		) AS cishu
+   FROM (
+       SELECT log_day  ,pid, server_id
+	   FROM role_recharge
+	  WHERE  server_id = #{currentServerId}   AND recharge_type = 3
+		<if test="@Ognl@isNotBlank(filter)">${filter} </if>
+        <if test="@Ognl@isNotBlank(logDay)">and log_day <![CDATA[ = ]]>#{logDay}</if>
+	   GROUP BY log_day
+	)  a 
+	
+    </select>
+</mapper>

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="activityJoin">
+	
+	<!-- 默认最近的七天 -->
+    <select id="activityJoinSearchByName" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        select 
+        	DATE_FORMAT(create_time,"%Y-%m-%d") date,
+        	activity_id,
+        	activity_name,
+        	count(*) AS count 
+        from activity_join
+        where 1=1
+        
+        <if test="@Ognl@isNotBlank(createDateStart)">and create_time <![CDATA[ >= ]]>#{startDate}</if>
+		<if test="@Ognl@isNotBlank(createDateEnd)">and create_time <![CDATA[ <= ]]>#{endDate}</if>
+		<if test="@Ognl@isNotBlank(activityName)">and activity_name like "%"#{activityName}"%"</if>
+		group by
+			date
+    </select>
+
+	
+    <select id="activityJoinList" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+        select 
+        	activity_id,
+        	activity_name,
+        	count(*) AS count 
+        from activity_join
+        where 1=1
+        <if test="@Ognl@isNotBlank(createDateStart)">and create_time <![CDATA[ >= ]]>#{startDate}</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and create_time <![CDATA[ >= ]]>#{startDate}</if>
+		<if test="@Ognl@isNotBlank(activityName)">and activity_name like "%"#{activityName}"%"</if>
+		group by
+			activity_id
+    </select>
+    
+    
+    <!-- 材料副本 -->
+	<!-- 默认最近的七天 -->
+    <select id="caiLiaoFubenSearchByName" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        select 
+        	DATE_FORMAT(create_time,"%Y-%m-%d") date,
+        	activity_id,
+        	activity_name,
+        	count(case WHEN challenge_result=1 THEN challenge_result END) AS tongguancishu, 
+        	count(CASE WHEN reset=1 THEN reset END) AS chongzhicishu
+        from activity_join
+        where 1=1
+        and fuben_name='gerenfuben'
+        <if test="@Ognl@isNotBlank(createDateStart)">and create_time <![CDATA[ >= ]]>#{startDate}</if>
+		<if test="@Ognl@isNotBlank(createDateEnd)">and create_time <![CDATA[ <= ]]>#{endDate}</if>
+		<if test="@Ognl@isNotBlank(activityName)">and activity_name like "%"#{activityName}"%"</if>
+		group by
+			date
+    </select>
+
+	
+    <select id="caiLiaoFuBenList" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+        select 
+        	activity_id,
+        	activity_name,
+        	count(*) AS count 
+        from activity_join
+        where 1=1
+        and fuben_name='gerenfuben'
+        <if test="@Ognl@isNotBlank(createDateStart)">and create_time <![CDATA[ >= ]]>#{startDate}</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and create_time <![CDATA[ >= ]]>#{startDate}</if>
+		<if test="@Ognl@isNotBlank(activityName)">and activity_name like "%"#{activityName}"%"</if>
+		group by
+			activity_id
+    </select>
+    
+    
+    <!-- 轩辕副本 -->
+	<!--按难度排列 -->
+    <select id="xuanYuanFuBenByDay" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        select 
+        	activity_nandu,
+        	activity_id,
+        	activity_name,
+        	count(case WHEN challenge_result=1 THEN challenge_result END) AS tongguancishu 
+        from activity_join
+        where 1=1
+		<if test="@Ognl@isNotBlank(endDate)">and DATE_FORMAT(create_time,"%Y%m%d") <![CDATA[ = ]]>DATE_FORMAT(#{endDate},"%Y%m%d")</if>
+        and fuben_name='tiaozhanBoss'
+		group by
+			activity_nandu
+    </select>
+
+	<!-- 查总数 -->
+    <select id="xuanYuanFuBenCount" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+        select 
+        	count(1) AS count 
+        from activity_join
+        where 1=1
+        <if test="@Ognl@isNotBlank(endDate)">and DATE_FORMAT(create_time,"%Y%m%d")<![CDATA[ = ]]>DATE_FORMAT(#{endDate},"%Y%m%d")</if>
+        and fuben_name='tiaozhanBoss'
+        and challenge_result=1
+    </select>
+    
+    
+    <!-- 十绝阵 组队副本-->
+	<!-- 默认最近的七天 -->
+    <select id="shiJueZhenSearchByName" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        select 
+        	DATE_FORMAT(create_time,"%Y-%m-%d") date,
+        	activity_id,
+        	activity_name,
+        	count(case WHEN challenge_result=1 THEN challenge_result END) AS tongguancishu 
+        from activity_join
+        where 1=1
+        and fuben_name='teamfuben'
+        <if test="@Ognl@isNotBlank(createDateStart)">and create_time <![CDATA[ >= ]]>#{startDate}</if>
+		<if test="@Ognl@isNotBlank(createDateEnd)">and create_time <![CDATA[ <= ]]>#{endDate}</if>
+		<if test="@Ognl@isNotBlank(activityName)">and activity_name like "%"#{activityName}"%"</if>
+		group by
+			date
+    </select>
+
+	
+    <select id="shiJueZhenList" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+        select 
+        	activity_id,
+        	activity_name,
+        	count(*) AS count 
+        from activity_join
+        where 1=1
+        and fuben_name='teamfuben'
+        <if test="@Ognl@isNotBlank(createDateStart)">and create_time <![CDATA[ >= ]]>#{startDate}</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and create_time <![CDATA[ >= ]]>#{startDate}</if>
+		<if test="@Ognl@isNotBlank(activityName)">and activity_name like "%"#{activityName}"%"</if>
+		group by
+			activity_id
+    </select>
+    
+    
+
+</mapper>

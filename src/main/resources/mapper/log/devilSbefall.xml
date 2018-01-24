@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="devilSbefall">
+
+	<select id="participation" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	select count(role_id) cou from(
+	select role_id from enter_map_log_${startDate} m 
+		where map_id=65
+		<if test="@Ognl@isNotBlank(serverIdList)">
+		AND server_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach> 
+		</if>
+		group by role_id) a
+		
+    </select>
+    
+    <select id="death" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+    select count(role_id) cou from(
+		SELECT role_id FROM dead_log_${startDate} m 
+		where stage_id=65
+		<if test="@Ognl@isNotBlank(serverIdList)">
+		AND server_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach> 
+		</if>
+		group by role_id) a
+    </select>
+ 
+ 
+   
+    <select id="boosKill" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+    select count(role_id) cou from (
+		SELECT role_id FROM mowang_boss_log m 
+		where log_day=#{startDate}
+		<if test="@Ognl@isNotBlank(serverIdList)">
+		AND server_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach> 
+		</if>
+		group by role_id) a
+    </select>
+    
+    <select id="boosKillMsg" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT role_name,power,rmb FROM mowang_boss_log m 
+		where 1=1
+		and log_day=#{startDate}
+		<if test="@Ognl@isNotBlank(serverIdList)">
+		AND server_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach> 
+		</if>
+    </select>
+    
+    
+</mapper>

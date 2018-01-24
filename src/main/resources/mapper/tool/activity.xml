@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="activity">
+
+    <select id="paging" resultType="com.mokylin.cabal.modules.tools.entity.Activity" parameterType="java.util.HashMap">
+        select id,name,activity_name,activity_desc,md5,original_file,is_global,server_ids,create_name,create_date,update_date
+         from activity_list where 1=1 and del_flag = '0'
+        <if test="@Ognl@isNotBlank(activityName)">and activity_name = #{activityName} </if>
+        <if test="@Ognl@isNotBlank(createTimeStart)">and date_format(create_date,'%Y-%m-%d') <![CDATA[ >= ]]> #{createTimeStart} </if>
+        <if test="@Ognl@isNotBlank(createTimeEnd)">and date_format(create_date,'%Y-%m-%d') <![CDATA[ <= ]]> #{createTimeEnd} </if>
+        order by update_date asc
+    </select>
+    
+    <select id="selectActivityById" resultType="com.mokylin.cabal.modules.tools.entity.Activity" parameterType="java.util.HashMap">
+		SELECT
+			 id,name,activity_name,activity_desc,md5,original_file,is_global,server_ids,create_name,create_date
+		FROM
+			activity_list
+		WHERE
+			id = #{id}
+    </select>
+
+    <insert id="insertActivity" parameterType="java.util.HashMap">
+        insert into activity_list(
+            id,
+            name,
+            activity_name,
+            activity_desc,
+            is_global,
+            md5,
+            original_file,
+            server_ids,
+            create_name,
+            create_by,
+            create_date,
+            update_date,
+            del_flag
+            )values(
+                #{id},
+                #{name},
+                #{activityName},
+                #{activityDesc},
+                #{isGlobal},
+                #{md5},
+                #{originalFile},
+                #{serverIds},
+                #{currentUser.loginName},
+                #{currentUser.id},
+                now(),
+                now(),
+                0
+            )
+    </insert>
+    
+    <update id="delete" parameterType="java.lang.String">
+        delete from activity_list  where id = #{id}
+    </update>
+    
+    <update id="batchDelete" parameterType="java.util.HashMap">
+        update activity_list SET  del_flag = 1
+        WHERE id in
+        <foreach item="item" index="index" collection="recordIdList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+    
+    
+        
+    <select id="selectActivityConfigList" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		SELECT
+			 id,name,alias
+		FROM
+			activity_config
+        WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(name)">and name like concat('%',#{name},'%') </if>
+    </select>
+    
+    <select id="getAliasByActivityConfigName" resultType="java.lang.String" parameterType="java.lang.String">
+		SELECT
+			 alias
+		FROM
+			activity_config where name = #{name}
+    </select>
+    
+    <insert id="insertActivityConfig" parameterType="java.util.HashMap">
+        insert into activity_config(
+            id,
+            name,
+            alias,
+            create_name,
+            create_by,
+            create_date,
+            update_date,
+            del_flag
+            )values(
+                #{id},
+                #{name},
+                #{alias},
+                #{currentUser.loginName},
+                #{currentUser.id},
+                now(),
+                now(),
+                0
+            )
+    </insert>
+    
+    <select id="selectActivityConfigById" resultType="com.mokylin.cabal.modules.tools.entity.ActivityConfig" parameterType="java.util.HashMap">
+		SELECT
+			 id,name,alias,create_name,create_date
+		FROM
+			activity_config
+		WHERE
+			id = #{id}
+    </select>
+    
+    <update id="updateActivityConfig" parameterType="java.util.HashMap">
+        update activity_config SET  
+        name = #{name}, 
+        alias = #{alias},
+        update_date = now()
+        WHERE id = #{id}
+    </update>
+    
+    <update id="deleteActivityConfig" parameterType="java.lang.String">
+        update activity_config SET 
+        del_flag = 1,
+        update_date = now() 
+        WHERE id = #{id}
+    </update>
+    
+      <update id="updateGlobal" parameterType="java.lang.String">
+        update activity_list SET 
+        is_global = 1
+        WHERE id = #{id}
+    </update>
+    
+      <update id="deleteActivityStatues" parameterType="java.lang.String">
+        update activity_list SET 
+        del_flag = 1
+        WHERE id = #{id}
+    </update>
+     <select id="selectActivityAlias" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		SELECT
+			 id,name,alias
+		FROM
+			activity_config
+         WHERE  alias =#{alias} 
+    </select>
+</mapper>

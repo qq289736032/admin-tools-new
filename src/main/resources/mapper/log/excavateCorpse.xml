@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="excavateCorpse">
+	<select id="vipExcavate" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		select num,sum(cou) cou from(
+			<foreach collection="list" item="items" index="index" separator="UNION ALL">	
+			SELECT num,count(num) cou FROM(
+				SELECT role_id,count(role_id) num 
+				FROM washi_log 
+				where type=2 
+				and log_day = ${items}
+				<if test="@Ognl@isNotBlank(serverIdList)">
+				AND server_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+						#{item}
+				</foreach>
+				</if>
+				GROUP BY role_id ORDER BY role_id)  AS A 
+			WHERE 1 = 1
+			group by num 
+			</foreach>
+		) c 
+		GROUP BY num 
+		ORDER BY num
+	</select>
+	
+	<select id="vipTask" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+			select guankaid,count(DISTINCT role_id) cou,count(role_id) num,sum(yb) yb 
+			from vipfuben_log
+			where 1=1
+			<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+				<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+				<if test="@Ognl@isNotBlank(serverIdList)">
+				AND server_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+						#{item}
+				</foreach>
+			</if> 
+			GROUP BY guankaid 
+			ORDER BY guankaid
+			
+	</select>
+	
+	<select id="vipNumber" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		select count(role_id) cou,sum(case when vip_level=4 then 1 else 0 end) 'vip4',sum(case when vip_level=6 then 1 else 0 end) 'vip6',sum(case when vip_level=8 then 1 else 0 end) 'vip8'
+		from (
+			select role_id,max(vip_level) vip_level 
+			from vipfuben_log 
+			where 1=1
+			<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+				<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+				<if test="@Ognl@isNotBlank(serverIdList)">
+				AND server_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+						#{item}
+				</foreach>
+			</if> 
+			GROUP BY role_id 
+		) a
+	</select> 
+</mapper>

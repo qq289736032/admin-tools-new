@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="gainProp">
+	<!--<select id="queryPage" resultType="com.mokylin.cabal.modules.sys.entity.User" parameterType="com.mokylin.cabal.common.persistence.Page">-->
+        <!--select * from sys_user -->
+	<!--</select>-->
+
+    <select id="paging" resultType="com.mokylin.cabal.modules.log.entity.GainPropDetail" parameterType="java.util.HashMap">
+        select * from gain_prop_detail_2014_9 where 1=1
+        <if test="@Ognl@isNotBlank(userRoleId)">and user_role_id =#{userRoleId}</if>
+    </select>
+
+    <select id="selectOneById" resultType="com.mokylin.cabal.modules.log.entity.GainPropDetail" parameterType="java.lang.String">
+        select * from gain_prop_detail_2014_9 where id = #{id}
+    </select>
+
+</mapper>

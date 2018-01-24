@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="item">
+
+    <select id="paging" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT
+             item.id,
+            item.template_id,
+            item.position,
+            item.user_role_id,
+            item.slot_num,
+            item.count,
+            item.bind,
+            item.rare_level,
+            1,
+            item.`level`,
+            item.attributes,
+            item.module,
+            item.end_time,
+            item.add_time,
+            item.modify_time
+        FROM `item`
+        WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(roleId)">and user_role_id = #{roleId}</if>
+        order by create_time desc
+    </select>
+
+    <!--position等于2表示装备-->
+    <select id="findItemByRoleId" resultType="java.util.HashMap">
+   SELECT
+            item.id,
+            item.template_id,
+            item.position,
+            item.user_role_id,
+            item.slot_num,
+            item.count,
+            item.bind,
+            item.rare_level,
+            1,
+            item.`level`,
+            item.attributes,
+            item.module,
+            item.end_time,
+            item.add_time,
+            item.modify_time
+        FROM `item` 
+        WHERE (item.slot_num >= 1350 or item.slot_num &lt;= 1001) and user_role_id  = #{id}
+    </select>
+  <!--寻宝仓库1001-1350-->
+   <select id="findXunbaoItemByRoleId" resultType="java.util.HashMap">
+    SELECT
+            item.id,
+            item.template_id,
+            item.position,
+            item.user_role_id,
+            item.slot_num,
+            item.count,
+            item.bind,
+            item.rare_level,
+            1,
+            item.`level`,
+            item.attributes,
+            item.module,
+            item.end_time,
+            item.add_time,
+            item.modify_time
+        FROM `item` 
+        WHERE (item.slot_num >= 1001 and item.slot_num &lt;= 1350) and user_role_id  = #{id}
+    </select>
+
+    <select id="findBagItemByRoleId" resultType="java.util.HashMap">
+        SELECT
+        item.id,
+        item.template_id,
+        item.position,
+        item.user_role_id,
+        item.slot_num,
+        item.count,
+        item.bind,
+        item.rare_level,
+        0 star_level,
+        item.`level`,
+        item.attributes,
+        item.module,
+        item.end_time,
+        item.add_time,
+        item.modify_time
+        FROM `item`
+        WHERE item.position = 1
+        and user_role_id = #{id}
+    </select>
+</mapper>

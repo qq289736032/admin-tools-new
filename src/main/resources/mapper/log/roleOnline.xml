@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="roleOnline">
+
+
+    <select id="paging" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT
+            *
+        FROM `role_online` WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]> unix_timestamp(DATE_ADD(#{createDateEnd},INTERVAL 1 day))*1000</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]> unix_timestamp(#{createDateStart})*1000</if>
+        order by log_hour desc
+    </select>
+     <select id="getOnline" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+         select  pid,server_id ,max(count) count  from role_online    where  server_id = #{currentServerId}
+         <if test="@Ognl@isNotBlank(filter)">${filter} </if>
+        <if test="@Ognl@isNotBlank(logDay)">and log_day <![CDATA[ = ]]>#{logDay}</if>
+       
+    </select>
+</mapper>

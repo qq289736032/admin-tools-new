@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="welfareNum">
+
+
+	<select id="paging"
+		resultType="com.mokylin.cabal.modules.welfare.entity.WelfareNum"
+		parameterType="java.util.HashMap">
+		select * from welfare_num where del_flag = 0
+		<if test="@Ognl@isNotBlank(pid)">and pid = #{pid}</if>
+		<if test="@Ognl@isNotBlank(serverId)">and server_id = #{serverId}</if>
+		<if test="@Ognl@isNotBlank(roleName)">and role_name like concat('%',#{roleName},'%')</if>
+		<if test="@Ognl@isNotBlank(userId)">and user_id = #{userId}</if>
+		<if test="@Ognl@isNotBlank(ids)">
+				and id in
+				<foreach collection="ids" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+		</if>
+		order by server_id desc
+	</select>
+	
+	<select id="findAll"
+		resultType="com.mokylin.cabal.modules.welfare.entity.WelfareNum"
+		parameterType="java.util.HashMap">
+		select * from welfare_num where del_flag = 0
+		<if test="@Ognl@isNotBlank(status)">and status = #{status}</if>
+	</select>
+	
+	<select id="count"
+		resultType="java.lang.Integer"
+		parameterType="com.mokylin.cabal.modules.welfare.entity.WelfareNum">
+		select count(*) from welfare_num where del_flag = 0
+		<if test="@Ognl@isNotBlank(pid)">and pid = #{pid}</if>
+		<if test="@Ognl@isNotBlank(serverId)">and server_id = #{serverId}</if>
+		<if test="@Ognl@isNotBlank(roleName)">and role_name = #{roleName}</if>
+		<if test="@Ognl@isNotBlank(userId)">and user_id = #{userId}</if>
+	</select>
+	
+	<select id="selectOneById"
+		resultType="com.mokylin.cabal.modules.welfare.entity.WelfareNum"
+		parameterType="java.lang.String">
+		select * from welfare_num where id = #{id} and del_flag = 0
+	</select>
+	
+	<select id="selectOneByRoleId"
+		resultType="com.mokylin.cabal.modules.welfare.entity.WelfareNum"
+		parameterType="java.math.BigInteger">
+		select * from welfare_num where role_id = #{roleId} and del_flag = 0
+	</select>
+	
+		<select id="selectOneByRoleIds"
+		resultType="com.mokylin.cabal.modules.welfare.entity.WelfareNum"
+		parameterType="java.util.HashMap">
+		select * from welfare_num where role_id in
+		<foreach collection="roleIds" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+		</foreach>
+		 and del_flag = 0
+	</select>
+	
+	<select id="selectAllByPidAndServerId"
+		resultType="com.mokylin.cabal.modules.welfare.entity.WelfareNum"
+		parameterType="java.util.HashMap">
+		select * from welfare_num where del_flag = 0 
+		<if test="@Ognl@isNotBlank(pids)">
+		and pid in
+		<foreach collection="pids" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+		</foreach>
+		</if>
+		<if test="@Ognl@isNotBlank(serverIds)">
+		and server_id in
+		<foreach collection="serverIds" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+		</foreach>
+		</if>
+		<if test="@Ognl@isNotBlank(isInfluence)">and is_influence = #{isInfluence}</if>
+	</select>
+
+	<update id="updateStatus" parameterType="com.mokylin.cabal.modules.welfare.entity.WelfareNum">
+		UPDATE
+			welfare_num
+		SET
+			status = #{status},
+			update_date = now(),
+			update_by = #{updateBy}
+		WHERE
+			id = #{id}
+	</update>
+	
+	<update id="updateTopCharge" parameterType="java.util.HashMap">
+		UPDATE
+			welfare_num
+		SET
+			top_charge = #{topCharge},
+			update_date = now(),
+			update_by = #{updateBy},
+			is_influence = #{isInfluence}
+		WHERE
+			id in
+			<foreach collection="ids" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+	</update>
+	
+	<update id="updateOneTopCharge" parameterType="java.util.HashMap">
+		UPDATE
+			welfare_num
+		SET
+			top_charge = #{topCharge},
+			update_date = now(),
+			update_by = #{updateBy},
+			is_influence = #{isInfluence}
+		WHERE
+			id = #{id}
+	</update>
+	
+	<update id="delete" parameterType="java.util.HashMap">
+		UPDATE
+			welfare_num
+		SET
+			del_flag = #{delFlag}
+		WHERE
+			id in
+			<foreach collection="ids" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+	</update>
+	
+	<insert id="insert" parameterType="com.mokylin.cabal.modules.welfare.entity.WelfareNum">
+        insert into welfare_num(
+            id,
+			role_name,
+			role_id,
+			user_id,
+			use_people,
+			use_people_post,
+			passageway,
+			status,
+			create_name,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag,
+			pid,
+			server_id,
+			server_name,
+			plat_name,
+			top_charge,
+			is_influence
+			
+		)
+		values(
+		    #{id},
+			#{roleName},
+			#{roleId},
+			#{userId},
+			#{usePeople},
+			#{usePeoplePost},
+			#{passageway},
+			0,
+			#{createName},
+			#{createBy},
+			now(),
+			#{updateBy},
+			now(),
+			0,
+			#{pid},
+			#{serverId},
+			#{serverName},
+			#{platName},
+			#{topCharge},
+			#{isInfluence}
+			
+		)
+    </insert>
+</mapper>

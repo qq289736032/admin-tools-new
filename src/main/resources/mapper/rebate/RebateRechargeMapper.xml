@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="rebateRechargeMapper">
+  <resultMap id="BaseResultMap" type="com.mokylin.cabal.modules.rebate.entity.RebateRecharge">
+    <result column="id" jdbcType="VARCHAR" property="id" />
+    <result column="user_id" jdbcType="VARCHAR" property="userId" />
+    <result column="role_id" jdbcType="BIGINT" property="roleId" />
+    <result column="role_name" jdbcType="VARCHAR" property="roleName" />
+    <result column="money_type" jdbcType="CHAR" property="moneyType" />
+    <result column="money_num" jdbcType="INTEGER" property="moneyNum" />
+    <result column="server_id" jdbcType="VARCHAR" property="serverId" />
+    <result column="recharge_type" jdbcType="CHAR" property="rechargeType" />
+    <result column="recharge_status" jdbcType="CHAR" property="rechargeStatus" />
+    <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
+    <result column="create_name" jdbcType="VARCHAR" property="createName" />
+    <result column="create_by" jdbcType="VARCHAR" property="createBy" />
+    <result column="approve_by" jdbcType="VARCHAR" property="approveBy" />
+    <result column="approve_name" jdbcType="VARCHAR" property="approveName" />
+    <result column="update_date" jdbcType="TIMESTAMP" property="updateDate" />
+    <result column="server_name" jdbcType="VARCHAR" property="serverName" />
+    <result column="plat_name" jdbcType="VARCHAR" property="platName" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.mokylin.cabal.modules.rebate.entity.RebateRecharge">
+    <result column="remark" jdbcType="LONGVARCHAR" property="remark" />
+  </resultMap>
+  <sql id="Blob_Column_List">
+    remark
+  </sql>
+  <select id="sumByRoleId" resultType="java.util.HashMap">
+  	select IFNULL(sum(money_num),0) as sumMoney,role_id as roleId
+  	,server_id as serverId,pid,order_id as orderId,user_id as userId
+  	 from rebate_recharge where 1=1
+  	<if test="@Ognl@isNotBlank(startTime)">and create_date &gt;= #{startTime}</if>
+	<if test="@Ognl@isNotBlank(endTime)">and create_date &lt;= #{endTime}</if>
+  	 group by role_id
+  </select>
+  
+    <select id="sumCharegByDate" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+  	select IFNULL(sum(money_num),0) as sumMoney,role_id as roleId,count(1) as times,server_id as serverId
+  	 ,pid,plat_name as platName,server_name as serverName,user_id as userId,role_name as roleName
+  	 from rebate_recharge 
+  	where 1=1
+  	<if test="@Ognl@isNotBlank(startTime)">and create_date &gt;= #{startTime}</if>
+		<if test="@Ognl@isNotBlank(endTime)">and create_date &lt;= #{endTime}</if>
+  	group by role_id
+  </select>
+  
+    <select id="sumByRoleIds" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+  	select IFNULL(sum(money_num),0) as sumMoney,role_id as roleId from rebate_recharge where role_id in
+  		<foreach item="item" index="index" collection="roleIds" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+  	 group by role_id
+  </select>
+  
+    
+    <select id="sumOneByRoleId" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+  	select IFNULL(sum(money_num),0) as sumMoney from rebate_recharge 
+  	where role_id = #{roleId}
+  </select>
+  
+      
+    <select id="sumBy" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+  	select IFNULL(sum(money_num),0) as sumMoney from rebate_recharge 
+  	where 1=1
+  	<if test="@Ognl@isNotBlank(startTime)">and create_date &gt;= #{startTime}</if>
+	<if test="@Ognl@isNotBlank(endTime)">and create_date &lt;= #{endTime}</if>
+	<if test="@Ognl@isNotBlank(serverId)">and server_id = #{serverId}</if>
+  </select>
+  
+      <select id="selectAllOrderId" resultType="java.util.HashMap">
+  	select order_id as orderId from rebate_recharge 
+  </select>
+  <insert id="insert" parameterType="com.mokylin.cabal.modules.rebate.entity.RebateRecharge">
+    insert into rebate_recharge (id, user_id, role_id, 
+      role_name, money_type, money_num, 
+      server_id, recharge_type, recharge_status, 
+      create_date, create_name, create_by, 
+      approve_by, approve_name, update_date, 
+      remark,pid,plat_name,server_name,order_id)
+    values (#{id,jdbcType=VARCHAR}, #{userId,jdbcType=VARCHAR}, #{roleId,jdbcType=BIGINT}, 
+      #{roleName,jdbcType=VARCHAR}, #{moneyType,jdbcType=CHAR}, #{moneyNum,jdbcType=INTEGER}, 
+      #{serverId,jdbcType=VARCHAR}, #{rechargeType,jdbcType=CHAR}, #{rechargeStatus,jdbcType=CHAR}, 
+      #{createDate,jdbcType=TIMESTAMP}, #{createName,jdbcType=VARCHAR}, #{createBy,jdbcType=VARCHAR}, 
+      #{approveBy,jdbcType=VARCHAR}, #{approveName,jdbcType=VARCHAR}, #{updateDate,jdbcType=TIMESTAMP}, 
+      #{remark,jdbcType=LONGVARCHAR},#{pid},#{platName},#{serverName},#{orderId})
+  </insert>
+  <insert id="insertSelective" parameterType="com.mokylin.cabal.modules.rebate.entity.RebateRecharge">
+    insert into rebate_recharge
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="userId != null">
+        user_id,
+      </if>
+      <if test="roleId != null">
+        role_id,
+      </if>
+      <if test="roleName != null">
+        role_name,
+      </if>
+      <if test="moneyType != null">
+        money_type,
+      </if>
+      <if test="moneyNum != null">
+        money_num,
+      </if>
+      <if test="serverId != null">
+        server_id,
+      </if>
+      <if test="rechargeType != null">
+        recharge_type,
+      </if>
+      <if test="rechargeStatus != null">
+        recharge_status,
+      </if>
+      <if test="createDate != null">
+        create_date,
+      </if>
+      <if test="createName != null">
+        create_name,
+      </if>
+      <if test="createBy != null">
+        create_by,
+      </if>
+      <if test="approveBy != null">
+        approve_by,
+      </if>
+      <if test="approveName != null">
+        approve_name,
+      </if>
+      <if test="updateDate != null">
+        update_date,
+      </if>
+      <if test="remark != null">
+        remark,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null">
+        #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="roleId != null">
+        #{roleId,jdbcType=BIGINT},
+      </if>
+      <if test="roleName != null">
+        #{roleName,jdbcType=VARCHAR},
+      </if>
+      <if test="moneyType != null">
+        #{moneyType,jdbcType=CHAR},
+      </if>
+      <if test="moneyNum != null">
+        #{moneyNum,jdbcType=INTEGER},
+      </if>
+      <if test="serverId != null">
+        #{serverId,jdbcType=VARCHAR},
+      </if>
+      <if test="rechargeType != null">
+        #{rechargeType,jdbcType=CHAR},
+      </if>
+      <if test="rechargeStatus != null">
+        #{rechargeStatus,jdbcType=CHAR},
+      </if>
+      <if test="createDate != null">
+        #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createName != null">
+        #{createName,jdbcType=VARCHAR},
+      </if>
+      <if test="createBy != null">
+        #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="approveBy != null">
+        #{approveBy,jdbcType=VARCHAR},
+      </if>
+      <if test="approveName != null">
+        #{approveName,jdbcType=VARCHAR},
+      </if>
+      <if test="updateDate != null">
+        #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="remark != null">
+        #{remark,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+</mapper>

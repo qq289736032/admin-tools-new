@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="starRank">
+	<select id="findStarStatistics" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+	select kong,
+		SUM(if(rlevel='1' and level='1' ,num,0)) as greenQuality1,
+		SUM(if(rlevel='1' and level='2' ,num,0)) as greenQuality2,
+		SUM(if(rlevel='1' and level='3' ,num,0)) as greenQuality3,
+		SUM(if(rlevel='1' and level='4' ,num,0)) as greenQuality4,
+		SUM(if(rlevel='1' and level='5' ,num,0)) as greenQuality5,
+		SUM(if(rlevel='1' and level='6' ,num,0)) as greenQuality6,
+		SUM(if(rlevel='1' and level='7' ,num,0)) as greenQuality7,
+		SUM(if(rlevel='1' and level='8' ,num,0)) as greenQuality8,
+		SUM(if(rlevel='1' and level='9' ,num,0)) as greenQuality9,
+		SUM(if(rlevel='1' and level='10' ,num,0)) as greenQuality10,
+		SUM(if(rlevel='2' and level='1' ,num,0)) as blueQuality1,
+		SUM(if(rlevel='2' and level='2' ,num,0)) as blueQuality2,
+		SUM(if(rlevel='2' and level='3' ,num,0)) as blueQuality3,
+		SUM(if(rlevel='2' and level='4' ,num,0)) as blueQuality4,
+		SUM(if(rlevel='2' and level='5' ,num,0)) as blueQuality5,
+		SUM(if(rlevel='2' and level='6' ,num,0)) as blueQuality6,
+		SUM(if(rlevel='2' and level='7' ,num,0)) as blueQuality7,
+		SUM(if(rlevel='2' and level='8' ,num,0)) as blueQuality8,
+		SUM(if(rlevel='2' and level='9' ,num,0)) as blueQuality9,
+		SUM(if(rlevel='2' and level='10' ,num,0)) as blueQuality10,
+		SUM(if(rlevel='3' and level='1' ,num,0)) as purpleQuality1,
+		SUM(if(rlevel='3' and level='2' ,num,0)) as purpleQuality2,
+		SUM(if(rlevel='3' and level='3' ,num,0)) as purpleQuality3,
+		SUM(if(rlevel='3' and level='4' ,num,0)) as purpleQuality4,
+		SUM(if(rlevel='3' and level='5' ,num,0)) as purpleQuality5,
+		SUM(if(rlevel='3' and level='6' ,num,0)) as purpleQuality6,
+		SUM(if(rlevel='3' and level='7' ,num,0)) as purpleQuality7,
+		SUM(if(rlevel='3' and level='8' ,num,0)) as purpleQuality8,
+		SUM(if(rlevel='3' and level='9' ,num,0)) as purpleQuality9,
+		SUM(if(rlevel='3' and level='10' ,num,0)) as purpleQuality10,
+		SUM(if(rlevel='4' and level='1' ,num,0)) as goldenQuality1,
+		SUM(if(rlevel='4' and level='2' ,num,0)) as goldenQuality2,
+		SUM(if(rlevel='4' and level='3' ,num,0)) as goldenQuality3,
+		SUM(if(rlevel='4' and level='4' ,num,0)) as goldenQuality4,
+		SUM(if(rlevel='4' and level='5' ,num,0)) as goldenQuality5,
+		SUM(if(rlevel='4' and level='6' ,num,0)) as goldenQuality6,
+		SUM(if(rlevel='4' and level='7' ,num,0)) as goldenQuality7,
+		SUM(if(rlevel='4' and level='8' ,num,0)) as goldenQuality8,
+		SUM(if(rlevel='4' and level='9' ,num,0)) as goldenQuality9,
+		SUM(if(rlevel='4' and level='10' ,num,0)) as goldenQuality10
+		from xingpan_log a 
+		WHERE 1 = 1
+		<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+		<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+		<if test="@Ognl@isNotBlank(serverIdList)">
+		AND server_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach> 
+		</if>
+		GROUP BY kong 
+		ORDER BY kong
+	</select>
+</mapper>

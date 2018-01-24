@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="treasureBoxLog">
+   <!--  <select id="findTreasureBoxLog" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+	    SELECT
+			a.`value` `value`,
+            count(1) num  
+		FROM
+			money_flow_log_${suffix} a
+		WHERE
+		    1 = 1 and 
+		    a.operate_type = 3171
+			<if test="@Ognl@isNotBlank(endDate)"> and  log_day <![CDATA[ <= ]]> replace(#{endDate},'-','')</if>
+			<if test="@Ognl@isNotBlank(startDate)"> and log_day <![CDATA[ >= ]]> replace(#{startDate},'-','')</if>
+		   and a.area_id = #{currentServerId}
+			GROUP BY a.`value`
+    </select> -->
+    
+     <select id="findTreasureBoxLog" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+	    SELECT
+			value
+		FROM
+			money_flow_log_${suffix} 
+		WHERE
+		    1 = 1 and 
+		    operate_type = 3171 and event_id = #{eventId}
+			<if test="@Ognl@isNotBlank(endDate)"> and  log_day <![CDATA[ <= ]]> replace(#{endDate},'-','')</if>
+			<if test="@Ognl@isNotBlank(startDate)"> and log_day <![CDATA[ >= ]]> replace(#{startDate},'-','')</if> 
+		   and area_id = #{currentServerId}
+
+    </select>
+    
+      <select id="findTreasureFlowByItemId" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+      
+      
+
+          SELECT event_id FROM goods_flow_log_${suffix} WHERE item_id = #{operateType}
+          
+             <if test="@Ognl@isNotBlank(endDate)"> and  log_day <![CDATA[ <= ]]> replace(#{endDate},'-','')</if>
+			<if test="@Ognl@isNotBlank(startDate)"> and log_day <![CDATA[ >= ]]> replace(#{startDate},'-','')</if> 
+           and area_id = #{currentServerId}
+	   
+    </select>
+</mapper>

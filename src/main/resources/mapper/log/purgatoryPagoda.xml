@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="purgatoryPagoda">
+	<select id="climbingTower" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		<!-- 炼狱之塔参与爬塔人数 -->
+		SELECT count(role_id) num FROM (
+			SELECT role_id 
+			FROM lianyu_log
+			WHERE 1 = 1
+			<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+			<if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach> 
+			</if>
+			GROUP BY role_id) A 
+	</select>
+	
+	<select id="kbshengji" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		SELECT sum(num) num,count(role_id) cou from( 
+			select count(role_id) num,role_id 
+			from duihuan_log 
+			where goods_id='kbshengji1' and duihuan_id='1001' 
+			<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+			<if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach> 
+			</if>
+			group by role_id) a
+	</select>
+	
+	<select id="sbjinjie" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		SELECT sum(num) num,count(role_id) cou from( 
+			select count(role_id) num,role_id 
+			from duihuan_log 
+			where goods_id='sbjinjie1' and duihuan_id='1003' 
+			<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+			<if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach> 
+			</if>
+			group by role_id) a
+	</select>
+	
+	<select id="jingtong" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		SELECT sum(num) num,count(role_id) cou from( 
+			select count(role_id) num,role_id 
+			from duihuan_log 
+			where goods_id='jingtong001' and duihuan_id='1002' 
+			<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+			<if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach> 
+			</if>
+			group by role_id) a
+	</select>
+	
+	<select id="climbingTowerNum" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		<!-- 炼狱之塔爬塔 -->
+		SELECT floor_id,count(role_id) cou FROM(
+			SELECT floor_id,role_id  
+			FROM lianyu_log 
+			where 1 = 1
+			<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+			<if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach> 
+			</if>
+			GROUP BY role_id ORDER BY role_id
+			)  AS A 
+			WHERE 1 = 1
+			group by floor_id 
+			order by floor_id
+	</select>
+	
+	
+	
+</mapper>

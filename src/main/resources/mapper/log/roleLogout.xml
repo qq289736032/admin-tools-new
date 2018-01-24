@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="roleLogout">
+
+
+    <select id="paging" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT
+            role_logout.id,
+            role_logout.user_id userId,
+            role_logout.role_id roleId,
+            role_logout.role_name roleName,
+            role_logout.level,
+            role_logout.login_time loginTime,
+            role_logout.logout_time logoutTime,
+            role_logout.pid platformId,
+            role_logout.server_id serverId,
+            role_logout.log_time logTime,
+            role_logout.ip,
+            role_logout.province,
+            role_logout.city,
+            role_logout.area,
+            role_logout.log_month,
+            role_logout.log_day,
+            role_logout.log_hour,
+            role_logout.log_minute
+        FROM `role_logout` 
+        WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(filter)">${filter} </if>
+        <if test="@Ognl@isNotBlank(userId)">and user_id = #{userId} </if>
+        <if test="@Ognl@isNotBlank(roleId)">and role_id = #{roleId} </if>
+        <if test="@Ognl@isNotBlank(roleName)">and role_name = #{roleName} </if>
+        <if test="@Ognl@isNotBlank(ip)">and ip = #{ip} </if>
+        <if test="@Ognl@isNotBlank(currentServerId)">and server_id = #{currentServerId} </if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_time <![CDATA[ <= ]]> unix_timestamp(DATE_ADD(#{createDateEnd},INTERVAL 1 day))*1000</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_time <![CDATA[ >= ]]> unix_timestamp(#{createDateStart})*1000</if>
+        order by log_time desc
+    </select>
+    
+    <select id="findActiveStatistics" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT
+            pid,
+            count(distinct role_id) au
+        FROM `role_logout` WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(pidsList)">
+			AND pid IN
+		     <foreach item="item" index="index" collection="pidsList" open="(" separator="," close=")">
+		       #{item}
+		     </foreach>
+	    </if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+        GROUP BY pid
+    </select>
+    
+    <select id="findSumActive" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT
+            count(distinct role_id) sum_au
+        FROM `role_logout` WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(pidsList)">
+			AND pid IN
+		     <foreach item="item" index="index" collection="pidsList" open="(" separator="," close=")">
+		       #{item}
+		     </foreach>
+	    </if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+    </select>
+    
+    <select id="findActiveStatisticsByPid" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT
+            pid,
+            count(distinct role_id) au
+        FROM `role_logout` WHERE pid = #{pid}
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+    </select>
+    
+    <select id="findSumOldActive" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT
+            count(distinct role_id) sum_old_au
+        FROM `role_logout` WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(pidsList)">
+			AND pid IN
+		     <foreach item="item" index="index" collection="pidsList" open="(" separator="," close=")">
+		       #{item}
+		     </foreach>
+	    </if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')
+        </if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')
+        	  and reg_day <![CDATA[ < ]]> replace(#{createDateStart},'-','')
+        </if>
+    </select>
+    
+    <select id="findOldActiveStatisticsByPid" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT
+            pid,
+            count(distinct role_id) old_au
+        FROM `role_logout` WHERE pid = #{pid}
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')
+        </if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')
+        	  and reg_day <![CDATA[ < ]]> replace(#{createDateStart},'-','')
+        </if>
+    </select>
+    
+    <select id="findActiveSumByArea" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT
+            count(distinct role_id) au
+        FROM `role_logout` WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+        <if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if> 
+    </select>
+    <select id="statRoleLoginOutLoginTime" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+    	select user_id,date_format(from_unixtime(login_time/1000),'%Y%m%d') date_login_time from role_login role
+    	where 1=1
+		 <if test="@Ognl@isNotBlank(currentDate)">and (date_format(from_unixtime(login_time/1000),'%Y%m%d') <![CDATA[ <= ]]>replace(#{currentDate},'-','')</if>
+	    <if test="@Ognl@isNotBlank(startDate)">and date_format(from_unixtime(login_time/1000),'%Y%m%d') <![CDATA[ >= ]]>replace(#{createDateStart},'-',''))</if>
+	    group by date_login_time,user_id
+    </select>
+</mapper>

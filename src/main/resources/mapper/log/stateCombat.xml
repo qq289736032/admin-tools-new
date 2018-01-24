@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="stateCombat">
+	<select id="findActiveStatistics" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		SELECT
+			 count(role_id) num
+		FROM (
+			SELECT role_id FROM 
+			role_login 
+			WHERE 1=1
+			<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+			<if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach> 
+			</if>	
+			group by role_id
+		) a
+	</select>
+	
+	<select id="findparticipation" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		select count(role_id) num from(
+		<foreach collection="list" item="items" index="index" separator="UNION ALL">  
+        	select role_id from enter_map_log_${items} where map_id='70' 
+			<if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach> 
+			</if>
+			group by role_id
+    	</foreach> 
+		) a
+	</select>
+	
+	<select id="findStatueStatistics" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		SELECT 
+			count(role_id) num 
+		FROM gather_log
+		WHERE map_id= '70'
+		<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+		<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach> 
+		</if>
+	</select>
+	
+	<select id="findDeadStatistics" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		select sum(num) num from(
+		<foreach collection="list" item="items" index="index" separator="UNION ALL"> 
+		SELECT count(role_id) num FROM dead_log_${items} m WHERE stage_id= '70'
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach> 
+		</if>
+		</foreach>
+		) a
+	</select>
+</mapper>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="rebateKeepDayMapper">
+  <resultMap id="BaseResultMap" type="com.mokylin.cabal.modules.rebate.entity.RebateKeepDay">
+    <result column="id" jdbcType="VARCHAR" property="id" />
+    <result column="day" jdbcType="INTEGER" property="day" />
+    <result column="create_name" jdbcType="VARCHAR" property="createName" />
+    <result column="create_by" jdbcType="VARCHAR" property="createBy" />
+    <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
+    <result column="update_by" jdbcType="VARCHAR" property="updateBy" />
+    <result column="update_date" jdbcType="TIMESTAMP" property="updateDate" />
+    <result column="del_flag" jdbcType="CHAR" property="delFlag" />
+  </resultMap>
+  	<select id="find"
+		resultType="com.mokylin.cabal.modules.rebate.entity.RebateKeepDay">
+		select * from rebate_keep_day where del_flag = 0
+	</select>
+  <insert id="insert" parameterType="com.mokylin.cabal.modules.rebate.entity.RebateKeepDay">
+    insert into rebate_keep_day (id, day, create_name, 
+      create_by, create_date, update_by, 
+      update_date, del_flag)
+    values (#{id,jdbcType=VARCHAR}, #{day,jdbcType=INTEGER}, #{createName,jdbcType=VARCHAR}, 
+      #{createBy,jdbcType=VARCHAR}, now(), #{updateBy,jdbcType=VARCHAR}, 
+      now(), 0)
+  </insert>
+  
+   <update id="update" parameterType="com.mokylin.cabal.modules.rebate.entity.RebateKeepDay">
+    update rebate_keep_day set update_date = now(),update_by = #{updateBy},day = #{day} 
+  </update>
+  <insert id="insertSelective" parameterType="com.mokylin.cabal.modules.rebate.entity.RebateKeepDay">
+    insert into rebate_keep_day
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="day != null">
+        day,
+      </if>
+      <if test="createName != null">
+        create_name,
+      </if>
+      <if test="createBy != null">
+        create_by,
+      </if>
+      <if test="createDate != null">
+        create_date,
+      </if>
+      <if test="updateBy != null">
+        update_by,
+      </if>
+      <if test="updateDate != null">
+        update_date,
+      </if>
+      <if test="delFlag != null">
+        del_flag,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="day != null">
+        #{day,jdbcType=INTEGER},
+      </if>
+      <if test="createName != null">
+        #{createName,jdbcType=VARCHAR},
+      </if>
+      <if test="createBy != null">
+        #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null">
+        #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null">
+        #{updateBy,jdbcType=VARCHAR},
+      </if>
+      <if test="updateDate != null">
+        #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="delFlag != null">
+        #{delFlag,jdbcType=CHAR},
+      </if>
+    </trim>
+  </insert>
+</mapper>

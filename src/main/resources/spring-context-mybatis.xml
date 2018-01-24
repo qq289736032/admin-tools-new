@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd"
+       default-lazy-init="true">
+
+	<description>Spring Configuration</description>
+	
+    <!-- 加载配置属性文件 -->
+	<!--<context:property-placeholder ignore-unresolvable="true" location="classpath*:/application.properties" />-->
+	
+ 	<!-- MyBatis begin -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <!--<property name="typeAliasesPackage" value="com.mokylin.cabal"/>-->
+        <!--<property name="typeAliasesSuperType" value="com.mokylin.cabal.common.persistence.BaseEntity"/>-->
+        <property name="mapperLocations" value="classpath:/mapper/tool/*.xml"/>
+		<property name="configLocation" value="classpath:/mybatis-config.xml"></property>
+        <!--<property name="plugins">-->
+            <!--<list>-->
+                <!--<ref bean="paginationInterceptor"></ref>-->
+            <!--</list>-->
+        <!--</property>-->
+    </bean>
+    <!-- 扫描basePackage下所有以@MyBatisRepository注解的接口-->
+    <!--<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">-->
+        <!--<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />-->
+        <!--<property name="basePackage" value="com.mokylin.cabal"/>-->
+        <!--<property name="annotationClass" value="com.mokylin.cabal.common.persistence.annotation.MyBatisDao"/>-->
+    <!--</bean>-->
+
+    <bean id="toolSqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg index="0" >
+            <ref bean="sqlSessionFactory"/>
+        </constructor-arg>
+    </bean>
+
+    <bean id="gameDataSource" class="com.mokylin.cabal.common.persistence.dynamicDataSource.GameDataSource" init-method="init">
+        <property name="maxActive" value="10" />
+        <property name="initialSize" value="1" />
+        <property name="maxWait" value="60000" />
+        <property name="minIdle" value="1" />
+        <property name="targetDataSources">
+            <map key-type="java.lang.String" />
+        </property>
+    </bean>
+    <bean id="gameSqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg index="0" >
+            <bean class="org.mybatis.spring.SqlSessionFactoryBean">
+                <property name="dataSource" ref="gameDataSource" />
+                <property name="mapperLocations" value="classpath:mapper/game/*.xml"/>
+                <property name="configLocation" value="classpath:/mybatis-config.xml"></property>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <!--<bean id="logDataSource" class="com.mokylin.cabal.common.persistence.dynamicDataSource.LogDataSource" init-method="init">
+        <property name="maxActive" value="10" />
+        <property name="initialSize" value="1" />
+        <property name="maxWait" value="60000" />
+        <property name="minIdle" value="1" />
+        <property name="targetDataSources">
+            <map key-type="java.lang.String" />
+        </property>
+    </bean>-->
+
+    <bean id="logSqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg index="0" >
+            <bean class="org.mybatis.spring.SqlSessionFactoryBean">
+                <property name="dataSource" ref="logDataSource" />
+                <property name="mapperLocations" value="classpath:mapper/log/*.xml"/>
+                <property name="configLocation" value="classpath:/mybatis-config.xml"></property>
+                <!--<property name="plugins">-->
+                    <!--<list>-->
+                        <!--<ref bean="paginationInterceptor" />-->
+                    <!--</list>-->
+                <!--</property>-->
+            </bean>
+        </constructor-arg>
+    </bean>
+
+
+    <bean id="globalSqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg index="0" >
+            <bean class="org.mybatis.spring.SqlSessionFactoryBean">
+                <property name="dataSource" ref="globalDataSource" />
+                <property name="mapperLocations" value="classpath:mapper/global/*.xml"/>
+                <property name="configLocation" value="classpath:/mybatis-config.xml"></property>
+            </bean>
+        </constructor-arg>
+    </bean>
+    
+    <bean id="chargeSqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg index="0" >
+            <bean class="org.mybatis.spring.SqlSessionFactoryBean">
+                <property name="dataSource" ref="chargeDataSource" />
+                <property name="mapperLocations" value="classpath:mapper/charge/*.xml"/>
+                <property name="configLocation" value="classpath:/mybatis-config.xml"></property>
+            </bean>
+        </constructor-arg>
+    </bean>
+    
+    <bean id="welfSqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg index="0" >
+            <bean class="org.mybatis.spring.SqlSessionFactoryBean">
+                <property name="dataSource" ref="dataSource" />
+                <property name="mapperLocations" value="classpath:mapper/welfare/*.xml"/>
+                <property name="configLocation" value="classpath:/mybatis-config.xml"></property>
+            </bean>
+        </constructor-arg>
+    </bean>
+    
+    <bean id="rebateSqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg index="0" >
+            <bean class="org.mybatis.spring.SqlSessionFactoryBean">
+                <property name="dataSource" ref="dataSource" />
+                <property name="mapperLocations" value="classpath:mapper/rebate/*.xml"/>
+                <property name="configLocation" value="classpath:/mybatis-config.xml"></property>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+
+    <!--<bean id="paginationInterceptor" class="com.mokylin.cabal.common.persistence.interceptor.PaginationInterceptor"></bean>-->
+    <!-- MyBatis end -->
+	
+</beans>

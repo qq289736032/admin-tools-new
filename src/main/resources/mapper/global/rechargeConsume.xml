@@ -1,0 +1,727 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="rechargeConsume">
+<select id="findDailyRechargeData" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+    	SELECT
+            stat_integrated.log_day,
+            sum(stat_integrated.is_open_day) kaifuNum,      <!-- 开服数 -->
+            sum(stat_integrated.income) income,				<!-- 日充值 -->
+            sum(stat_integrated.dru) dru,					<!-- 日新注册人数 -->
+            sum(stat_integrated.dau) dau,					<!-- 日活跃 -->
+            sum(stat_integrated.dpa) dpa,					<!-- 日充值用户 -->
+            sum(stat_integrated.dP_times) dP_times,			<!-- 日充值次数-->
+            sum(stat_integrated.dpa) /sum(stat_integrated.dau) pay_rate, 					<!--付费率=充值人数/活跃人数（不去重）-->
+            sum(stat_integrated.income) / sum(stat_integrated.dpa) arpu,					<!--ARPU=充值金额/充值用户数-->
+            sum(stat_integrated.income) / sum(stat_integrated.dau) active_arpu,				<!--活跃ARPU=充值金额/登陆用户数（不去重）-->
+            sum(stat_integrated.first_pay_user) first_pay_user,								<!--日首充人数-->
+            sum(stat_integrated.first_pay_value) first_pay_value,							<!--日首充金额(RMB)-->
+            first_day_data.first_day_dpa first_day_dpa,										
+            first_day_data.first_day_income first_day_income,								
+            first_day_data.first_day_pay_rate first_day_pay_rate,							
+            first_day_data.first_day_arpu first_day_arpu,									
+            third_day_data.third_day_dpa third_day_dpa,										
+            third_day_data.third_day_income third_day_income,								
+            third_day_data.third_day_pay_rate third_day_pay_rate,							
+            third_day_data.third_day_arpu third_day_arpu,									
+            seventh_day_data.seventh_day_dpa seventh_day_dpa,								
+            seventh_day_data.seventh_day_income seventh_day_income,							
+            seventh_day_data.seventh_day_pay_rate seventh_day_pay_rate,						
+            seventh_day_data.seventh_day_arpu seventh_day_arpu,								
+            sum(stat_integrated.nn_pa) nn_pa,															<!-- 新新充值人数 -->
+            sum(stat_integrated.nn_pay_value) nn_pay_value,												<!-- 新新充值金额 -->
+            sum(stat_integrated.nn_pa) / sum(stat_integrated.dru) nn_pay_rate,							<!--新新付费率=新新充值人数/新注册用户 -->
+            sum(stat_integrated.nn_pay_value)/sum(stat_integrated.nn_pa) nn_arpu,						<!--新新arpu=新新充值金额/新新充值人数 -->
+            sum(stat_integrated.on_pa) on_pa,															<!-- 老新充值人数 -->
+            sum(stat_integrated.on_pay_value) on_pay_value,												<!-- 老新充值金额(RMB) -->
+            sum(stat_integrated.on_pa)/(sum(stat_integrated.dau)-sum(stat_integrated.dru)) on_pay_rate,	<!-- 老新付费率=老新充值人数/老用户数（日活跃-日新注册） -->
+            sum(stat_integrated.on_pay_value)/sum(stat_integrated.on_pa) on_arpu,						<!-- 老新ARPU=老新充值金额/老新充值人数 -->
+            sum(stat_integrated.oo_pa) oo_pa,															<!-- 老老充值人数 -->
+            sum(stat_integrated.oo_pay_value) oo_pay_value,												<!-- 老老充值金额(RMB)-->
+            sum(stat_integrated.oo_pa) / (sum(stat_integrated.dau)-sum(stat_integrated.dru)) oo_pay_rate, <!-- 老老付费率=老老充值人数/老用户数  -->
+            sum(stat_integrated.oo_pay_value) / sum(stat_integrated.oo_pa) oo_arpu
+        FROM  stat_integrated
+        LEFT JOIN (
+	        SELECT sum(dpa) first_day_dpa,
+	        	sum(income) first_day_income,
+	        	sum(dpa) /sum(dau) first_day_pay_rate,
+	       		sum(income) / sum(dpa) first_day_arpu,
+	       		log_day first_day_log_day
+	       	FROM stat_integrated
+	        WHERE open_days = 1
+	        GROUP BY log_day) first_day_data
+        ON stat_integrated.log_day = first_day_data.first_day_log_day
+        LEFT JOIN (
+	        SELECT sum(dpa) third_day_dpa,
+	        	sum(income) third_day_income,
+	        	sum(dpa) /sum(dau) third_day_pay_rate,
+	        	sum(income) / sum(dpa) third_day_arpu,
+	        	log_day third_day_log_day
+	        FROM stat_integrated
+	        WHERE open_days = 3
+	        GROUP BY log_day) third_day_data
+        ON stat_integrated.log_day = third_day_data.third_day_log_day
+        LEFT JOIN (
+	        SELECT sum(dpa) seventh_day_dpa,
+	        	sum(income) seventh_day_income,
+	        	sum(dpa) /sum(dau) seventh_day_pay_rate,
+	        	sum(income) / sum(dpa) seventh_day_arpu,
+	        	log_day seventh_day_log_day
+	        FROM stat_integrated
+	        WHERE open_days = 7
+	        GROUP BY log_day) seventh_day_data
+        ON stat_integrated.log_day = seventh_day_data.seventh_day_log_day
+        WHERE 1 = 1 
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+        GROUP BY stat_integrated.log_day
+        ORDER BY stat_integrated.log_day DESC
+    
+    </select>
+    
+    <select id="findDailyPlatformRechargeData" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+    	SELECT
+            log_day,
+            pid,
+            sum(dau) dau,
+            sum(dpa) dpa,
+            sum(income) income,
+            sum(dpa) /sum(dau) pay_rate,
+            sum(income) / sum(dpa) arpu,
+            sum(income) / sum(dau) active_arpu
+        FROM  stat_integrated
+        WHERE 1 = 1 
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+        GROUP BY log_day,pid
+        ORDER BY  log_day DESC
+    </select>
+    
+    <select id="findRechargeByPlatform" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select 
+        	pid, 
+        	sum(income) income
+        from stat_integrated where 1 =1 
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+	    <if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>
+        GROUP BY pid
+    </select>
+    
+    <select id="findDailyConsumeData" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+    	SELECT
+            stat_consume_treasure.log_day,
+            sum(stat_consume_treasure.is_open_day) kaifuNum,
+            sum(stat_consume_treasure.amount) amount,
+            sum(stat_consume_treasure.dru) dru,
+            sum(stat_consume_treasure.dau) dau,
+            sum(stat_consume_treasure.num) num,
+            sum(stat_consume_treasure.times) times,
+            sum(stat_consume_treasure.num) /sum(stat_consume_treasure.dau) pay_rate,
+            sum(stat_consume_treasure.amount) / sum(stat_consume_treasure.num) arpu,
+            sum(stat_consume_treasure.amount) / sum(stat_consume_treasure.dau) active_arpu,
+            sum(stat_consume_treasure.first_num) first_num,
+            sum(stat_consume_treasure.first_amount) first_amount,
+            first_day_data.first_day_num first_day_num,
+            first_day_data.first_day_amount first_day_amount,
+            first_day_data.first_day_pay_rate first_day_pay_rate,
+            first_day_data.first_day_arpu first_day_arpu,
+            third_day_data.third_day_num third_day_num,
+            third_day_data.third_day_amount third_day_amount,
+            third_day_data.third_day_pay_rate third_day_pay_rate,
+            third_day_data.third_day_arpu third_day_arpu,
+            seventh_day_data.seventh_day_num seventh_day_num,
+            seventh_day_data.seventh_day_amount seventh_day_amount,
+            seventh_day_data.seventh_day_pay_rate seventh_day_pay_rate,
+            seventh_day_data.seventh_day_arpu seventh_day_arpu,
+            sum(stat_consume_treasure.nn_num) nn_num,
+            sum(stat_consume_treasure.nn_amount) nn_amount,
+            sum(stat_consume_treasure.nn_num) / sum(stat_consume_treasure.dru) nn_pay_rate,
+            sum(stat_consume_treasure.nn_amount)/sum(stat_consume_treasure.nn_num) nn_arpu,
+            sum(stat_consume_treasure.on_num) on_num,
+            sum(stat_consume_treasure.on_amount) on_amount,
+            sum(stat_consume_treasure.on_num)/sum(stat_consume_treasure.dru_gunfu) on_pay_rate,
+            sum(stat_consume_treasure.on_amount)/sum(stat_consume_treasure.on_num) on_arpu,
+            sum(stat_consume_treasure.oo_num) oo_num,
+            sum(stat_consume_treasure.oo_amount) oo_amount,
+            sum(stat_consume_treasure.oo_num) / (sum(stat_consume_treasure.dau)-sum(stat_consume_treasure.dru)) oo_pay_rate,
+            sum(stat_consume_treasure.oo_amount) / sum(stat_consume_treasure.oo_num) oo_arpu
+        FROM  stat_consume_treasure
+        LEFT JOIN (
+	        SELECT 
+	        	sum(num) first_day_num,
+                sum(amount) first_day_amount,
+                sum(num) /sum(dau) first_day_pay_rate,
+                sum(amount) / sum(num) first_day_arpu,
+                log_day first_day_log_day
+	       	FROM stat_consume_treasure
+	        WHERE open_days = 1
+	        GROUP BY log_day) first_day_data
+        ON stat_consume_treasure.log_day = first_day_data.first_day_log_day
+        LEFT JOIN (
+	        SELECT 
+	        	sum(num) third_day_num,
+	        	sum(amount) third_day_amount,
+	        	sum(num) /sum(dau) third_day_pay_rate,
+	        	sum(amount) / sum(num) third_day_arpu,
+	        	log_day third_day_log_day
+	        FROM stat_consume_treasure
+	        WHERE open_days = 3
+	        GROUP BY log_day) third_day_data
+        ON stat_consume_treasure.log_day = third_day_data.third_day_log_day
+        LEFT JOIN (
+	        SELECT 
+	        	sum(num) seventh_day_num,
+	        	sum(amount) seventh_day_amount,
+	        	sum(num) /sum(dau) seventh_day_pay_rate,
+	        	sum(amount) / sum(num) seventh_day_arpu,
+	        	log_day seventh_day_log_day
+	        FROM stat_consume_treasure
+	        WHERE open_days = 7
+	        GROUP BY log_day) seventh_day_data
+        ON stat_consume_treasure.log_day = seventh_day_data.seventh_day_log_day
+        WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+	    <if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>
+        GROUP BY stat_consume_treasure.log_day
+        ORDER BY stat_consume_treasure.log_day DESC
+    </select>
+    
+    <select id="findDailyPlatformConsumeData" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+    	SELECT
+            log_day,
+            pid,
+            sum(dau) dau,
+            sum(num) num,
+            sum(amount) amount,
+            sum(num) /sum(dau) pay_rate,
+            sum(amount) / sum(num) arpu,
+            sum(amount) / sum(dau) active_arpu
+        FROM  stat_consume_treasure
+        WHERE 1 = 1 
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+	    <if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>
+        GROUP BY log_day,pid
+        ORDER BY  log_day DESC
+    </select>
+    
+    <select id="findConsumeByPlatform" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select 
+        	pid, 
+        	sum(amount) amount
+        from stat_consume_treasure where 1 =1
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+	    <if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>        
+        GROUP BY pid
+    </select>
+    
+    <select id="findDailyBindConsumeData" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+    	SELECT
+            stat_consume_banding_treasure.log_day,
+            sum(stat_consume_banding_treasure.is_open_day) kaifuNum,
+            sum(stat_consume_banding_treasure.total) total,
+            sum(stat_consume_banding_treasure.produce) produce,
+            sum(stat_consume_banding_treasure.amount) amount,
+            sum(stat_consume_banding_treasure.dru) dru,
+            sum(stat_consume_banding_treasure.dau) dau,
+            sum(stat_consume_banding_treasure.num) num,
+            sum(stat_consume_banding_treasure.times) times,
+            sum(stat_consume_banding_treasure.num) /sum(stat_consume_banding_treasure.dau) pay_rate,
+            sum(stat_consume_banding_treasure.amount) / sum(stat_consume_banding_treasure.num) arpu,
+            sum(stat_consume_banding_treasure.amount) / sum(stat_consume_banding_treasure.dau) active_arpu,
+            sum(stat_consume_banding_treasure.first_num) first_num,
+            sum(stat_consume_banding_treasure.first_amount) first_amount,
+            first_day_data.first_day_num first_day_num,
+            first_day_data.first_day_num first_day_num,
+            first_day_data.first_day_pay_rate first_day_pay_rate,
+            first_day_data.first_day_arpu first_day_arpu,
+            third_day_data.third_day_num third_day_num,
+            third_day_data.third_day_amount third_day_amount,
+            third_day_data.third_day_pay_rate third_day_pay_rate,
+            third_day_data.third_day_arpu third_day_arpu,
+            seventh_day_data.seventh_day_num seventh_day_num,
+            seventh_day_data.seventh_day_amount seventh_day_amount,
+            seventh_day_data.seventh_day_pay_rate seventh_day_pay_rate,
+            seventh_day_data.seventh_day_arpu seventh_day_arpu,
+            sum(stat_consume_banding_treasure.nn_num) nn_num,
+            sum(stat_consume_banding_treasure.nn_amount) nn_amount,
+            sum(stat_consume_banding_treasure.nn_num) / sum(stat_consume_banding_treasure.dru) nn_pay_rate,
+            sum(stat_consume_banding_treasure.nn_amount)/sum(stat_consume_banding_treasure.nn_num) nn_arpu,
+            sum(stat_consume_banding_treasure.on_num) on_num,
+            sum(stat_consume_banding_treasure.on_amount) on_amount,
+            sum(stat_consume_banding_treasure.on_num)/sum(stat_consume_banding_treasure.dru_gunfu) on_pay_rate,
+            sum(stat_consume_banding_treasure.on_amount)/sum(stat_consume_banding_treasure.on_num) on_arpu,
+            sum(stat_consume_banding_treasure.oo_num) oo_num,
+            sum(stat_consume_banding_treasure.oo_amount) oo_amount,
+            sum(stat_consume_banding_treasure.oo_num) / (sum(stat_consume_banding_treasure.dau)-sum(stat_consume_banding_treasure.dru)) oo_pay_rate,
+            sum(stat_consume_banding_treasure.oo_amount) / sum(stat_consume_banding_treasure.oo_num) oo_arpu
+        FROM  stat_consume_banding_treasure
+        LEFT JOIN (
+	        SELECT 
+	        	sum(num) first_day_num,
+                sum(amount) first_day_amount,
+                sum(num) /sum(dau) first_day_pay_rate,
+                sum(amount) / sum(num) first_day_arpu,
+                log_day first_day_log_day
+	       	FROM stat_consume_banding_treasure
+	        WHERE open_days = 1
+	        GROUP BY log_day) first_day_data
+        ON stat_consume_banding_treasure.log_day = first_day_data.first_day_log_day
+        LEFT JOIN (
+	        SELECT 
+	        	sum(num) third_day_num,
+	        	sum(amount) third_day_amount,
+	        	sum(num) /sum(dau) third_day_pay_rate,
+	        	sum(amount) / sum(num) third_day_arpu,
+	        	log_day third_day_log_day
+	        FROM stat_consume_banding_treasure
+	        WHERE open_days = 3
+	        GROUP BY log_day) third_day_data
+        ON stat_consume_banding_treasure.log_day = third_day_data.third_day_log_day
+        LEFT JOIN (
+	        SELECT 
+	        	sum(num) seventh_day_num,
+	        	sum(amount) seventh_day_amount,
+	        	sum(num) /sum(dau) seventh_day_pay_rate,
+	        	sum(amount) / sum(num) seventh_day_arpu,
+	        	log_day seventh_day_log_day
+	        FROM stat_consume_banding_treasure
+	        WHERE open_days = 7
+	        GROUP BY log_day) seventh_day_data
+        ON stat_consume_banding_treasure.log_day = seventh_day_data.seventh_day_log_day
+        WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+	    <if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>        
+        GROUP BY stat_consume_banding_treasure.log_day
+        ORDER BY stat_consume_banding_treasure.log_day DESC 
+    </select>
+    
+    <select id="findDailyPlatformBindConsumeData" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+    	SELECT
+            log_day,
+            pid,
+            sum(dau) dau,
+            sum(total) total,
+            sum(produce) produce,
+            sum(num) num,
+            sum(amount) amount,
+            sum(num) /sum(dau) pay_rate,
+            sum(amount) / sum(num) arpu,
+            sum(amount) / sum(dau) active_arpu
+        FROM  stat_consume_banding_treasure
+        WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+	    <if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>        
+        GROUP BY log_day,pid
+        ORDER BY  log_day DESC
+    </select>
+    
+    <select id="findBindConsumeByPlatform" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select 
+        	pid, 
+        	sum(amount) amount
+        from stat_consume_banding_treasure where 1 =1 
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+	    <if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>        
+        GROUP BY pid
+    </select>
+    
+    <select id="findMonthConsumeData" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+    	SELECT
+            stat_monthly_consume.log_month,
+            sum(stat_monthly_consume.is_open_month) kaifuNum,            <!-- 开服数量 -->
+            sum(stat_monthly_consume.income) income,					 <!-- 月收入 -->
+            sum(stat_monthly_consume.ru) dru,							 <!-- 注册用户 -->
+            sum(stat_monthly_consume.au) dau,							 <!-- 活跃用户 -->
+            sum(stat_monthly_consume.ou) ou,							 <!-- 老用户数 -->
+            sum(stat_monthly_consume.account) num,						 <!-- 消费人数 -->
+            sum(stat_monthly_consume.times) times,						 <!-- 消费次数 -->
+            sum(stat_monthly_consume.amount) amount,					 <!-- 消费金额（元宝） -->
+            sum(stat_monthly_consume.account) /sum(stat_monthly_consume.au) pay_rate,		<!--消费率=充值人数/登录人数 -->
+            sum(stat_monthly_consume.amount) / sum(stat_monthly_consume.account) arpu,		<!--消费arpu=消费金额/消费用户数  -->
+            sum(stat_monthly_consume.amount) / sum(stat_monthly_consume.au) active_arpu,	<!-- 活跃arpu=消费金额/登陆用户数 -->
+            sum(stat_monthly_consume.first_consume_account) first_num,
+            sum(stat_monthly_consume.first_consume_amount) first_amount,
+            month_new_data.month_new_dau month_new_dau,
+            month_new_data.month_new_num month_new_num,
+            month_new_data.month_new_amount month_new_amount,
+            month_new_data.month_new_pay_rate month_new_pay_rate,
+            month_new_data.month_new_arpu month_new_arpu,
+            month_old_data.month_old_dau month_old_dau,
+            month_old_data.month_old_num month_old_num,
+            month_old_data.month_old_amount month_old_amount,
+            month_old_data.month_old_pay_rate month_old_pay_rate,
+            month_old_data.month_old_arpu month_old_arpu
+        FROM  stat_monthly_consume
+        LEFT JOIN (
+	        SELECT 
+	        	sum(au) month_new_dau,
+	        	sum(account) month_new_num,
+                sum(amount) month_new_amount,
+                sum(account) /sum(au) month_new_pay_rate,
+                sum(amount) / sum(account) month_new_arpu,
+                log_month first_day_log_month
+	       	FROM stat_monthly_consume
+	        WHERE is_open_month = 1
+	        <if test="@Ognl@isNotBlank(createDateEnd)">and log_month <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+	        <if test="@Ognl@isNotBlank(createDateStart)">and log_month <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if> 
+	        GROUP BY log_month) month_new_data
+        ON stat_monthly_consume.log_month = month_new_data.first_day_log_month
+        LEFT JOIN (
+	        SELECT 
+	        	sum(au) month_old_dau,
+	        	sum(account) month_old_num,
+                sum(amount) month_old_amount,
+                sum(account) /sum(au) month_old_pay_rate,
+                sum(amount) / sum(account) month_old_arpu,
+                log_month first_day_log_month
+	       	FROM stat_monthly_consume
+	        WHERE is_open_month = 0
+	        <if test="@Ognl@isNotBlank(createDateEnd)">and log_month <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+	        <if test="@Ognl@isNotBlank(createDateStart)">and log_month <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if> 
+	        GROUP BY log_month) month_old_data
+        ON stat_monthly_consume.log_month = month_old_data.first_day_log_month
+        WHERE 1 = 1 
+        <if test="@Ognl@isNotBlank(pidsList)">
+			AND pid IN
+		     <foreach item="item" index="index" collection="pidsList" open="(" separator="," close=")">
+		       #{item}
+		     </foreach>
+	    </if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_month <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_month <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+        GROUP BY stat_monthly_consume.log_month
+        ORDER BY stat_monthly_consume.log_month DESC
+    </select>
+    
+    <select id="findMonthPlatformConsumeData" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+    	SELECT
+            log_month,
+            pid,
+            sum(au) dau,
+            sum(account) num,
+            sum(amount) amount,
+            sum(account) /sum(au) pay_rate,
+            sum(amount) / sum(account) arpu,
+            sum(amount) / sum(au) active_arpu
+        FROM  stat_monthly_consume
+        WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(pidsList)">
+			AND pid IN
+		     <foreach item="item" index="index" collection="pidsList" open="(" separator="," close=")">
+		       #{item}
+		     </foreach>
+	    </if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_month <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_month <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+        GROUP BY log_month,pid
+        ORDER BY  log_month DESC
+    </select>
+    
+    <select id="findMonthBindConsumeData" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+    	SELECT
+            stat_monthly_consume_banding.log_month,
+            sum(stat_monthly_consume_banding.is_open_month) kaifuNum,
+            sum(stat_monthly_consume_banding.income) amount,
+            sum(stat_monthly_consume_banding.total) total,
+            sum(stat_monthly_consume_banding.produce) produce,
+            sum(stat_monthly_consume_banding.ru) dru,
+            sum(stat_monthly_consume_banding.au) dau,
+            sum(stat_monthly_consume_banding.ou) ou,
+            sum(stat_monthly_consume_banding.account) num,
+            sum(stat_monthly_consume_banding.times) times,
+            sum(stat_monthly_consume_banding.amount) amount,
+            sum(stat_monthly_consume_banding.account) /sum(stat_monthly_consume_banding.au) pay_rate,
+            sum(stat_monthly_consume_banding.income) / sum(stat_monthly_consume_banding.account) arpu,
+            sum(stat_monthly_consume_banding.income) / sum(stat_monthly_consume_banding.au) active_arpu,
+            sum(stat_monthly_consume_banding.first_consume_account) first_num,
+            sum(stat_monthly_consume_banding.first_consume_amount) first_amount,
+            month_new_data.month_new_dau month_new_dau,
+            month_new_data.month_new_num month_new_num,
+            month_new_data.month_new_amount month_new_amount,
+            month_new_data.month_new_pay_rate month_new_pay_rate,
+            month_new_data.month_new_arpu month_new_arpu,
+            month_old_data.month_old_dau month_old_dau,
+            month_old_data.month_old_num month_old_num,
+            month_old_data.month_old_amount month_old_amount,
+            month_old_data.month_old_pay_rate month_old_pay_rate,
+            month_old_data.month_old_arpu month_old_arpu
+        FROM  stat_monthly_consume_banding
+        LEFT JOIN (
+	        SELECT 
+	        	sum(au) month_new_dau,
+	        	sum(account) month_new_num,
+                sum(amount) month_new_amount,
+                sum(account) /sum(au) month_new_pay_rate,
+                sum(amount) / sum(account) month_new_arpu,
+                log_month month_new_log_month
+	       	FROM stat_monthly_consume_banding
+	        WHERE is_open_month = 1
+	        <if test="@Ognl@isNotBlank(createDateEnd)">and log_month <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+	        <if test="@Ognl@isNotBlank(createDateStart)">and log_month <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if> 
+	        GROUP BY log_month) month_new_data
+        ON stat_monthly_consume_banding.log_month = month_new_data.month_new_log_month
+        LEFT JOIN (
+	        SELECT 
+	        	sum(au) month_old_dau,
+	        	sum(account) month_old_num,
+                sum(amount) month_old_amount,
+                sum(account) /sum(au) month_old_pay_rate,
+                sum(amount) / sum(account) month_old_arpu,
+                log_month month_old_log_month
+	       	FROM stat_monthly_consume_banding
+	        WHERE is_open_month = 0
+	        <if test="@Ognl@isNotBlank(createDateEnd)">and log_month <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+	        <if test="@Ognl@isNotBlank(createDateStart)">and log_month <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if> 
+	        GROUP BY log_month) month_old_data
+        ON stat_monthly_consume_banding.log_month = month_old_data.month_old_log_month
+        WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(pidsList)">
+			AND pid IN
+		     <foreach item="item" index="index" collection="pidsList" open="(" separator="," close=")">
+		       #{item}
+		     </foreach>
+	    </if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_month <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_month <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+        GROUP BY stat_monthly_consume_banding.log_month
+        ORDER BY stat_monthly_consume_banding.log_month DESC
+    </select>
+    
+    <select id="findMonthBindPlatformConsumeData" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+    	SELECT
+            log_month,
+            pid,
+            sum(au) dau,
+            sum(account) num,
+            sum(amount) amount,
+            sum(account) /sum(au) pay_rate,
+            sum(amount) / sum(account) arpu,
+            sum(amount) / sum(au) active_arpu
+        FROM  stat_monthly_consume_banding
+        WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(pidsList)">
+			AND pid IN
+		     <foreach item="item" index="index" collection="pidsList" open="(" separator="," close=")">
+		       #{item}
+		     </foreach>
+	    </if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_month <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_month <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+        GROUP BY log_month,pid
+        ORDER BY  log_month DESC
+    </select>
+    
+    <!-- 单服充值排行 -->
+    <select id="findRechargeRanking" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        SELECT pid,area_id,
+          max(pa) maxpa, <!--最大总充值-->
+          min(pa) minpa, <!--最小总充值-->
+          max(pa)-min(pa) pa, <!--总充值-->
+          sum(income) income,
+          sum(income)/(max(pa)-min(pa)) arpu
+        FROM stat_integrated
+        WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+	    <if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>        
+        GROUP BY pid, area_id
+        HAVING(income) <![CDATA[ >= ]]> #{jeValue}
+        ORDER BY income DESC
+    </select>
+    
+    <!-- 平台充值排行 -->
+    <select id="findRechargePlatformRanking" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        SELECT pid,sum(maxpa) maxpa,sum(minpa) minpa,sum(maxpa)-sum(minpa) pa,sum(income) income,sum(income)/(sum(maxpa)-sum(minpa)) arpu FROM (
+            SELECT pid,area_id,max(pa) maxpa,min(pa) minpa,sum(income) income
+            FROM stat_integrated
+            WHERE 1 =1
+            <if test="@Ognl@isNotBlank(serverIdList)">
+                AND area_id IN
+                <foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+            <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+        GROUP BY pid,area_id
+        ) AS a
+        WHERE 1 = 1
+        GROUP BY pid
+        HAVING(income) <![CDATA[ >= ]]> #{jeValue}
+        ORDER BY income DESC
+    </select>
+    
+    <!-- 单服消费排行 -->
+    <select id="findConsumeRanking" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        select pid,area_id,
+          sum(first_num) num, <!-- 每天首消人数相加即为这几天的消费人数 -->
+          sum(first_amount) amount,<!-- 每天首消金额相加即为这几天的消费金额 -->
+          sum(first_amount)/sum(first_num) arpu
+        from stat_consume_treasure
+        WHERE 1 = 1 
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+	    <if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>        
+        GROUP BY pid, area_id
+        HAVING(amount) <![CDATA[ >= ]]> #{jeValue}
+        ORDER BY amount DESC
+    </select>
+    
+    <!-- 平台消费排行 -->
+    <select id="findConsumePlatformRanking" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        select pid,
+            sum(first_num) num, <!-- 每天首消人数相加即为这几天的消费人数 -->
+            sum(first_amount) amount,<!-- 每天首消金额相加即为这几天的消费金额 -->
+            sum(first_amount)/sum(first_num) arpu
+        from stat_consume_treasure
+        WHERE 1 = 1 
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+	    <if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>        
+        GROUP BY pid
+        HAVING(amount) <![CDATA[ >= ]]> #{jeValue}
+        ORDER BY amount DESC
+    </select>
+    
+        
+    <!-- 单服消费排行 -->
+    <select id="findConsumeBandingRanking" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        select pid,area_id,
+        sum(first_num) num, <!-- 每天首消人数相加即为这几天的消费人数 -->
+        sum(first_amount) amount,<!-- 每天首消金额相加即为这几天的消费金额 -->
+        sum(first_amount)/sum(first_num) arpu
+        FROM  stat_consume_banding_treasure
+        WHERE 1 = 1 
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+	    <if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>        
+        GROUP BY pid, area_id
+        HAVING(amount) <![CDATA[ >= ]]> #{jeValue}
+        ORDER BY amount DESC
+    </select>
+    
+    <!-- 平台消费排行 -->
+    <select id="findConsumePlatformBandingRanking" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        SELECT pid,
+        sum(first_num) num, <!-- 每天首消人数相加即为这几天的消费人数 -->
+        sum(first_amount) amount,<!-- 每天首消金额相加即为这几天的消费金额 -->
+        sum(first_amount)/sum(first_num) arpu
+        FROM  stat_consume_banding_treasure
+        WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+	    <if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>        
+        GROUP BY pid
+        HAVING(amount) <![CDATA[ >= ]]> #{jeValue}
+        ORDER BY amount DESC
+    </select>
+    
+    <!-- 平台消费 -->
+    <select id="findPlatformConsume" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        SELECT
+			stat_consume_treasure.log_day log_day,
+			stat_consume_treasure.pid pid,
+			stat_consume_treasure.dau dau,
+			stat_consume_treasure.amount amount,
+			stat_consume_treasure.num num,
+			stat_consume_treasure.num/stat_consume_treasure.dau num_dau,
+			stat_consume_treasure.amount/num amount_num,
+			stat_consume_treasure.amount/dau amount_dau,
+			stat_consume_treasure.nn_num nn_num,
+			stat_consume_treasure.nn_amount nn_amount,
+			stat_consume_treasure.on_num on_num,
+			stat_consume_treasure.on_amount on_amount
+		FROM
+			stat_consume_treasure
+		WHERE
+			1=1
+			<if test="@Ognl@isNotBlank(pidsList)">
+				AND pid IN
+			     <foreach item="item" index="index" collection="pidsList" open="(" separator="," close=")">
+			       #{item}
+			     </foreach>
+		    </if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+            <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+		ORDER BY
+			log_day DESC
+    </select>
+</mapper>

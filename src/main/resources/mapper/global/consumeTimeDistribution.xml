@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="consumeTimeDistribution">
+    <select id="findPlatformConsumeTimePeriod" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		SELECT
+			stat_consume_time_distribution.log_day log_day,
+			stat_consume_time_distribution.pid pid,
+			stat_consume_time_distribution.section_1 s_1,
+			stat_consume_time_distribution.section_2 s_2,
+			stat_consume_time_distribution.section_3 s_3,
+			stat_consume_time_distribution.section_4 s_4,
+			stat_consume_time_distribution.section_5 s_5,
+			stat_consume_time_distribution.section_6 s_6,
+			stat_consume_time_distribution.section_7 s_7,
+			stat_consume_time_distribution.section_8 s_8,
+			stat_consume_time_distribution.section_9 s_9,
+			stat_consume_time_distribution.section_10 s_10,
+			stat_consume_time_distribution.section_11 s_11,
+			stat_consume_time_distribution.section_12 s_12,
+			stat_consume_time_distribution.section_13 s_13,
+			stat_consume_time_distribution.section_14 s_14,
+			stat_consume_time_distribution.section_15 s_15,
+			stat_consume_time_distribution.section_16 s_16,
+			stat_consume_time_distribution.section_17 s_17,
+			stat_consume_time_distribution.section_18 s_18,
+			stat_consume_time_distribution.section_19 s_19,
+			stat_consume_time_distribution.section_20 s_20,
+			stat_consume_time_distribution.section_21 s_21,
+			stat_consume_time_distribution.section_22 s_22,
+			stat_consume_time_distribution.section_23 s_23,
+			stat_consume_time_distribution.section_24 s_24
+		FROM
+			stat_consume_time_distribution
+		WHERE
+			1 = 1
+			<if test="@Ognl@isNotBlank(pidsList)">
+				AND pid IN
+			     <foreach item="item" index="index" collection="pidsList" open="(" separator="," close=")">
+			       #{item}
+			     </foreach>
+		    </if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+            <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+		ORDER BY
+			stat_consume_time_distribution.log_day DESC
+    </select>
+    
+    <select id="findPlatformConsumeBandingTimePeriod" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		SELECT
+			log_day,
+			pid,
+			section_1 s_1,
+			section_2 s_2,
+			section_3 s_3,
+			section_4 s_4,
+			section_5 s_5,
+			section_6 s_6,
+			section_7 s_7,
+			section_8 s_8,
+			section_9 s_9,
+			section_10 s_10,
+			section_11 s_11,
+			section_12 s_12,
+			section_13 s_13,
+			section_14 s_14,
+			section_15 s_15,
+			section_16 s_16,
+			section_17 s_17,
+			section_18 s_18,
+			section_19 s_19,
+			section_20 s_20,
+			section_21 s_21,
+			section_22 s_22,
+			section_23 s_23,
+			section_24 s_24
+		FROM
+			stat_consume_banding_time_distribution
+		WHERE
+			1 = 1
+			<if test="@Ognl@isNotBlank(pidsList)">
+				AND pid IN
+			     <foreach item="item" index="index" collection="pidsList" open="(" separator="," close=")">
+			       #{item}
+			     </foreach>
+		    </if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+            <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+		ORDER BY
+			log_day DESC
+    </select>
+</mapper>

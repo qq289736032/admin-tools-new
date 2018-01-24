@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="stallTrade">
+<select id="findStallTrade" parameterType="java.util.HashMap"
+	resultType="java.util.HashMap">
+		select
+			pid,
+			server_id,
+			role_level,
+			role_name,
+			role_id,
+			item_id,
+			item_name,
+			num,
+			seller_role_id,
+			seller_role_name,
+			seller_job_id,
+			seller_role_level,
+			seller_vip_level,
+			start_time,
+			cost,
+			money,
+			log_day,
+			log_time
+	  from   stall_trade_log
+	  where  server_id = #{currentServerId}
+	<if test="@Ognl@isNotBlank(sellerRoleName)"> and seller_role_name =#{sellerRoleName}</if>
+	<if test="@Ognl@isNotBlank(roleName)"> and  role_name= #{roleName} </if>
+	<if test="@Ognl@isNotBlank(roleId)"> and  role_id= #{roleId} </if>
+	<if test="@Ognl@isNotBlank(sellerRoleId)"> and  seller_role_id= #{sellerRoleId} </if>
+	<if test="@Ognl@isNotBlank(endDate)"> and log_day <![CDATA[ <= ]]> #{endDate}</if> 
+	<if test="@Ognl@isNotBlank(startDate)"> and log_day <![CDATA[ >= ]]> #{startDate}</if>
+	  ORDER BY log_time DESC
+</select>
+
+<select id="export" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+        select  
+          	server_id,
+			role_id,
+			role_name,
+			item_name,
+			item_id,
+			num,
+			seller_role_id,
+			seller_role_name,
+			cost,
+			money,
+			start_time
+	  from   stall_trade_log
+      where  server_id = #{currentServerId}
+	<if test="@Ognl@isNotBlank(sellerRoleName)"> and seller_role_name =#{sellerRoleName}</if>
+	<if test="@Ognl@isNotBlank(roleName)"> and  role_name= #{roleName} </if>
+	<if test="@Ognl@isNotBlank(roleId)"> and  role_id= #{roleId} </if>
+	<if test="@Ognl@isNotBlank(sellerRoleId)"> and  seller_role_id= #{sellerRoleId} </if>
+	<if test="@Ognl@isNotBlank(endDate)"> and log_day <![CDATA[ <= ]]> #{endDate}</if> 
+	<if test="@Ognl@isNotBlank(startDate)"> and log_day <![CDATA[ >= ]]> #{startDate}</if>
+    </select>
+</mapper>

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="reabateGoodsSpecMapper">
+  <resultMap id="BaseResultMap" type="com.mokylin.cabal.modules.rebate.entity.RebateGoodsSpec">
+    <result column="id" jdbcType="VARCHAR" property="id" />
+    <result column="pid" jdbcType="VARCHAR" property="pid" />
+    <result column="plat_name" jdbcType="VARCHAR" property="platName" />
+    <result column="goods_name" jdbcType="VARCHAR" property="goodsName" />
+    <result column="goods_id" jdbcType="VARCHAR" property="goodsId" />
+    <result column="goods_desc" jdbcType="VARCHAR" property="goodsDesc" />
+    <result column="goods_price" jdbcType="INTEGER" property="goodsPrice" />
+    <result column="goods_prop" jdbcType="INTEGER" property="goodsProp" />
+    <result column="exchange_limit" jdbcType="INTEGER" property="exchangeLimit" />
+    <result column="top_num" jdbcType="INTEGER" property="topNum" />
+    <result column="create_name" jdbcType="VARCHAR" property="createName" />
+    <result column="create_by" jdbcType="VARCHAR" property="createBy" />
+    <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
+    <result column="update_by" jdbcType="VARCHAR" property="updateBy" />
+    <result column="update_date" jdbcType="TIMESTAMP" property="updateDate" />
+    <result column="del_flag" jdbcType="CHAR" property="delFlag" />
+  </resultMap>
+  	 <select id="findOne"
+		resultType="com.mokylin.cabal.modules.rebate.entity.RebateGoodsSpec"
+		parameterType="com.mokylin.cabal.modules.rebate.entity.RebateGoodsSpec">
+		select * from rebate_goods_spec where id = #{id}
+	</select>
+  	<select id="findAll"
+		resultType="com.mokylin.cabal.modules.rebate.entity.RebateGoodsSpec"
+		parameterType="com.mokylin.cabal.modules.rebate.entity.RebateGoodsSpec">
+		select * from rebate_goods_spec where del_flag = 0
+		<if test="@Ognl@isNotBlank(pid)">and pid = #{pid}</if>
+		<if test="@Ognl@isNotBlank(goodsName)">and goods_name like concat('%',#{goodsName},'%')</if>
+		<if test="@Ognl@isNotBlank(goodsId)">and goods_id = #{goodsId}</if>
+		<if test="@Ognl@isNotBlank(goodsProp)">and goods_prop = #{goodsProp}</if>
+		
+		order by goods_id desc
+	</select>
+  <insert id="insert" parameterType="com.mokylin.cabal.modules.rebate.entity.RebateGoodsSpec">
+    insert into rebate_goods_spec (id, pid, plat_name, 
+      goods_name, goods_id, goods_desc, 
+      goods_price, goods_prop, exchange_limit, 
+      top_num, create_name, create_by, 
+      create_date, update_by, update_date, 
+      del_flag)
+    values (#{id,jdbcType=VARCHAR}, #{pid,jdbcType=VARCHAR}, #{platName,jdbcType=VARCHAR}, 
+      #{goodsName,jdbcType=VARCHAR}, #{goodsId,jdbcType=VARCHAR}, #{goodsDesc,jdbcType=VARCHAR}, 
+      #{goodsPrice,jdbcType=INTEGER}, #{goodsProp,jdbcType=INTEGER}, #{exchangeLimit,jdbcType=INTEGER}, 
+      #{topNum,jdbcType=INTEGER}, #{createName,jdbcType=VARCHAR}, #{createBy,jdbcType=VARCHAR}, 
+      now(), #{updateBy,jdbcType=VARCHAR}, now(), 0)
+  </insert>
+  
+    <update id="update" parameterType="com.mokylin.cabal.modules.rebate.entity.RebateGoodsSpec">
+    update rebate_goods_spec set goods_name = #{goodsName},goods_id = #{goodsId},goods_desc = #{goodsDesc},
+    goods_price = #{goodsPrice},goods_prop = #{goodsProp},exchange_limit = #{exchangeLimit},
+    top_num = #{topNum},update_date = now(),update_by = #{updateBy},pid = #{pid},plat_name = #{platName}
+    where id = #{id}
+  </update>
+  
+    <update id="del" parameterType="com.mokylin.cabal.modules.rebate.entity.RebateGoodsSpec">
+    update rebate_goods_spec set del_flag = #{delFlag},update_by = #{updateBy},update_date = now()
+    where id = #{id}
+  </update>
+  <insert id="insertSelective" parameterType="com.mokylin.cabal.modules.rebate.entity.RebateGoodsSpec">
+    insert into rebate_goods_spec
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="pid != null">
+        pid,
+      </if>
+      <if test="platName != null">
+        plat_name,
+      </if>
+      <if test="goodsName != null">
+        goods_name,
+      </if>
+      <if test="goodsId != null">
+        goods_id,
+      </if>
+      <if test="goodsDesc != null">
+        goods_desc,
+      </if>
+      <if test="goodsPrice != null">
+        goods_price,
+      </if>
+      <if test="goodsProp != null">
+        goods_prop,
+      </if>
+      <if test="exchangeLimit != null">
+        exchange_limit,
+      </if>
+      <if test="topNum != null">
+        top_num,
+      </if>
+      <if test="createName != null">
+        create_name,
+      </if>
+      <if test="createBy != null">
+        create_by,
+      </if>
+      <if test="createDate != null">
+        create_date,
+      </if>
+      <if test="updateBy != null">
+        update_by,
+      </if>
+      <if test="updateDate != null">
+        update_date,
+      </if>
+      <if test="delFlag != null">
+        del_flag,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="pid != null">
+        #{pid,jdbcType=VARCHAR},
+      </if>
+      <if test="platName != null">
+        #{platName,jdbcType=VARCHAR},
+      </if>
+      <if test="goodsName != null">
+        #{goodsName,jdbcType=VARCHAR},
+      </if>
+      <if test="goodsId != null">
+        #{goodsId,jdbcType=VARCHAR},
+      </if>
+      <if test="goodsDesc != null">
+        #{goodsDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="goodsPrice != null">
+        #{goodsPrice,jdbcType=INTEGER},
+      </if>
+      <if test="goodsProp != null">
+        #{goodsProp,jdbcType=BIT},
+      </if>
+      <if test="exchangeLimit != null">
+        #{exchangeLimit,jdbcType=BIT},
+      </if>
+      <if test="topNum != null">
+        #{topNum,jdbcType=INTEGER},
+      </if>
+      <if test="createName != null">
+        #{createName,jdbcType=VARCHAR},
+      </if>
+      <if test="createBy != null">
+        #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null">
+        #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null">
+        #{updateBy,jdbcType=VARCHAR},
+      </if>
+      <if test="updateDate != null">
+        #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="delFlag != null">
+        #{delFlag,jdbcType=CHAR},
+      </if>
+    </trim>
+  </insert>
+</mapper>

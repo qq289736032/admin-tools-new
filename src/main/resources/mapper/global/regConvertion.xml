@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="regConvertion">
+
+    <select id="findRegConvertionRealTime" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+			SELECT
+				pid,
+				area_id,
+				open_days,
+				step5 visit_times,
+				step1,
+				step2,
+				step3,
+				step4,
+				create_role_times,
+				role_num,
+				login_times,
+				enter_name_times,
+				random_times,
+				log_day
+			FROM 
+				stat_reg_convertion
+			WHERE
+				1 = 1 
+          		<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ = ]]>replace(replace(#{createDateStart},'-',''),' ','')</if>
+			    <if test="@Ognl@isNotBlank(serverIdList)">
+					AND area_id IN
+					<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+							#{item}
+					</foreach>
+				</if>          		
+    </select>
+    
+     <select id="findRegConvertionTotal" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+			SELECT 
+				sum(step5) visit_times,
+				sum(step1) step1,
+				sum(step2) step2,
+				sum(step3) step3,
+				sum(step4) step4,
+				sum(create_role_times) create_role_times,
+				sum(role_num) role_num,
+				sum(login_times) login_times,
+				sum(enter_name_times) enter_name_times,
+				sum(random_times) random_times,
+				log_day
+			FROM 
+				stat_reg_convertion
+			WHERE
+				1 = 1 
+				<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+          		<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(replace(#{createDateStart},'-',''),' ','')</if>
+			    <if test="@Ognl@isNotBlank(serverIdList)">
+					AND area_id IN
+					<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+							#{item}
+					</foreach>
+				</if>          		
+    </select>
+
+    <select id="findRegConvertionStatisticsByDay" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+			SELECT
+				pid,
+				sum(step5) visit_times,
+				sum(step1) step1,
+				sum(step2) step2,
+				sum(step3) step3,
+				sum(step4) step4,
+				sum(create_role_times) create_role_times,
+				sum(role_num) role_num,
+				sum(login_times) login_times,
+				sum(enter_name_times) enter_name_times,
+				sum(random_times) random_times,
+				log_day
+			from stat_reg_convertion where 1 =1
+			<if test="@Ognl@isNotBlank(pidsList)">
+				AND pid IN
+			     <foreach item="item" index="index" collection="pidsList" open="(" separator="," close=")">
+			       #{item}
+			     </foreach>
+		    </if>
+	        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+	        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+	          GROUP BY log_day, pid
+	          ORDER BY log_day DESC
+    </select>
+    
+    <select id="findRegConvertionStatistics" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+			SELECT
+				pid,
+				sum(step5) visit_times,
+				sum(step1) step1,
+				sum(step2) step2,
+				sum(step3) step3,
+				sum(step4) step4,
+				sum(create_role_times) create_role_times,
+				sum(role_num) role_num,
+				sum(login_times) login_times,
+				sum(enter_name_times) enter_name_times,
+				sum(random_times) random_times
+			from stat_reg_convertion where 1 =1
+	        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+	        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+	          GROUP BY pid
+    </select>
+    
+    <select id="findRegConvertionStatisticsByPid" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+			SELECT
+				sum(step5) visit_times,
+				sum(create_role_times) create_role_times,
+				sum(role_num) role_num,
+				sum(login_times) login_times,
+				sum(enter_name_times) enter_name_times,
+				sum(random_times) random_times
+			from stat_reg_convertion where pid = #{pid}
+	        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+	        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+    </select>
+</mapper>

@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="goodsFlowLog">
+<!--道具消耗日志 -->
+<select id="paging" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	select g.role_name as roleName, 
+      	   g.operate_type as opereateType,
+		   g.item_name as itemName,
+		   g.flow_type as flowType,
+		   g.resource_line as resource,
+		   g.active_panel as active,
+		   g.value as value,
+		   g.before_value as beforeValue,
+		   g.after_value as afterValue,
+		   g.log_time
+	from goods_flow_log_${suffix} g
+	where g.area_id = #{currentServerId}
+	<if test="@Ognl@isNotBlank(itemName)"> and g.item_name LIKE concat('%',#{itemName},'%') </if>
+	<if test="@Ognl@isNotBlank(roleName)"> and g.role_name= #{roleName} </if>
+	<if test="@Ognl@isNotBlank(operaTypeList)"> 
+	 and g.operate_type in 
+	<foreach item="item" index="index" collection="operaTypeList" open="(" separator="," close=")">
+            #{item}
+    </foreach>
+    </if>
+	AND g.flow_type = 2
+	<!--<if test="@Ognl@isNotBlank(endDate)"> and  g.log_day <![CDATA[ <= ]]> replace(#{endDate},'-','')</if>-->
+	<!--<if test="@Ognl@isNotBlank(startDate)"> and g.log_day <![CDATA[ >= ]]> replace(#{startDate},'-','')</if>-->
+	ORDER BY g.log_time DESC
+</select>
+
+
+	<select id="findGoodsConsume" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select g.role_name as roleName,
+		g.operate_type as opereateType,
+		g.item_name as itemName,
+		g.flow_type as flowType,
+		g.resource_line as resource,
+		g.active_panel as active,
+		g.value as value,
+		g.before_value as beforeValue,
+		g.after_value as afterValue,
+		g.log_time
+		from goods_flow_log_${suffix} g
+		where g.area_id = #{currentServerId}
+		<if test="@Ognl@isNotBlank(itemName)"> and g.item_name LIKE concat('%',#{itemName},'%') </if>
+		<if test="@Ognl@isNotBlank(roleName)"> and g.role_name= #{roleName} </if>
+		<if test="@Ognl@isNotBlank(operaTypeList)">
+			and g.operate_type in
+			<foreach item="item" index="index" collection="operaTypeList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		AND g.flow_type = 2
+		ORDER BY g.log_time DESC
+	</select>
+
+<!-- 道具获取日志 -->
+<select id="propGainPaging" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	    select g.role_name as roleName, 
+	      	   g.operate_type as opereateType,
+			   g.item_name as itemName,
+			   g.flow_type as flowType,
+			   g.resource_line as resource,
+		       g.active_panel as active,
+			   g.value as value,
+			   g.before_value as beforeValue,
+			   g.after_value as afterValue,
+	      	   g.log_time
+		from goods_flow_log_${suffix} g
+		where  g.flow_type = 1 and g.area_id = #{currentServerId}
+		<if test="@Ognl@isNotBlank(itemName)"> and g.item_name LIKE concat('%',#{itemName},'%') </if>
+		<if test="@Ognl@isNotBlank(roleName)"> and g.role_name= #{roleName} </if>
+		<if test="@Ognl@isNotBlank(operaTypeList)"> 
+		 and g.operate_type in 
+		<foreach item="item" index="index" collection="operaTypeList" open="(" separator="," close=")">
+	            #{item}
+	    </foreach>
+	    </if>
+		<!-- <if test="@Ognl@isNotBlank(endDate)"> and  g.log_day <![CDATA[ <= ]]> replace(#{endDate},'-','')</if>
+		<if test="@Ognl@isNotBlank(startDate)"> and   g.log_day <![CDATA[ >= ]]> replace(#{startDate},'-','')</if> -->
+		ORDER BY g.log_time DESC
+</select>
+
+	<select id="findGoodsGain" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select g.role_name as roleName,
+		g.operate_type as opereateType,
+		g.item_name as itemName,
+		g.flow_type as flowType,
+		g.resource_line as resource,
+		g.active_panel as active,
+		g.value as value,
+		g.before_value as beforeValue,
+		g.after_value as afterValue,
+		g.log_time
+		from goods_flow_log_${suffix} g
+		where  g.flow_type = 1 and g.area_id = #{currentServerId}
+		<if test="@Ognl@isNotBlank(itemName)"> and g.item_name LIKE concat('%',#{itemName},'%') </if>
+		<if test="@Ognl@isNotBlank(roleName)"> and g.role_name= #{roleName} </if>
+		<if test="@Ognl@isNotBlank(operaTypeList)">
+			and g.operate_type in
+			<foreach item="item" index="index" collection="operaTypeList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+	
+	<select id="bigLottoAward" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		<!-- 大乐透奖励分布 -->
+		select item_name,count(DISTINCT role_id) cou from(
+		<foreach collection="list" item="items" index="index" separator="UNION ALL">
+		select item_name,role_id from goods_flow_log_${items} where operate_type=3262
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		group by role_id
+		</foreach>
+		) a GROUP BY item_name
+	</select>
+	
+	<select id="foregoerBag" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		<!-- 先行者礼包 -->			
+		select operate_type,count(role_id) cou from(
+		<foreach collection="list" item="items" index="index" separator="UNION ALL"> 
+		select operate_type,role_id from goods_flow_log_${items} where flow_type=1 and operate_type=3102
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach> 
+		</if>
+		group by role_id
+		</foreach>
+		) a
+	</select>
+	
+	<select id="integralOutput" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		<!-- 炼狱之塔爬塔积分总产出数 -->
+		select sum(num) num from (
+		<foreach collection="list" item="items" index="index" separator="UNION ALL"> 
+			SELECT sum(value) num FROM goods_flow_log_${items} where flow_type=1  and item_id='pve1' 
+			<if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach> 
+			</if>
+		</foreach>
+		) a
+		
+		
+	</select>
+	
+	<select id="acquireAward" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		<!-- 炼狱之塔直接领取奖励人数 -->
+		select count(num) num from(
+		<foreach collection="list" item="items" index="index" separator="UNION ALL"> 
+			SELECT role_id num FROM goods_flow_log_${items} g where flow_type=1 and operate_type=2150
+			<if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach> 
+			</if>
+			group by role_id
+		</foreach>
+		) a
+			
+	</select>
+	
+	<select id="consumeAward" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		<!-- 消耗积分总数-->
+		select sum(num) num from(
+		<foreach collection="list" item="items" index="index" separator="UNION ALL"> 
+		SELECT sum(value) num FROM goods_flow_log_${items} where flow_type=2  and  item_id='pve1'
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		</foreach> 
+		) a
+	</select>
+	
+	<select id="templeMopUp" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		<!-- 守护神殿统计直接扫荡人数 -->		
+		select count(role_id) cou from(
+		<foreach collection="list" item="items" index="index" separator="UNION ALL"> 
+		SELECT role_id FROM goods_flow_log_${items} g where operate_type=2161 and flow_type=2 
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		group by role_id
+		</foreach>
+		) a
+	</select>
+	
+	<select id="templeCreateinstance" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		<!-- 守护神殿统计重置副本人数 -->
+		select count(role_id) cou from (
+		<foreach collection="list" item="items" index="index" separator="UNION ALL"> 
+		select role_id from goods_flow_log_${items} g where operate_type=2160 and flow_type=2
+		<if test="@Ognl@isNotBlank(serverIdList)">
+				AND area_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+		</if>
+		group by role_id
+		</foreach>
+		) a
+	</select>
+	
+	<select id="roolNum" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		<!-- 幻魔密境10点、16点roll次数 -->
+		select 
+			item_name,
+			SUM(if(log_time <![CDATA[ < ]]> #{timestamps},value,0)) as tenNum,
+			SUM(if(log_time <![CDATA[ >= ]]> #{timestamps},value,0)) as sixteenNum
+			from  goods_flow_log_${suffix} g  
+			where operate_type='6032'
+			<if test="@Ognl@isNotBlank(serverIdList)">
+				AND area_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			GROUP BY item_name 
+			ORDER BY item_name
+	</select>
+	
+	<select id="yunDartConsume" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		<!-- 运镖消耗统计道具刷新-->	
+		select count(DISTINCT role_id) cou,count(role_id) num from(
+		<foreach collection="list" item="items" index="index" separator="UNION ALL">
+		SELECT role_id FROM goods_flow_log_${items} m where operate_type='2100' and flow_type=2	
+		<if test="@Ognl@isNotBlank(serverIdList)">
+				AND area_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+						#{item}
+				</foreach>
+		</if>
+		</foreach>		
+		) a
+	</select>
+	<!--道具产出统计-->
+	<select id="findPropProduce" resultType="map" parameterType="map">
+		SELECT operate_type,log_day ,item_name,sum(vip0) vip0,sum(vip0times) vip0times,sum(vip) vip,sum(viptimes) viptimes,sum(vip0num) vip0num,sum(vipnum) vipnum FROM(
+			SELECT a.operate_type,a.log_day ,a.item_name,a.area_id,a.vip0,a.vip0times,a.vip,a.viptimes,
+				(
+					select count(distinct role_id) from goods_flow_log_${suffix} where operate_type = a.operate_type and area_id = a.area_id and vip_level = -1   AND flow_type = 1
+				) vip0num,
+				(
+					select count(distinct role_id) from goods_flow_log_${suffix} where operate_type = a.operate_type and area_id = a.area_id and vip_level > -1  AND flow_type = 1
+				) vipnum
+			FROM(
+				SELECT operate_type,log_day ,item_name,area_id,sum(case vip_level when -1 THEN `value` ELSE 0 END) vip0,sum(case vip_level when -1 THEN 1 ELSE 0 END) vip0times ,
+						sum(case vip_level when vip_level >-1 THEN `value` ELSE 0 END) vip,sum(case vip_level when vip_level > -1 THEN 1 ELSE 0 END) viptimes
+				FROM goods_flow_log_${suffix}
+				WHERE 1 = 1
+				 AND flow_type = 1
+				GROUP BY operate_type,area_id
+			) as a
+		) as b
+		WHERE 1 = 1
+		<!-- <if test="@Ognl@isNotBlank(endDate)"> and  b.log_day <![CDATA[ <= ]]> replace(#{endDate},'-','')</if>
+	    <if test="@Ognl@isNotBlank(startDate)"> and b.log_day <![CDATA[ >= ]]> replace(#{startDate},'-','')</if> -->
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			and  b.area_id in
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="@Ognl@isNotBlank(filter)">${filter} </if>
+		GROUP by operate_type
+		</select>
+		<!--道具消耗统计-->
+		<select id="propProduceConsume" resultType="map" parameterType="map">
+			SELECT operate_type,log_day ,item_name,sum(vip0) vip0,sum(vip0times) vip0times,sum(vip) vip,sum(viptimes) viptimes,sum(vip0num) vip0num,sum(vipnum) vipnum FROM(
+				SELECT a.operate_type,a.log_day ,a.item_name,a.area_id,a.vip0,a.vip0times,a.vip,a.viptimes,
+					(
+						select count(distinct role_id) from goods_flow_log_${suffix} where operate_type = a.operate_type and area_id = a.area_id and vip_level = -1   AND flow_type = 2
+					) vip0num,
+					(
+						select count(distinct role_id) from goods_flow_log_${suffix} where operate_type = a.operate_type and area_id = a.area_id and vip_level > -1  AND flow_type = 2
+					) vipnum
+				FROM(
+					SELECT operate_type,log_day ,item_name,area_id,sum(case vip_level when -1 THEN `value` ELSE 0 END) vip0,sum(case vip_level when -1 THEN 1 ELSE 0 END) vip0times ,
+							sum(case vip_level when vip_level >-1 THEN `value` ELSE 0 END) vip,sum(case vip_level when vip_level > -1 THEN 1 ELSE 0 END) viptimes
+					FROM goods_flow_log_${suffix}
+					WHERE 1 = 1
+					 AND flow_type = 2
+					GROUP BY operate_type,area_id
+				) as a
+			) as b
+			WHERE 1 = 1
+			<if test="@Ognl@isNotBlank(serverIdList)">
+				and  b.area_id in
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="@Ognl@isNotBlank(filter)">${filter} </if>
+			GROUP by operate_type
+			</select>
+			
+		<select id="funnelPrimary" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		<!-- 初级增幅器 -->		
+		select item_id,sum(value1) value1,sum(value2) value2,sum(value3) value3,sum(value4) value4,sum(value5) value5,sum(value6) value6 from (
+		<foreach collection="list" item="items" index="index" separator="UNION ALL">
+			select item_id, sum(case when value <![CDATA[ >= ]]> 0 and value <![CDATA[ <= ]]> 100 then 1 else 0 end ) 'value1',
+							sum(case when value <![CDATA[ >= ]]> 101 and value <![CDATA[ <= ]]> 200 then 1 else 0 end ) 'value2',
+							sum(case when value <![CDATA[ >= ]]> 201 and value <![CDATA[ <= ]]> 300 then 1 else 0 end ) 'value3',
+							sum(case when value <![CDATA[ >= ]]> 301 and value <![CDATA[ <= ]]> 400 then 1 else 0 end ) 'value4',
+							sum(case when value <![CDATA[ >= ]]> 401 and value <![CDATA[ <= ]]> 500 then 1 else 0 end ) 'value5',
+							sum(case when value <![CDATA[ >= ]]> 501 and value <![CDATA[ <= ]]> 600 then 1 else 0 end ) 'value6'
+			from goods_flow_log_${items} 
+			where 1=1
+			<if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach> 
+			</if>
+			GROUP BY item_id 
+		</foreach>
+		) a GROUP BY item_id ORDER BY item_id
+	</select>
+	
+	<!--活动道具日志 -->
+	<select id="actGoodsStat" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select log_day, 
+			operate_type, 
+			item_name, 
+			flow_type, 
+			sum(value) add_num,
+			count(distinct role_id) role_num
+		from goods_flow_log_${suffix}
+		where 1 = 1
+		<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+		<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+		<if test="@Ognl@isNotBlank(operaTypeList)"> 
+		 and operate_type in 
+		<foreach item="item" index="index" collection="operaTypeList" open="(" separator="," close=")">
+	            #{item}
+	    </foreach>
+	    </if>
+		group by log_day, operate_type, item_name, flow_type
+		order by operate_type, flow_type;
+	</select>
+	
+	<select id="findAllGoodsConsume" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select g.role_name as roleName,
+		g.operate_type as opereateType,
+		item_id,
+		g.item_name as itemName,
+		g.flow_type as flowType,
+		g.resource_line as resource,
+		g.active_panel as active,
+		g.value as value,
+		g.before_value as beforeValue,
+		g.after_value as afterValue,
+		g.log_time
+		from goods_flow_log_${suffix} g
+		where 1=1
+		<if test="@Ognl@isNotBlank(itemName)"> and g.item_name LIKE concat('%',#{itemName},'%') </if>
+		<if test="@Ognl@isNotBlank(roleName)"> and g.role_name= #{roleName} </if>
+		<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+		<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+		<if test="@Ognl@isNotBlank(operaTypeList)">
+			and g.operate_type in
+			<foreach item="item" index="index" collection="operaTypeList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		ORDER BY g.log_time DESC
+	</select>
+</mapper>

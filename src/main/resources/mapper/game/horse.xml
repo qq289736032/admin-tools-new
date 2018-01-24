@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="horse">
+
+    <select id="paging" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT
+            horse.user_role_id,
+            horse.rank,
+            horse.star,
+            horse.lucky_value,
+            horse.history_lucky,
+            horse.upgrade_value,
+            horse.history_upgrade,
+            horse.draw_list,
+            horse.add_time,
+            horse.modify_time,
+            horse.draw_id,
+            horse.rank
+        FROM `horse`
+        WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(id)">and role_id = #{id}</if>
+        order by create_time desc
+    </select>
+
+    <select id="findHorseByRoleId" resultType="java.util.HashMap">
+         SELECT
+            horse.user_role_id,
+            horse.rank,
+            horse.star,
+            horse.lucky_value,
+            horse.history_lucky,
+            horse.upgrade_value,
+            horse.history_upgrade,
+            horse.draw_list,
+            horse.add_time,
+            horse.modify_time,
+            horse.draw_id,
+            horse.rank
+        FROM `horse`
+        WHERE user_role_id = #{id}
+    </select>
+</mapper>

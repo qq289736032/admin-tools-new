@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="guild">
+
+    <select id="findGuildList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	    SELECT
+			guild.id,
+			guild.name,
+			role.name leader_name,
+		    FROM_UNIXTIME(guild.create_time/1000,'%Y-%m-%d %H:%i:%s') add_time,
+			guild.guild_level banner_level,
+			guild.zhanli fighting,
+			(SELECT COUNT(user_role_id)  FROM guild_member WHERE guild_id = guild.id) current_member_num,
+			<!-- guild_state.state guild_state -->
+			role.server_id,
+			role.id   roleId
+		FROM
+			guild, role
+		WHERE
+		(SELECT user_role_id FROM guild_member where guild_id = guild.id and position = 0) = role.id
+			<if test="@Ognl@isNotBlank(createDateStart)">and FROM_UNIXTIME(guild.create_time/1000,'%Y-%m-%d') <![CDATA[ >= ]]> #{createDateStart}</if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and FROM_UNIXTIME(guild.create_time/1000,'%Y-%m-%d') <![CDATA[ <= ]]> #{createDateEnd}</if>
+			<if test="@Ognl@isNotBlank(name)">and guild.name like #{name}</if>
+		ORDER BY
+		guild_level DESC
+    </select>
+    
+    
+    <!-- 查看公会成员 -->
+    <select id="MembersList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT user_role_id AS roleId,
+        r.`name` AS roleName,
+        POSITION AS position,
+		FROM_UNIXTIME(g.add_time/1000,'%Y-%m-%d %H:%i:%s')  AS modifyTime,
+		FROM_UNIXTIME(g.add_time/1000,'%Y-%m-%d %H:%i:%s')  AS addTime,
+		contribution AS gongxian
+        FROM guild_member g  LEFT JOIN role r ON r.id = g.user_role_id
+         WHERE 1=1 AND guild_id = #{guildId}
+         <if test="@Ognl@isNotBlank(roleName)">and role_name = #{roleName}</if>
+         <if test="@Ognl@isNotBlank(createDateStart)">and FROM_UNIXTIME(create_time/1000,'%Y-%m-%d') <![CDATA[ >= ]]> #{createDateStart}</if>
+		 <if test="@Ognl@isNotBlank(createDateEnd)">and FROM_UNIXTIME(create_time/1000,'%Y-%m-%d') <![CDATA[ <= ]]> #{createDateEnd}</if>
+		
+    </select>
+    <select id="name" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	    SELECT 
+	              name
+		FROM
+			     guild
+		WHERE
+			    name=#{newName}
+    </select>
+    <!-- 公会名称 -->
+    <update id="updateName" parameterType="java.util.HashMap">
+        update guild set name = #{newName} where id = #{guildId}
+    </update>
+     <select id="roleName" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	    SELECT 
+	              name
+		FROM
+			     role
+		WHERE
+			    name=#{newName} 
+    </select>
+     <update id="updateRoleName" parameterType="java.util.HashMap">
+        update role set name = #{newName} where id = #{roleId}
+    </update>
+    <update id="updateMemberName" parameterType="java.util.HashMap">
+        update guild_member set role_name = #{newName} where role_id = #{roleId}  and  guild_id=#{guildId}
+    </update>
+</mapper>

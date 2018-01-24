@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="welfareSettingLog">
+
+
+	<select id="condition"
+		resultType="com.mokylin.cabal.modules.welfare.entity.WelfareSettingLog"
+		parameterType="java.util.HashMap">
+		select * from welfare_setting_log where 1=1
+		<if test="@Ognl@isNotBlank(pid)">and pid = #{pid}</if>
+		<if test="@Ognl@isNotBlank(status)">and status = #{status}</if>
+		<if test="@Ognl@isNotBlank(goldPoolCategory)">and gold_pool_category = #{goldPoolCategory}</if>
+		<if test="@Ognl@isNotBlank(platNature)">and plat_nature = #{platNature}</if>
+		<if test="@Ognl@isNotBlank(startTime)">and create_date &gt;= #{startTime}</if>
+		<if test="@Ognl@isNotBlank(endTime)">and create_date &lt;= #{endTime}</if>
+		order by create_date desc
+	</select>
+	
+	<select id="count"
+		resultType="java.lang.Integer"
+		parameterType="java.util.HashMap">
+		select count(*) from welfare_setting_log where 1=1
+		<if test="@Ognl@isNotBlank(pid)">and pid = #{pid}</if>
+		<if test="@Ognl@isNotBlank(status)">and status = #{status}</if>
+		<if test="@Ognl@isNotBlank(goldPoolCategory)">and gold_pool_category = #{goldPoolCategory}</if>
+		<if test="@Ognl@isNotBlank(platNature)">and plat_nature = #{platNature}</if>
+		<if test="@Ognl@isNotBlank(startTime)">and create_date &gt;= #{startTime}</if>
+		<if test="@Ognl@isNotBlank(endTime)">and create_date &lt;= #{endTime}</if>
+	</select>
+	
+	<insert id="insert" parameterType="com.mokylin.cabal.modules.welfare.entity.WelfareSettingLog">
+        insert into welfare_setting_log(
+            id,
+			plat_name,
+			plat_nature,
+			gold_pool_category,
+			new_service_gold,
+			r_resource_amount,
+			r_resource_ratio,
+			single_charge_ratio,
+			top_charge,
+			top_gold_day,
+			top_hold_gold,
+			top_internal_number,
+			add_time_limit,
+			status,
+			pid,
+			create_name,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag,
+			edit_type
+		)
+		values
+		
+		(
+		    #{id},
+			#{platName},
+			#{platNature},
+			#{goldPoolCategory},
+			#{newServiceGold},
+			#{RResourceAmount},
+			#{RResourceRatio},
+			#{singleChargeRatio},
+			#{topCharge},
+			#{topGoldDay},
+			#{topHoldGold},
+			#{topInternalNumber},
+			#{addTimeLimit},
+			#{status},
+			#{pid},
+			#{createName},
+			#{createBy},
+			now(),
+			#{updateBy},
+			now(),
+			0,
+			#{editType}
+		)
+		
+    </insert>
+    
+	<insert id="batchInsert" parameterType="java.util.List">
+        insert into welfare_setting_log(
+            id,
+			plat_name,
+			plat_nature,
+			gold_pool_category,
+			new_service_gold,
+			r_resource_amount,
+			r_resource_ratio,
+			single_charge_ratio,
+			top_charge,
+			top_gold_day,
+			top_hold_gold,
+			top_internal_number,
+			add_time_limit,
+			status,
+			pid,
+			create_name,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag,
+			edit_type
+		)
+		values
+		<foreach item="item" index="index" collection="list" separator=",">
+		(
+		    #{item.id},
+			#{item.platName},
+			#{item.platNature},
+			#{item.goldPoolCategory},
+			#{item.newServiceGold},
+			#{item.RResourceAmount},
+			#{item.RResourceRatio},
+			#{item.singleChargeRatio},
+			#{item.topCharge},
+			#{item.topGoldDay},
+			#{item.topHoldGold},
+			#{item.topInternalNumber},
+			#{item.addTimeLimit},
+			#{item.status},
+			#{item.pid},
+			#{item.createName},
+			#{item.createBy},
+			now(),
+			#{item.updateBy},
+			now(),
+			0,
+			#{item.editType}
+		)
+		</foreach>
+    </insert>
+</mapper>

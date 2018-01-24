@@ -1,0 +1,499 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="monthlyIntegrated">
+
+ <sql id="pccu_column">
+        sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 1 ),',',-1)) col1,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 2 ),',',-1)) col2,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 3 ),',',-1)) col3,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 4 ),',',-1)) col4,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 5 ),',',-1)) col5,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 6 ),',',-1)) col6,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 7 ),',',-1)) col7,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 8 ),',',-1)) col8,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 9 ),',',-1)) col9,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 10 ),',',-1)) col10,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 11 ),',',-1)) col11,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 12 ),',',-1)) col12,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 13 ),',',-1)) col13,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 14 ),',',-1)) col14,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 15 ),',',-1)) col15,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 16 ),',',-1)) col16,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 17 ),',',-1)) col17,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 18 ),',',-1)) col18,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 19 ),',',-1)) col19,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 20 ),',',-1)) col20,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 21 ),',',-1)) col21,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 22 ),',',-1)) col22,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 23 ),',',-1)) col23,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 24 ),',',-1)) col24,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 25 ),',',-1)) col25,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 26 ),',',-1)) col26,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 27 ),',',-1)) col27,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 28 ),',',-1)) col28,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 29 ),',',-1)) col29,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 30 ),',',-1)) col30,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 31 ),',',-1)) col31,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 32 ),',',-1)) col32,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 33 ),',',-1)) col33,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 34 ),',',-1)) col34,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 35 ),',',-1)) col35,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 36 ),',',-1)) col36,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 37 ),',',-1)) col37,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 38 ),',',-1)) col38,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 39 ),',',-1)) col39,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 40 ),',',-1)) col40,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 41 ),',',-1)) col41,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 42 ),',',-1)) col42,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 43 ),',',-1)) col43,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 44 ),',',-1)) col44,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 45 ),',',-1)) col45,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 46 ),',',-1)) col46,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 47 ),',',-1)) col47,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 48 ),',',-1)) col48,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 49 ),',',-1)) col49,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 50 ),',',-1)) col50,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 51 ),',',-1)) col51,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 52 ),',',-1)) col52,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 53 ),',',-1)) col53,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 54 ),',',-1)) col54,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 55 ),',',-1)) col55,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 56 ),',',-1)) col56,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 57 ),',',-1)) col57,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 58 ),',',-1)) col58,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 59 ),',',-1)) col59,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 60 ),',',-1)) col60,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 61 ),',',-1)) col61,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 62 ),',',-1)) col62,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 63 ),',',-1)) col63,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 64 ),',',-1)) col64,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 65 ),',',-1)) col65,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 66 ),',',-1)) col66,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 67 ),',',-1)) col67,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 68 ),',',-1)) col68,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 69 ),',',-1)) col69,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 70 ),',',-1)) col70,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 71 ),',',-1)) col71,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 72 ),',',-1)) col72,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 73 ),',',-1)) col73,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 74 ),',',-1)) col74,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 75 ),',',-1)) col75,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 76 ),',',-1)) col76,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 77 ),',',-1)) col77,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 78 ),',',-1)) col78,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 79 ),',',-1)) col79,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 80 ),',',-1)) col80,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 81 ),',',-1)) col81,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 82 ),',',-1)) col82,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 83 ),',',-1)) col83,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 84 ),',',-1)) col84,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 85 ),',',-1)) col85,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 86 ),',',-1)) col86,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 87 ),',',-1)) col87,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 88 ),',',-1)) col88,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 89 ),',',-1)) col89,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 90 ),',',-1)) col90,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 91 ),',',-1)) col91,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 92 ),',',-1)) col92,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 93 ),',',-1)) col93,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 94 ),',',-1)) col94,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 95 ),',',-1)) col95,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 96 ),',',-1)) col96,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 97 ),',',-1)) col97,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 98 ),',',-1)) col98,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 99 ),',',-1)) col99,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 100 ),',',-1)) col100,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 101 ),',',-1)) col101,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 102 ),',',-1)) col102,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 103 ),',',-1)) col103,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 104 ),',',-1)) col104,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 105 ),',',-1)) col105,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 106 ),',',-1)) col106,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 107 ),',',-1)) col107,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 108 ),',',-1)) col108,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 109 ),',',-1)) col109,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 110 ),',',-1)) col110,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 111 ),',',-1)) col111,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 112 ),',',-1)) col112,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 113 ),',',-1)) col113,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 114 ),',',-1)) col114,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 115 ),',',-1)) col115,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 116 ),',',-1)) col116,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 117 ),',',-1)) col117,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 118 ),',',-1)) col118,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 119 ),',',-1)) col119,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 120 ),',',-1)) col120,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 121 ),',',-1)) col121,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 122 ),',',-1)) col122,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 123 ),',',-1)) col123,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 124 ),',',-1)) col124,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 125 ),',',-1)) col125,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 126 ),',',-1)) col126,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 127 ),',',-1)) col127,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 128 ),',',-1)) col128,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 129 ),',',-1)) col129,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 130 ),',',-1)) col130,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 131 ),',',-1)) col131,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 132 ),',',-1)) col132,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 133 ),',',-1)) col133,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 134 ),',',-1)) col134,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 135 ),',',-1)) col135,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 136 ),',',-1)) col136,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 137 ),',',-1)) col137,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 138 ),',',-1)) col138,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 139 ),',',-1)) col139,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 140 ),',',-1)) col140,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 141 ),',',-1)) col141,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 142 ),',',-1)) col142,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 143 ),',',-1)) col143,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 144 ),',',-1)) col144,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 145 ),',',-1)) col145,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 146 ),',',-1)) col146,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 147 ),',',-1)) col147,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 148 ),',',-1)) col148,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 149 ),',',-1)) col149,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 150 ),',',-1)) col150,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 151 ),',',-1)) col151,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 152 ),',',-1)) col152,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 153 ),',',-1)) col153,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 154 ),',',-1)) col154,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 155 ),',',-1)) col155,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 156 ),',',-1)) col156,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 157 ),',',-1)) col157,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 158 ),',',-1)) col158,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 159 ),',',-1)) col159,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 160 ),',',-1)) col160,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 161 ),',',-1)) col161,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 162 ),',',-1)) col162,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 163 ),',',-1)) col163,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 164 ),',',-1)) col164,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 165 ),',',-1)) col165,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 166 ),',',-1)) col166,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 167 ),',',-1)) col167,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 168 ),',',-1)) col168,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 169 ),',',-1)) col169,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 170 ),',',-1)) col170,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 171 ),',',-1)) col171,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 172 ),',',-1)) col172,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 173 ),',',-1)) col173,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 174 ),',',-1)) col174,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 175 ),',',-1)) col175,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 176 ),',',-1)) col176,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 177 ),',',-1)) col177,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 178 ),',',-1)) col178,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 179 ),',',-1)) col179,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 180 ),',',-1)) col180,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 181 ),',',-1)) col181,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 182 ),',',-1)) col182,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 183 ),',',-1)) col183,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 184 ),',',-1)) col184,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 185 ),',',-1)) col185,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 186 ),',',-1)) col186,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 187 ),',',-1)) col187,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 188 ),',',-1)) col188,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 189 ),',',-1)) col189,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 190 ),',',-1)) col190,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 191 ),',',-1)) col191,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 192 ),',',-1)) col192,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 193 ),',',-1)) col193,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 194 ),',',-1)) col194,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 195 ),',',-1)) col195,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 196 ),',',-1)) col196,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 197 ),',',-1)) col197,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 198 ),',',-1)) col198,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 199 ),',',-1)) col199,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 200 ),',',-1)) col200,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 201 ),',',-1)) col201,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 202 ),',',-1)) col202,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 203 ),',',-1)) col203,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 204 ),',',-1)) col204,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 205 ),',',-1)) col205,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 206 ),',',-1)) col206,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 207 ),',',-1)) col207,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 208 ),',',-1)) col208,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 209 ),',',-1)) col209,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 210 ),',',-1)) col210,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 211 ),',',-1)) col211,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 212 ),',',-1)) col212,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 213 ),',',-1)) col213,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 214 ),',',-1)) col214,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 215 ),',',-1)) col215,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 216 ),',',-1)) col216,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 217 ),',',-1)) col217,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 218 ),',',-1)) col218,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 219 ),',',-1)) col219,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 220 ),',',-1)) col220,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 221 ),',',-1)) col221,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 222 ),',',-1)) col222,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 223 ),',',-1)) col223,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 224 ),',',-1)) col224,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 225 ),',',-1)) col225,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 226 ),',',-1)) col226,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 227 ),',',-1)) col227,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 228 ),',',-1)) col228,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 229 ),',',-1)) col229,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 230 ),',',-1)) col230,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 231 ),',',-1)) col231,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 232 ),',',-1)) col232,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 233 ),',',-1)) col233,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 234 ),',',-1)) col234,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 235 ),',',-1)) col235,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 236 ),',',-1)) col236,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 237 ),',',-1)) col237,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 238 ),',',-1)) col238,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 239 ),',',-1)) col239,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 240 ),',',-1)) col240,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 241 ),',',-1)) col241,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 242 ),',',-1)) col242,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 243 ),',',-1)) col243,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 244 ),',',-1)) col244,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 245 ),',',-1)) col245,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 246 ),',',-1)) col246,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 247 ),',',-1)) col247,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 248 ),',',-1)) col248,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 249 ),',',-1)) col249,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 250 ),',',-1)) col250,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 251 ),',',-1)) col251,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 252 ),',',-1)) col252,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 253 ),',',-1)) col253,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 254 ),',',-1)) col254,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 255 ),',',-1)) col255,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 256 ),',',-1)) col256,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 257 ),',',-1)) col257,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 258 ),',',-1)) col258,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 259 ),',',-1)) col259,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 260 ),',',-1)) col260,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 261 ),',',-1)) col261,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 262 ),',',-1)) col262,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 263 ),',',-1)) col263,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 264 ),',',-1)) col264,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 265 ),',',-1)) col265,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 266 ),',',-1)) col266,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 267 ),',',-1)) col267,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 268 ),',',-1)) col268,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 269 ),',',-1)) col269,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 270 ),',',-1)) col270,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 271 ),',',-1)) col271,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 272 ),',',-1)) col272,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 273 ),',',-1)) col273,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 274 ),',',-1)) col274,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 275 ),',',-1)) col275,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 276 ),',',-1)) col276,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 277 ),',',-1)) col277,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 278 ),',',-1)) col278,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 279 ),',',-1)) col279,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 280 ),',',-1)) col280,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 281 ),',',-1)) col281,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 282 ),',',-1)) col282,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 283 ),',',-1)) col283,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 284 ),',',-1)) col284,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 285 ),',',-1)) col285,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 286 ),',',-1)) col286,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 287 ),',',-1)) col287,
+              sum(SUBSTRING_INDEX(SUBSTRING_INDEX(five_minute_count , ',', 288 ),',',-1)) col288
+    </sql>
+     <!-- 查询月总数据（没有当前月） -->
+    <select id="findMonthlyTotalData" resultType="java.util.HashMap">
+        select log_month as log_month,
+                sum(income) as income,
+                sum(ru) as ru,							<!-- 月注册用户数 -->
+                sum(au) as au,							<!-- 月活跃 -->
+                sum(month_remainer) as month_remainer,	<!-- 月留存 -->
+              <!--   sum(acu) as acu,	 -->					<!-- accu -->
+                sum(pa) as pa, 							<!-- 月充值用户数 -->
+       			sum(pa)/sum(au) as mRate,				<!--月付费率= 月充值人数/月登录人数 -->
+       			sum(income)/sum(pa) as mArpu,			<!--月ARPU= 月充值金额/月充值用户数 -->
+       			sum(income)/sum(au) as active_arpu    <!--月活跃ARPU= 月充值金额/月登录用户数 -->
+       			<!-- <include refid="pccu_column"/> -->
+		from stat_monthly_integrated
+		where 1 = 1
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>
+		GROUP BY log_month
+		ORDER BY log_month desc
+    </select>
+     <!-- 平台月度数据统计 -->
+    <select id="findMonthData" resultType="java.util.HashMap">
+    	SELECT
+			stat_monthly_integrated.log_month AS log_month,
+			stat_monthly_integrated.pid AS pid,
+			COUNT(1) new_server_num,
+			SUM(stat_monthly_integrated.income) AS income,
+			SUM(stat_monthly_integrated.ru) AS ru,
+			SUM(stat_monthly_integrated.au) AS au,
+			avg(stat_monthly_integrated.acu) AS acu,
+			MAX(stat_monthly_integrated.pcu) AS pcu,
+			avg(stat_monthly_integrated.dt) AS dt,
+			SUM(stat_monthly_integrated.ou) AS ou,
+			SUM(stat_monthly_integrated.month_remainer)/SUM(stat_monthly_integrated.ru) AS mr_r,
+			SUM(stat_monthly_integrated.pa) AS pa,
+			SUM(stat_monthly_integrated.pa)/SUM(stat_monthly_integrated.au) AS pa_au,
+			SUM(stat_monthly_integrated.income)/SUM(stat_monthly_integrated.pa) AS income_pa,
+			SUM(stat_monthly_integrated.income)/SUM(stat_monthly_integrated.au) AS income_au,
+			SUM(stat_monthly_integrated.first_pay_user) AS first_pay_user,
+			SUM(stat_monthly_integrated.first_pay_value) AS first_pay_value,
+			SUM(stat_monthly_integrated.nn_pa) AS nn_pa,
+			SUM(stat_monthly_integrated.nn_pay_value) AS nn_pay_value,
+			SUM(stat_monthly_integrated.nn_pa)/SUM(stat_monthly_integrated.ru) AS nn_pa_ru,
+			SUM(stat_monthly_integrated.nn_pay_value)/SUM(stat_monthly_integrated.nn_pa) AS nn_pay_value_nn_pa,
+			SUM(stat_monthly_integrated.ou_pa) AS ou_pa,
+			SUM(stat_monthly_integrated.ou_pay_value) AS ou_pay_value,
+			SUM(stat_monthly_integrated.ou_pa)/SUM(stat_monthly_integrated.ou) AS ou_pa_ou,
+			SUM(stat_monthly_integrated.ou_pay_value)/SUM(stat_monthly_integrated.ou_pa) AS ou_pay_value_ou_pa
+		FROM
+			stat_monthly_integrated
+		WHERE
+			1 = 1
+			<if test="@Ognl@isNotBlank(pidsList)">
+				AND pid IN
+			     <foreach item="item" index="index" collection="pidsList" open="(" separator="," close=")">
+			       #{item}
+			     </foreach>
+		    </if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_month <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        	<if test="@Ognl@isNotBlank(createDateStart)">and log_month <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+		GROUP BY
+			log_month,pid
+		ORDER BY
+			log_month DESC
+    </select>
+     <!-- 平台新服月度数据统计 -->
+    <select id="findNewServerMonthData" resultType="java.util.HashMap">
+    SELECT
+			stat_monthly_integrated.log_month AS log_month,
+			stat_monthly_integrated.pid AS pid,
+			COUNT(1) new_server_num,
+			SUM(stat_monthly_integrated.income) AS income,
+			SUM(stat_monthly_integrated.ru) AS ru,
+			SUM(stat_monthly_integrated.au) AS au,
+			SUM(stat_monthly_integrated.acu)/COUNT(1) AS acu,
+			MAX(stat_monthly_integrated.pcu) AS pcu,
+			SUM(stat_monthly_integrated.dt)/COUNT(1) AS dt,
+			SUM(stat_monthly_integrated.pa) AS pa,
+			SUM(stat_monthly_integrated.pa)/SUM(stat_monthly_integrated.au) AS pa_au,
+			SUM(stat_monthly_integrated.income)/SUM(stat_monthly_integrated.pa) AS income_pa,
+			SUM(stat_monthly_integrated.income)/SUM(stat_monthly_integrated.au) AS income_au
+		FROM
+			stat_monthly_integrated
+		WHERE
+			is_open_month=1
+			<if test="@Ognl@isNotBlank(pidsList)">
+				AND pid IN
+			     <foreach item="item" index="index" collection="pidsList" open="(" separator="," close=")">
+			       #{item}
+			     </foreach>
+		    </if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_month <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        	<if test="@Ognl@isNotBlank(createDateStart)">and log_month <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+		GROUP BY
+			log_month,pid
+		ORDER BY
+			log_month DESC
+    </select>
+     <!-- 平台老服月度数据统计 --> 
+     <select id="findOldServerMonthData" resultType="java.util.HashMap">
+     SELECT
+			stat_monthly_integrated.log_month AS log_month,
+			stat_monthly_integrated.pid AS pid,
+			COUNT(1) new_server_num,
+			SUM(stat_monthly_integrated.income) AS income,
+			SUM(stat_monthly_integrated.ru) AS ru,
+			SUM(stat_monthly_integrated.au) AS au,
+			SUM(stat_monthly_integrated.acu)/COUNT(1) AS acu,
+			MAX(stat_monthly_integrated.pcu) AS pcu,
+			SUM(stat_monthly_integrated.dt)/COUNT(1) AS dt,
+			SUM(stat_monthly_integrated.pa) AS pa,
+			SUM(stat_monthly_integrated.pa)/SUM(stat_monthly_integrated.au) AS pa_au,
+			SUM(stat_monthly_integrated.income)/SUM(stat_monthly_integrated.pa) AS income_pa,
+			SUM(stat_monthly_integrated.income)/SUM(stat_monthly_integrated.au) AS income_au,
+			SUM(stat_monthly_integrated.first_pay_user) AS first_pay_user,
+			SUM(stat_monthly_integrated.first_pay_value) AS first_pay_value,
+			SUM(stat_monthly_integrated.nn_pa)/SUM(stat_monthly_integrated.ru) AS nn_pa_ru,
+			SUM(stat_monthly_integrated.nn_pay_value)/SUM(stat_monthly_integrated.nn_pa) AS nn_pay_value_nn_pa,
+			SUM(stat_monthly_integrated.ou_pa) AS ou_pa,
+			SUM(stat_monthly_integrated.ou_pay_value) AS ou_pay_value,
+			SUM(stat_monthly_integrated.ou_pa)/SUM(stat_monthly_integrated.ou) AS ou_pa_ou,
+			SUM(stat_monthly_integrated.ou_pay_value)/SUM(stat_monthly_integrated.ou_pa) AS ou_pay_value_ou_pa
+		FROM
+			stat_monthly_integrated
+		WHERE
+			is_open_month=0
+			<if test="@Ognl@isNotBlank(pidsList)">
+				AND pid IN
+			     <foreach item="item" index="index" collection="pidsList" open="(" separator="," close=")">
+			       #{item}
+			     </foreach>
+		    </if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_month <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        	<if test="@Ognl@isNotBlank(createDateStart)">and log_month <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+		GROUP BY
+			log_month,pid
+		ORDER BY
+			log_month DESC
+    </select>
+    
+    <!-- 月数据报表 -->
+	<select id="findMonthlyReport" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        SELECT
+            log_month,
+            sum(is_open_month) kaifuNum,
+            sum(income) income, <!-- 月收入 -->
+            sum(ru) dru, <!-- 月新注册 -->
+            sum(au) mau, <!-- 月活跃 登录人数-->
+       <!--      avg(acu) acu, ACCU -->
+            avg(dt) dt, <!-- DT时长 -->
+            sum(ou) mou, <!-- 月老用户数 -->
+            sum(month_remainer) month_remainer, <!-- 月留存率 -->
+            sum(pa) mpu, <!-- 月充值用户 -->
+            sum(pay_times) dp_times, <!-- 月充值次数 --> 
+            sum(pa) / sum(au) pay_rate, <!-- 月付费率 -->
+            sum(income) / sum(pa) arpu, <!-- 月ARPU -->
+            sum(income) / sum(au) active_arpu, <!-- 月活跃ARPU -->
+            sum(first_pay_user) first_pay_user, <!-- 月首充人数 -->
+            sum(first_pay_times) first_pay_times, <!-- 月首充次数  -->
+            sum(first_pay_value) first_pay_value, <!-- 月首充金额 -->
+            sum(nn_pa) mnn_pa, <!-- 月新新充值人数 -->
+            sum(nn_pay_times) nn_pay_times, <!-- 月新新充值次数 -->
+            sum(nn_pay_value) nn_pay_value, <!-- 月新新充值金额 -->
+            sum(nn_pa) / (sum(ru) - sum(ru_gunfu)) nn_pay_rate, <!-- 月新新付费率 -->
+            sum(nn_pay_value) / sum(nn_pa) nn_arpu, <!-- 月新新ARPU -->
+            sum(ou_pa) d_n_pa, <!-- 月老充值人数 -->
+            sum(ou_pay_times) df_times, <!-- 月老充值次数 -->
+            sum(ou_pay_value) i_f_pay_value, <!-- 月老充值金额  -->
+            sum(ou_pa) / sum(ou) on_pay_rate, <!-- 月老付费率 老充值人数/(日活跃-日新注册人数)-->
+            sum(ou_pay_value) / sum(ou_pa) on_arpu <!-- 月老ARPU 老充值金额/老充值人数-->
+            <!--   <include refid="pccu_column"/> -->
+        FROM  stat_monthly_integrated
+        WHERE 1 = 1 
+	    <if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_month <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_month <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+        GROUP BY log_month
+        ORDER BY log_month DESC
+    </select>
+    
+      <select id="selectPccu"  resultType="java.util.HashMap" parameterType="java.lang.String">
+      SELECT log_month  logDay, five_minute_count as  col   from stat_monthly_integrated WHERE   log_month = #{month}
+    </select>
+    <select id="selectMonthPccu"  resultType="java.util.HashMap" parameterType="java.util.HashMap">
+      SELECT log_month  logDay, five_minute_count as  col   from stat_monthly_integrated  where  1=1
+         <if test="@Ognl@isNotBlank(createDateEnd)">and log_month <![CDATA[ <= ]]>#{createDateEnd}</if>
+         <if test="@Ognl@isNotBlank(createDateStart)">and log_month <![CDATA[ >= ]]>#{createDateStart}</if>
+         <if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>
+    </select>
+
+</mapper>

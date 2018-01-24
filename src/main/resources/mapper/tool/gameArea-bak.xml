@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="gameArea-bak">
+
+	<sql id="Base_Column">
+			game_area.world_id worldId,
+			game_area.area_id id,
+			game_area.world_name worldName,
+			game_area.area_name name,
+			game_area.area_type type,
+			game_area.external_ip externalIp,
+			game_area.tcp_port tcpPort,
+			game_area.web_port webPort,
+			game_area.inner_port innerPort,
+			game_area.inner_ip innerIp,
+			game_area.pid platformId,
+			game_area.`status` `status`,
+			game_area.follower_id followerId,
+			game_area.open_time openTime,
+			game_area.update_time updateTime
+	</sql>
+
+    <select id="findAllGameWorldId" resultType="java.lang.String" parameterType="java.util.HashMap">
+		SELECT
+			game_area.world_id world_id
+		FROM
+			game_area
+    </select>
+
+	<select id="selectByWorldId" resultType="com.mokylin.cabal.common.redis.Server" parameterType="java.util.HashMap">
+		SELECT
+			<include refid="Base_Column"/>
+		FROM
+			game_area
+		WHERE world_id = #{worldId}
+	</select>
+
+    <select id="findGameAreaByWorldId" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		SELECT
+			game_area.world_id world_id
+		FROM
+			game_area
+		WHERE 
+        	game_area.world_id = #{worldId}
+    </select>
+    <select id="findGameAreas" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		SELECT
+			game_area.world_id world_id,
+			game_area.area_id area_id,
+			game_area.world_name world_name,
+			game_area.area_name area_name,
+			game_area.area_type area_type,
+			game_area.external_ip external_ip,
+			game_area.tcp_port tcp_port,
+			game_area.web_port web_port,
+			game_area.inner_port inner_port,
+			game_area.inner_ip inner_ip,
+			game_area.pid pid,
+			game_area.`status` `status`,
+			game_area.follower_id follower_id,
+			game_area.open_time open_time,
+			game_area.update_time update_time,
+			game_area.combine_time combine_time,
+			game_area.server_version
+		FROM
+			game_area
+		WHERE
+			1=1
+		<if test="@Ognl@isNotBlank(pids)"> and pid = #{pids} </if>
+		<if test="@Ognl@isNotBlank(areaId)"> and area_id = #{areaId} </if>
+		<if test="@Ognl@isNotBlank(serverId)">
+			AND world_id = #{serverId}
+	    </if>
+		ORDER BY
+			game_area.pid ASC,
+			game_area.world_id ASC
+    </select>
+    <select id="findAllGameArea" resultType="com.mokylin.cabal.common.redis.Server" parameterType="java.util.HashMap">
+		SELECT
+			game_area.world_id worldId,
+			game_area.area_id id,
+			game_area.world_name worldName,
+			game_area.area_name name,
+			game_area.area_type type,
+			game_area.external_ip externalIp,
+			game_area.tcp_port tcpPort,
+			game_area.web_port webPort,
+			game_area.inner_port innerPort,
+			game_area.inner_ip innerIp,
+			game_area.pid platformId,
+			game_area.`status` `status`,
+			game_area.follower_id followerId,
+			game_area.open_time openTime,
+			game_area.update_time updateTime
+		FROM
+			game_area
+			where   1=1
+			<if test="@Ognl@isNotBlank(pids)"> and pid = #{pids} </if>
+            <if test="@Ognl@isNotBlank(followerId)"> and follower_id = #{followerId} </if>
+		ORDER BY
+			game_area.pid ASC,
+			game_area.world_id ASC
+    </select>
+    <!--<select id="resetGameServer" resultType="com.mokylin.cabal.common.redis.Server" parameterType="java.util.HashMap">-->
+		<!--SELECT-->
+			<!--game_area.id id,-->
+			<!--<include refid="Base_Column"/>-->
+		<!--FROM-->
+			<!--game_area-->
+    <!--</select>-->
+    <insert id="insert" parameterType="java.util.HashMap">
+        insert into game_area
+        	(id, world_id, world_name, area_name, area_id, area_type, inner_ip,
+        		external_ip, inner_port, tcp_port, web_port, follower_id,status, pid, open_time, server_version)
+        values
+        	( #{id},#{server.worldId}, #{server.worldName}, #{server.name}, #{server.id}, #{server.type}, #{server.innerIp}, 
+        		#{server.externalIp}, #{server.innerPort}, #{server.tcpPort}, #{server.webPort}, #{server.followerId}, #{server.status}, #{pid},
+        		#{server.openTime}, #{version})
+    </insert>
+    
+    <update id="update" parameterType="java.util.HashMap">
+		UPDATE game_area SET status=#{status},update_time=NOW() WHERE world_id = #{worldId}
+    </update>
+
+    <update id="updateByWorldId" parameterType="java.util.HashMap">
+		UPDATE 
+			game_area 
+		SET 
+			area_id= #{server.id},
+			world_name= #{server.worldName},
+			area_name= #{server.name},
+			area_type= #{server.type},
+			external_ip= #{server.externalIp},
+			tcp_port= #{server.tcpPort},
+			web_port= #{server.webPort},
+			inner_port= #{server.innerPort},
+			inner_ip= #{server.innerIp},
+			pid= #{pid},
+			`status`= #{server.status},
+			follower_id= #{server.followerId},
+			open_time = #{server.openTime},
+			combine_time= #{server.hefuTime},
+			update_time=now(),
+			server_version = #{version}
+ 		WHERE world_id = #{worldId}
+		<!--<if test="@Ognl@isNotBlank(pid)">and pid = #{pid} </if>-->
+    </update>
+
+    <delete id="deleteByWorldId" parameterType="java.util.HashMap">
+		delete from game_area WHERE world_id = #{server.worldId}
+    </delete>
+
+	<select id="findGameAreaByPid" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT
+			game_area.id id,
+			game_area.world_id world_id,
+			game_area.area_id area_id,
+			game_area.world_name world_name,
+			game_area.area_name area_name,
+			game_area.area_type area_type,
+			game_area.external_ip external_ip,
+			game_area.tcp_port tcp_port,
+			game_area.web_port web_port,
+			game_area.inner_port inner_port,
+			game_area.inner_ip inner_ip,
+			game_area.pid pid,
+			game_area.`status` `status`,
+			game_area.follower_id follower_id,
+			game_area.open_time open_time,
+			game_area.update_time update_time
+		FROM
+			game_area game_area
+		WHERE 1 = 1
+		<if test="@Ognl@isNotBlank(serverId)">
+			AND game_area.world_id = #{serverId}
+		</if>
+		AND game_area.pid = #{pid}
+
+		ORDER BY
+			game_area.pid ASC,
+			game_area.world_id DESC
+	</select>
+	
+	<select id="findGameAreaByServerId" parameterType="java.util.HashMap" resultType="com.mokylin.cabal.common.redis.Server">
+		SELECT
+			game_area.id id,
+			<include refid="Base_Column"/>
+			platform.name pName
+		FROM
+			game_area game_area left join game_platform platform on game_area.pid = platform.pid
+		WHERE game_area.pid = #{pid}
+	    <if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>
+		ORDER BY
+			game_area.pid ASC,
+			game_area.world_id ASC
+	</select>
+	
+	<select id="findAllList" parameterType="java.util.HashMap" resultType="com.mokylin.cabal.common.redis.Server">
+		SELECT
+			game_area.id id,
+			<include refid="Base_Column"/>
+			platform.name pName
+		FROM
+			game_area game_area left join game_platform platform on game_area.pid = platform.pid
+		WHERE game_area.pid = #{pid}
+		ORDER BY
+			game_area.pid ASC,
+			game_area.world_id ASC
+	</select>
+	
+	<select id="findAreaId" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select world_id area_id from game_area where pid='37wan_1' and area_name=#{server}
+	</select>
+	
+	<update id="updateOpen" parameterType="java.util.HashMap">
+        UPDATE 
+        	game_area 
+        SET 
+        	open_time = #{open_time}
+        WHERE 
+        	world_id = #{woldId}
+    </update>
+    
+    <update id="updateHefu" parameterType="java.util.HashMap">
+        UPDATE 
+        	game_area 
+        SET 
+        	combine_time = #{hefu_time}
+        WHERE 
+        	world_id = #{woldId}
+    </update>
+	<select id="findOneByPidAndWorldId" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select 
+		<include refid="Base_Column"/>
+ 		from game_area where pid=#{pid} and world_id=#{serverId}
+	</select>
+	
+	<select id="findOneByPidAndWorldName" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select 
+		world_id as worldId
+ 		from game_area where pid=#{pid} and world_name=#{serverName}
+	</select>
+</mapper>

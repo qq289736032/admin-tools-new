@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="gift">
+    <select id="paging" resultType="com.mokylin.cabal.modules.tools.entity.Gift" parameterType="java.util.HashMap">
+        select * from gift_base where 1=1
+        <if test="@Ognl@isNotBlank(name)">and name = #{name} </if>
+        <if test="@Ognl@isNotBlank(content)">and content like concat('%',#{content},'%') </if>
+        order by create_date desc
+    </select>
+
+    <select id="selectGiftById" resultType="com.mokylin.cabal.modules.tools.entity.Gift" parameterType="java.lang.String">
+        select * from gift_base where id = #{id}
+    </select>
+
+    <insert id="insertGiftBase" parameterType="java.util.HashMap">
+        insert into gift_base(
+            id,
+            name,
+            content,
+            attachments,
+            create_date,
+            create_name,
+            create_by,
+            update_date,
+            update_by,
+            del_flag
+            )values(
+                #{id},
+                #{name},
+                #{content},
+                #{attachments},
+                now(),
+                #{currentUser.loginName},
+                #{currentUser.id},
+                now(),
+                #{currentUser.id},
+                0
+            )
+    </insert>
+    
+    <select id="createCodeList" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        select 
+			id,
+			uuid,
+			gift_id,
+			gift_name,
+			type,
+			count,
+			prefix,
+			code_length,
+			pid,
+			remarks,
+			create_by,
+			create_name,
+			create_time,
+			effective_time,
+			effective_end_time,
+			del_flag
+		from gift_create_code where 1=1
+			<if test="@Ognl@isNotBlank(giftId)">and gift_id = #{giftId} </if>
+			<if test="@Ognl@isNotBlank(name)">and gift_name = #{name} </if>
+			<if test="@Ognl@isNotBlank(endDate)"> and create_time <![CDATA[ <= ]]> #{endDate}</if> 
+	        <if test="@Ognl@isNotBlank(startDate)"> and create_time <![CDATA[ >= ]]> #{startDate}</if>
+			
+		order by create_time desc
+    </select>
+
+    <select id="selectGiftCreateCodeById" resultType="java.util.HashMap" parameterType="java.lang.String">
+        select 
+			id,
+			uuid,
+			gift_id,
+			gift_name,
+			type,
+			count,
+			repeat_num as repeatNum,
+			prefix,
+			code_length,
+			pid,
+			remarks,
+			create_by,
+			create_name,
+			create_time,
+			effective_time,
+			effective_end_time 
+		from gift_create_code where del_flag!=1 and id = #{id} 
+    </select>
+    
+    <select id="selectGiftCreateCodeByUuid" resultType="java.util.HashMap" parameterType="java.lang.String">
+        select 
+			id,
+			uuid,
+			gift_id,
+			gift_name,
+			type,
+			count,
+			prefix,
+			code_length,
+			pid,
+			remarks,
+			create_by,
+			create_name,
+			create_time,
+			effective_time,
+			effective_end_time 
+		from gift_create_code where uuid = #{uuid}
+    </select>
+
+    <insert id="insertGiftCreateCode" parameterType="java.util.HashMap">
+        insert into gift_create_code(
+        	uuid,
+            gift_id,
+            gift_name,
+            type,
+            count,
+            repeat_num,
+            prefix,
+            code_length,
+            pid,
+            remarks,
+            create_by,
+            create_name,
+            create_time,
+            effective_time,
+            effective_end_time,
+            update_time,
+            del_flag
+            )values(
+           		#{uuid},
+                #{giftId},
+                #{giftName},
+                #{type},
+                #{count},
+                #{repeatNum},
+                #{prefix},
+                #{codeLength},
+                #{pids},
+                #{remarks},
+                #{currentUser.id},
+                #{currentUser.loginName},
+                now(),
+                #{effectiveTime},
+                #{effectiveEndTime},
+                now(),
+                0
+            )
+    </insert>
+    
+    <update id="deleteGiftCreateCode" parameterType="java.util.HashMap">
+        update gift_create_code
+        set del_flag = 1
+        where id = #{id}
+    </update>
+    
+    <select id="checkGiftCodeTableExist" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+    	select count(*) num from
+        gift_code_${tableIndex}
+    </select>
+    
+    <update id="createGiftCodeTable" parameterType="java.util.HashMap">
+		CREATE TABLE `gift_code_${tableIndex}` (
+		  `id` varchar(64) NOT NULL,
+		  `code` varchar(64) binary NOT NULL,
+		  `gift_id` varchar(64) NOT NULL,
+		  `gift_name` varchar(64) NOT NULL,
+		  `gift_create_id` varchar(64) NOT NULL DEFAULT '0',
+		  `platform_id` varchar(64) NOT NULL DEFAULT '0',
+		  `create_time` datetime NOT NULL,
+		  `create_name` varchar(64) DEFAULT NULL,
+		  `create_by` varchar(64) DEFAULT NULL,
+		  `use_name` varchar(64) DEFAULT NULL,
+		  `use_by` varchar(64) DEFAULT NULL,
+		  `use_time` datetime DEFAULT NULL,
+		  `update_time` datetime DEFAULT NULL,
+		  `status` tinyint(4) NOT NULL DEFAULT '0',
+		  PRIMARY KEY (`id`),
+		  KEY `code` (`code`)
+		)
+    </update>
+    
+    <insert id="batchInsertGiftCode" parameterType="java.util.HashMap">
+        insert into `gift_code_${tableIndex}`(
+            id,
+            code,
+            gift_id,
+            gift_name,
+            gift_create_id,
+            platform_id,
+            create_time,
+            create_name,
+            create_by,
+            use_name,
+            use_by,
+            use_time,
+            update_time,
+            status
+        )
+        values
+        <foreach item="item" index="index" collection="parmList" separator=",">
+            (
+                #{item.id},
+                #{item.code},
+                #{item.gift_id},
+                #{item.gift_name},
+                #{item.gift_create_id},
+                #{item.platform_id},
+                now(),
+                #{currentUser.loginName},
+                #{currentUser.id},
+                #{item.use_name},
+                #{item.use_by},
+                #{item.use_time},
+               	now(),
+               	0
+            )
+        </foreach>
+    </insert>
+    
+    <select id="viewCodeList" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        select 
+		  `id`,
+		  `code`,
+		  `gift_id`,
+		  `gift_name`,
+		  `gift_create_id`,
+		  `platform_id`,
+		  `create_time`,
+		  `use_name`,
+		  `use_time`,
+		  `status`
+		from gift_code_${tableIndex} where 1=1
+			<if test="@Ognl@isNotBlank(code)">and code = #{code} </if>
+		order by create_time desc
+    </select>
+    
+    <select id="selectCodeListByGiftCreateId" resultType="java.lang.String" parameterType="java.util.HashMap">
+        select
+		  `code`
+		from gift_code_${tableIndex} where gift_create_id = #{giftCreateId}
+    </select>
+    
+    <select id="selectUsedCodeByUserIdAndGiftCreateId" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        select 
+		  `id`,
+		  `code`,
+		  `gift_id`,
+		  `gift_name`,
+		  `gift_create_id`,
+		  `platform_id`,
+		  `create_time`,
+		  `use_by`,
+		  `use_name`,
+		  `use_time`,
+		  `status`
+		from gift_code_${tableIndex} where use_by = #{userId} and gift_create_id = #{giftCreateId}
+    </select>
+    
+    <select id="selectCountByUserIdAndGiftCreateId" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+        select 
+		  count(1)
+		from gift_code_${tableIndex} where use_by = #{userId} 
+		and gift_create_id = #{giftCreateId}
+		and status = #{status}
+    </select>
+    
+    <update id="updateGiftCodeStatus" parameterType="java.util.HashMap">
+        update gift_code_${tableIndex}
+		  set `use_by` = #{userId},
+		  	  `use_name` = #{userName},
+		  	  `use_time` = now(),
+		  	  `update_time` = now(),
+		  	  `status` = 1
+		where code = #{code}
+    </update>
+    
+     <select id="viewCodeName" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        select 
+		  `id`,
+		  `code`,
+		  `gift_id`,
+		  `gift_name`,
+		  `gift_create_id`,
+		  `platform_id`,
+		  `create_time`,
+		  `use_name`,
+		  `use_time`,
+		  `status`
+		from gift_code_${tableIndex} where 1=1
+			<if test="@Ognl@isNotBlank(giftId)">and gift_id = #{giftId} </if>
+			<if test="@Ognl@isNotBlank(giftCreateId)">and gift_create_id = #{giftCreateId} </if>
+		order by create_time desc
+    </select>
+    <select id="name" resultType="com.mokylin.cabal.modules.tools.entity.Gift" parameterType="java.util.HashMap">
+        select * from gift_base where 1=1
+        order by create_date desc
+    </select>
+    <select id="createGiftId" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        select 
+			id,
+			uuid,
+			gift_id
+		from gift_create_code where 1=1
+			<if test="@Ognl@isNotBlank(giftId)">and gift_id = #{giftId} </if>
+			<if test="@Ognl@isNotBlank(endDate)"> and create_time <![CDATA[ <= ]]> #{endDate}</if> 
+	        <if test="@Ognl@isNotBlank(startDate)"> and create_time <![CDATA[ >= ]]> #{startDate}</if>
+			
+		order by create_time desc
+    </select> 
+    
+       <select id="countGiftId" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+     	<foreach collection="list" item="items" index="index" separator="UNION ALL"> 
+	       select   gift_create_id,count(gift_create_id) as  num
+	       from gift_code_${items.tableIndex} where status = 1  
+		   and gift_id = #{giftId} 
+		   and gift_create_id = ${items.giftCreateId}
+	   </foreach>
+    </select>
+    
+</mapper>

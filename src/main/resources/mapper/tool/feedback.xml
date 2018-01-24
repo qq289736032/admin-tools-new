@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="feedback">
+
+    <select id="paging" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT
+            feed_back.id,
+            feed_back.role_id roleId,
+            feed_back.title,
+            feed_back.content,
+            feed_back.type,
+            feed_back.platform_id platformId,
+            feed_back.server_id serverId,
+            feed_back.role_name roleName,
+            feed_back.feedback_time feedbackTime,
+            feed_back.contact_info contactInfo,
+            vip_level vipLevel,
+            total_recharge totalRecharge
+        FROM `feed_back` WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(roleId)">and role_id = #{roleId} </if>
+        <if test="@Ognl@isNotBlank(feedbackType)">and type = #{feedbackType} </if>
+        <if test="@Ognl@isNotBlank(roleName)">and role_name = #{roleName} </if>
+        <if test="@Ognl@isNotBlank(keywords)">and content LIKE concat('%',#{keywords},'%') </if>
+        <if test="@Ognl@isNotBlank(feedbackTimeEnd)">and feedback_time <![CDATA[ < ]]>DATE_ADD(#{feedbackTimeEnd},INTERVAL 1 day)</if>
+        <if test="@Ognl@isNotBlank(feedbackTimeStart)">and feedback_time <![CDATA[ >= ]]>#{feedbackTimeStart}</if>
+        order by feedback_time desc
+    </select>
+
+
+    <update id="updateRepliedStatus" parameterType="java.util.HashMap">
+        UPDATE feed_back SET is_replied = #{isReplied},feedback_content=#{feedbackContent} where id = #{id}
+    </update>
+
+    <insert id="insert" parameterType="java.util.HashMap">
+        insert into feed_back(id,role_id,role_name,title,content,type,platform_id,server_id,contact_info
+            <if test="@Ognl@isNotBlank(vipLevel)">,vip_level </if>
+            <if test="@Ognl@isNotBlank(totalRecharge)">, total_recharge</if>
+        )
+        values(
+          #{id},#{roleId},#{roleName},#{title},#{content},#{type},#{platformId},#{serverId},#{qq}
+            <if test="@Ognl@isNotBlank(vipLevel)">,#{vipLevel} </if>
+            <if test="@Ognl@isNotBlank(totalRecharge)">,#{totalRecharge} </if>
+        )
+    </insert>
+</mapper>

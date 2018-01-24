@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="welfareCommonTemp">
+	
+
+    <select id="selectAll" resultType="com.mokylin.cabal.modules.welfare.entity.WelfareCommonTemp" parameterType="java.lang.String">
+        SELECT
+        	 id,
+        	 plat_nature platNature,
+        	 new_service_gold newServiceGold,
+        	 r_resource_amount RResourceAmount,
+        	 r_resource_ratio RResourceRatio,
+        	 single_charge_ratio,
+        	 top_charge,
+        	 top_gold_day,
+        	 top_hold_gold,
+        	 top_internal_number,
+        	 add_time_limit
+        FROM	 
+        	 welfare_common_temp 
+    </select>
+
+    <update id="update" parameterType="java.util.HashMap">
+    	UPDATE
+    		welfare_common_temp 
+    	SET
+	    	plat_nature = #{platNature},
+	    	new_service_gold = #{newServiceGold},
+	    	r_resource_amount = #{RResourceAmount},
+	    	r_resource_ratio = ${RResourceRatio},
+	    	single_charge_ratio = ${singleChargeRatio},
+	    	top_charge = ${topCharge},
+	    	top_gold_day = ${topGoldDay},
+	    	top_hold_gold = ${topHoldGold},
+	    	top_internal_number = ${topInternalNumber},
+	    	add_time_limit = ${addTimeLimit},
+	    	update_date = now(),
+	    	update_by =  #{loginName}
+	    WHERE
+	    	id = #{id}
+    </update>
+</mapper>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="pvpLog">
+	<select id="pvpEveryday" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		select po,count(po) cou from(
+			select role_id,power,
+			CASE
+			WHEN power BETWEEN 1 and 5000 then '1-5000' 
+			WHEN power BETWEEN 5001 and 10000 then '5001-1W' 
+			WHEN power BETWEEN 10001 and 20000 then '1W-2W' 
+			WHEN power BETWEEN 20001 and 40000 then '2W-4W' 
+			WHEN power BETWEEN 40001 and 60000 then '4W-6W' 
+			WHEN power BETWEEN 60001 and 100000 then '6W-10W'
+			WHEN power >=100001 then '10W以上'
+			END as po
+			from pvp_log 
+			where 1=1
+			<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+			group by role_id
+			) AS A
+			group by po
+	</select>
+	<select id="pvpSuccess" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">				
+		SELECT pipeiTime,count(pipeiTime) pipei FROM(
+			SELECT role_id,pipei_time,
+			CASE
+			WHEN pipei_time BETWEEN 1 and 10 then '10秒'
+			WHEN pipei_time BETWEEN 11 and 20 then '20秒'
+			WHEN pipei_time BETWEEN 21 and 30 then '30秒'
+			WHEN pipei_time BETWEEN 31 and 60 then '60秒'
+			WHEN pipei_time BETWEEN 61 and 90 then '90秒'
+			WHEN pipei_time >=91 then '90秒以上'
+			END as pipeiTime
+			FROM pvp_log 
+			where type=1 
+			<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+			GROUP BY role_id
+			) AS A 
+			GROUP BY pipeiTime 
+			ORDER BY pipeiTime
+	</select>
+	<select id="pvpLose" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		SELECT pipeiTime,count(pipeiTime) pipei FROM(
+			SELECT role_id,pipei_time,
+			CASE
+			WHEN pipei_time BETWEEN 1 and 10 then '10秒'
+			WHEN pipei_time BETWEEN 11 and 20 then '20秒'
+			WHEN pipei_time BETWEEN 21 and 30 then '30秒'
+			WHEN pipei_time BETWEEN 31 and 60 then '60秒'
+			WHEN pipei_time BETWEEN 61 and 90 then '90秒'
+			WHEN pipei_time >=91 then '90秒以上'
+			END as pipeiTime
+			FROM pvp_log 
+			where type=0
+			<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+			GROUP BY role_id
+			) AS A 
+			GROUP BY pipeiTime 
+			ORDER BY pipeiTime
+	</select>
+	<select id="pvpOpen" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		SELECT log_day,cast(count(DISTINCT role_id)/2 as decimal(18,0)) cou
+			FROM pvp_log
+			WHERE type = 1
+			<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+	</select>
+	
+	<select id="oneServerPvpJoin" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		<!-- 单服统计竞技场参与人数 -->
+		select sum(one) one,sum(two) two,sum(three) three,sum(four) four,sum(five) five,sum(six) six,sum(seven) seven,sum(enght) enght, sum(nine) nine,sum(ten) ten from (
+		<foreach collection="list" item="items" index="index" separator="UNION ALL">
+		select sum(case when cou=1 then 1 else 0 end) one,
+			   sum(case when cou=2 then 1 else 0 end) two,
+			   sum(case when cou=3 then 1 else 0 end) three,
+			   sum(case when cou=4 then 1 else 0 end) four,
+			   sum(case when cou=5 then 1 else 0 end) five,
+			   sum(case when cou=6 then 1 else 0 end) six,
+			   sum(case when cou=7 then 1 else 0 end) seven,
+			   sum(case when cou=8 then 1 else 0 end) enght,
+			   sum(case when cou=9 then 1 else 0 end) nine,
+			   sum(case when cou=10 then 1 else 0 end) ten 
+		from(
+			select role_id,count(role_id) cou from enter_map_log_${items} where map_id='53' 
+			<if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach> 
+			</if>
+			GROUP BY role_id
+			) a
+		</foreach>
+		) b
+	</select>
+	
+</mapper>

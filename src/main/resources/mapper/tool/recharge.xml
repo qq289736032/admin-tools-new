@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="recharge">
+	<!--<select id="queryPage" resultType="com.mokylin.cabal.modules.sys.entity.User" parameterType="com.mokylin.cabal.common.persistence.Page">-->
+        <!--select * from sys_user -->
+	<!--</select>-->
+
+    <select id="paging" resultType="com.mokylin.cabal.modules.tools.entity.Recharge" parameterType="java.util.HashMap">
+        select * from recharge where 1=1
+        <if test="@Ognl@isNotBlank(pid)"> and pid = #{pid}</if>
+		<if test="@Ognl@isNotBlank(rechargeStatus)">and recharge_status =#{rechargeStatus}</if>
+		<if test="@Ognl@isNotBlank(roleNames)">and role_names like concat('%',#{roleNames},'%') </if>
+		<if test="@Ognl@isNotBlank(serverId)">and server_id =#{serverId}</if>
+		<if test="@Ognl@isNotBlank(rechargeType)">and recharge_type =#{rechargeType}</if>
+		<if test="@Ognl@isNotBlank(moneyType)">and money_type =#{moneyType}</if>
+        <if test="@Ognl@isNotBlank(createTimeEnd)">and create_date <![CDATA[ < ]]> DATE_ADD(#{createTimeEnd},INTERVAL 1 day)</if>
+        <if test="@Ognl@isNotBlank(createTimeStart)">and create_date <![CDATA[ >= ]]> #{createTimeStart} </if>
+        <!--<if test="isGlobalPlatformPermission == false">-->
+            <!--and create_by in-->
+            <!--<foreach item="item" index="index" collection="roleUserIdList" open="(" separator="," close=")">-->
+                <!--#{item,jdbcType=VARCHAR}-->
+            <!--</foreach>-->
+        <!--</if>-->
+        order by create_date desc
+    </select>
+
+    <select id="selectOneById" resultType="com.mokylin.cabal.modules.tools.entity.Recharge" parameterType="java.lang.String">
+        select * from recharge where id = #{id}
+    </select>
+
+   <!-- 查询玩家充值状态 -->
+    <select id="selectStatus" parameterType="java.util.HashMap" resultType="String">
+      select recharge_status as status  from recharge 
+      where id in 
+     <foreach item="item" index="index" collection="recordIdList" open="(" separator="," close=")">
+            #{item}
+     </foreach>
+    </select>
+    <update id="batchUpdateStatus" parameterType="java.util.HashMap">
+        update recharge set recharge_status = #{rechargeStatus},approve_by = #{currentUser.id},approve_name=#{currentUser.loginName}
+        WHERE id in
+        <foreach item="item" index="index" collection="recordIdList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <update id="updateStatus" parameterType="java.util.HashMap">
+        update recharge set recharge_status = #{rechargeStatus},approve_by = #{currentUser.id},approve_name=#{currentUser.loginName}
+        WHERE id = #{id}
+    </update>
+
+    <select id="findRechargeByIdList" parameterType="java.util.HashMap" resultType="com.mokylin.cabal.modules.tools.entity.Recharge">
+        select * from recharge where id IN
+        <foreach item="item" index="index" collection="recordIdList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and recharge_status = 0
+    </select>
+
+    <select id="findById" parameterType="java.util.HashMap" resultType="com.mokylin.cabal.modules.tools.entity.Recharge">
+        select * from recharge2 where id = #{id}
+    </select>
+    
+    <select id="sumByRoleId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+        select IFNULL(sum(money_num),0) as money from recharge where recharge_status = 1 
+        <if test="@Ognl@isNotBlank(roleId)">and role_ids like concat('%',#{roleId},'%')</if>
+        <if test="@Ognl@isNotBlank(serverId)">and server_id &gt;= #{serverId}</if>
+        <if test="@Ognl@isNotBlank(startTime)">and update_date &gt;= #{startTime}</if>
+		<if test="@Ognl@isNotBlank(endTime)">and update_date &lt;= #{endTime}</if>
+    </select>
+
+    <insert id="insert"  parameterType="java.util.HashMap">
+        insert into recharge(
+            id,
+            user_ids,
+            role_ids,
+            role_names,
+            money_type,
+            money_num,
+            pid,
+            server_id,
+            recharge_type,
+            create_date,
+            create_name,
+            create_by,
+            remark
+        )values(
+            #{id},
+            #{userIds},
+            #{roleIds},
+            #{roleNames},
+            #{moneyType},
+            #{moneyNum},
+            #{pid},
+            #{currentServerId},
+            #{rechargeType},
+            now(),
+            #{currentUser.loginName},
+            #{currentUser.id},
+            #{remark}
+        )
+    </insert>
+
+    <insert id="insert2"  parameterType="java.util.HashMap">
+        insert into recharge2(
+        id,
+        user_ids,
+        role_ids,
+        role_names,
+        money_type,
+        money_num,
+        pid,
+        server_id,
+        recharge_type,
+        create_date,
+        create_name,
+        create_by,
+        remark
+        )values(
+        #{id},
+        #{userIds},
+        #{roleIds},
+        #{roleNames},
+        #{moneyType},
+        #{moneyNum},
+        #{pid},
+        #{currentServerId},
+        #{rechargeType},
+        now(),
+        #{currentUser.loginName},
+        #{currentUser.id},
+        #{remark}
+        )
+    </insert>
+
+</mapper>

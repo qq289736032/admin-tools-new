@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="onlineTimeDistribution">
+<!-- 在线数据分布 -->
+<select id="onlinePointDis" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		select 
+			   sum(section_1) as h0,
+			   sum(section_2) as h1,
+			   sum(section_3) as h2,
+			   sum(section_4) as h3,
+			   sum(section_5) as h4,
+			   sum(section_6) as h5,
+			   sum(section_7) as h6,
+			   sum(section_8) as h7,
+			   sum(section_9) as h8,
+			   sum(section_10) as h9,
+			   sum(section_11) as h10,
+			   sum(section_12) as h11,
+			   sum(section_13) as h12,
+			   sum(section_14) as h13,
+			   sum(section_15) as h14,
+			   sum(section_16) as h15,
+			   sum(section_17) as h16,
+			   sum(section_18) as h17,
+			   sum(section_19) as h18,
+			   sum(section_20) as h19,
+			   sum(section_21) as h20,
+			   sum(section_22) as h21,
+			   sum(section_23) as h22,
+			   sum(section_24) as h23,
+			   log_day as logDay
+		from stat_online_time_distribution
+		where 1=1
+		 <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+	     <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+	     <if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>		 
+		GROUP BY log_day
+		order by log_day desc
+</select>
+
+<!-- 七日对比 -->
+<select id="onlinePointCompare" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+   select 	   #{createDateStart} as logDay,
+				sum(section_24) as h23,
+				sum(section_1) as h0,
+				sum(section_2) as h1,
+				sum(section_3) as h2,
+				sum(section_4) as h3,
+				sum(section_5) as h4,
+				sum(section_6) as h5,
+				sum(section_7) as h6,
+				sum(section_8) as h7,
+				sum(section_9) as h8,
+				sum(section_10) as h9,
+				sum(section_11) as h10,
+				sum(section_12) as h11,
+				sum(section_13) as h12,
+				sum(section_14) as h13,
+				sum(section_15) as h14,
+				sum(section_16) as h15,
+				sum(section_17) as h16,
+				sum(section_18) as h17,
+				sum(section_19) as h18,
+				sum(section_20) as h19,
+				sum(section_21) as h20,
+				sum(section_22) as h21,
+				sum(section_23) as h22
+		from stat_online_time_distribution
+		where 1=1
+		 <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+	     <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+	     <if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>		 
+		union
+		select 
+			   #{beforeStart} as logDay,
+				sum(section_24) as h23,
+				sum(section_1) as h0,
+				sum(section_2) as h1,
+				sum(section_3) as h2,
+				sum(section_4) as h3,
+				sum(section_5) as h4,
+				sum(section_6) as h5,
+				sum(section_7) as h6,
+				sum(section_8) as h7,
+				sum(section_9) as h8,
+				sum(section_10) as h9,
+				sum(section_11) as h10,
+				sum(section_12) as h11,
+				sum(section_13) as h12,
+				sum(section_14) as h13,
+				sum(section_15) as h14,
+				sum(section_16) as h15,
+				sum(section_17) as h16,
+				sum(section_18) as h17,
+				sum(section_19) as h18,
+				sum(section_20) as h19,
+				sum(section_21) as h20,
+				sum(section_22) as h21,
+				sum(section_23) as h22
+		from stat_online_time_distribution
+		where 1=1
+		 <if test="@Ognl@isNotBlank(beforeEnd)">and log_day <![CDATA[ <= ]]>replace(#{beforeEnd},'-','')</if>
+	     <if test="@Ognl@isNotBlank(beforeStart)">and log_day <![CDATA[ >= ]]>replace(#{beforeStart},'-','')</if>
+	     <if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>		 
+</select>
+
+</mapper>

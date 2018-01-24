@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="operaGoldLog">
+
+	<select id="paging"
+		resultType="com.mokylin.cabal.modules.welfare.entity.OperaGoldLog"
+		parameterType="java.util.HashMap">
+		select * from opera_gold_log where 1=1
+		<if test="@Ognl@isNotBlank(pid)">and pid = #{pid}</if>
+		<if test="@Ognl@isNotBlank(serverId)">and server_id = #{serverId}</if>
+		<if test="@Ognl@isNotBlank(roleId)">and role_id = #{roleId}</if>
+		<if test="@Ognl@isNotBlank(roleName)">and role_name like concat('%',#{roleName},'%')</if>
+		<if test="@Ognl@isNotBlank(userId)">and user_id = #{userId}</if>
+		<if test="@Ognl@isNotBlank(startTime)">and create_date &gt;= #{startTime}</if>
+		<if test="@Ognl@isNotBlank(endTime)">and create_date &lt;= #{endTime}</if>
+		order by create_date desc
+	</select>
+	
+	<select id="count"
+		resultType="java.lang.Integer"
+		parameterType="java.util.HashMap">
+		select count(*) from opera_gold_log where 1=1
+		<if test="@Ognl@isNotBlank(pid)">and pid = #{pid}</if>
+		<if test="@Ognl@isNotBlank(serverId)">and server_id = #{serverId}</if>
+		<if test="@Ognl@isNotBlank(roleName)">and role_name like concat('%',#{roleName},'%')</if>
+		<if test="@Ognl@isNotBlank(roleId)">and role_id = #{roleId}</if>
+		<if test="@Ognl@isNotBlank(userId)">and user_id = #{userId}</if>
+		<if test="@Ognl@isNotBlank(startTime)">and create_date &gt;= #{startTime}</if>
+		<if test="@Ognl@isNotBlank(endTime)">and create_date &lt;= #{endTime}</if>
+	</select>
+	
+	<select id="sum"
+		resultType="java.lang.Integer"
+		parameterType="java.util.HashMap">
+		select IFNULL(sum(gold),0) from opera_gold_log where 1=1
+		<if test="@Ognl@isNotBlank(pid)">and pid = #{pid}</if>
+		<if test="@Ognl@isNotBlank(serverId)">and server_id = #{serverId}</if>
+		<if test="@Ognl@isNotBlank(roleId)">and role_id = #{roleId}</if>
+		<if test="@Ognl@isNotBlank(userId)">and user_id = #{userId}</if>
+		<if test="@Ognl@isNotBlank(startTime)">and create_date &gt;= #{startTime}</if>
+		<if test="@Ognl@isNotBlank(endTime)">and create_date &lt;= #{endTime}</if>
+		<if test="@Ognl@isNotBlank(passageway)">and passageway!=#{passageway}</if>
+		<if test="@Ognl@isNotBlank(passageway0)">and passageway=#{passageway0}</if>
+	</select>
+	
+	<select id="sumByRoleIds"
+		resultType="java.util.HashMap"
+		parameterType="java.util.HashMap">
+		select IFNULL(sum(gold),0) as sumYb,role_id as roleId from opera_gold_log where 1=1
+		<if test="@Ognl@isNotBlank(roleIds)">
+				and role_id in
+				<foreach collection="roleIds" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+		</if>
+		group by role_id
+	</select>
+	
+	<select id="sumPassageway"
+		resultType="java.util.HashMap"
+		parameterType="java.util.HashMap">
+		select IFNULL(sum(gold),0),passageway from opera_gold_log where 1=1
+		<if test="@Ognl@isNotBlank(pid)">and pid = #{pid}</if>
+		<if test="@Ognl@isNotBlank(serverId)">and server_id = #{serverId}</if>
+		<if test="@Ognl@isNotBlank(roleId)">and role_id = #{roleId}</if>
+		<if test="@Ognl@isNotBlank(userId)">and user_id = #{userId}</if>
+		<if test="@Ognl@isNotBlank(startTime)">and create_date &gt;= #{startTime}</if>
+		<if test="@Ognl@isNotBlank(endTime)">and create_date &lt;= #{endTime}</if>
+		group by passageway
+	</select>
+	
+	<select id="sumRankPlat"
+		resultType="java.util.HashMap"
+		parameterType="java.util.HashMap">
+		select n.pid,n.plat_name as platName,
+		n.server_name as serverName,
+		n.server_id as serverId,
+		n.role_name as roleName,
+		n.user_id as userId,
+		n.role_id as roleId,
+		n.use_people as usePeople,
+		n.use_people_post as usePeoplePost,
+		n.status,
+		IFNULL(SUM(l.gold),0) as sumYb
+		from welfare_num n ,opera_gold_log l 
+		where l.role_id = n.role_id  and n.del_flag = 0 and l.del_flag = 0
+		<if test="@Ognl@isNotBlank(pid)">and l.pid = #{pid}</if>
+		<if test="@Ognl@isNotBlank(serverId)">and l.server_id = #{serverId}</if>
+		<if test="@Ognl@isNotBlank(startTime)">and l.create_date &gt;= #{startTime}</if>
+		<if test="@Ognl@isNotBlank(endTime)">and l.create_date &lt;= #{endTime}</if>
+		GROUP BY l.role_id 
+		ORDER BY sumYb desc
+	</select>
+	
+	<select id="sumRankInd"
+		resultType="java.util.HashMap"
+		parameterType="java.util.HashMap">
+		select n.pid,n.plat_name as platName,
+		n.server_name as serverName,
+		n.server_id as serverId,
+		n.role_name as roleName,
+		n.user_id as userId,
+		n.role_id as roleId,
+		n.use_people as usePeople,
+		n.use_people_post as usePeoplePost,
+		n.status,
+		IFNULL(SUM(l.gold),0) as sumYb,l.passageway 
+		from welfare_num n ,opera_gold_log l 
+		where l.role_id = n.role_id  
+		<if test="@Ognl@isNotBlank(pid)">and l.pid = #{pid}</if>
+		<if test="@Ognl@isNotBlank(serverId)">and l.server_id = #{serverId}</if>
+		<if test="@Ognl@isNotBlank(startTime)">and l.create_date &gt;= #{startTime}</if>
+		<if test="@Ognl@isNotBlank(endTime)">and l.create_date &lt;= #{endTime}</if>
+		GROUP BY l.passageway ,l.role_id 
+		ORDER BY sumYb desc
+	</select>
+	<insert id="insert"
+		parameterType="java.util.HashMap">
+		insert into opera_gold_log(
+			id,
+			passageway,
+			plat_name,
+			server_id,
+			server_name,
+			role_name,
+			user_id,
+			role_id,
+			gold,
+			create_name,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag,
+			pid
+		)
+		values
+
+		(
+			#{id},
+			#{passageway},
+			#{platName},
+			#{serverId},
+			#{serverName},
+			#{roleName},
+			#{userId},
+			#{roleId},
+			#{gold},
+			#{createName},
+			#{createBy},
+			now(),
+			#{updateBy},
+			now(),
+			0,
+			#{pid}
+		)
+
+	</insert>
+
+	<insert id="batchInsert" parameterType="java.util.List">
+		insert into opera_gold_log(
+			id,
+			passageway,
+			plat_name,
+			server_id,
+			server_name,
+			role_name,
+			user_id,
+			role_id,
+			gold,
+			create_name,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag,
+			pid
+		)
+		values
+		<foreach item="item" index="index" collection="list"
+			separator=",">
+			(
+			#{item.id},
+			#{item.passageway},
+			#{item.platName},
+			#{item.serverId},
+			#{item.serverName},
+			#{item.roleName},
+			#{item.userId},
+			#{item.roleId},
+			#{item.gold},
+			#{item.createName},
+			#{item.createBy},
+			now(),
+			#{item.updateBy},
+			now(),
+			0,
+			#{item.pid}
+			)
+		</foreach>
+	</insert>
+</mapper>

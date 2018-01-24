@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="monitorConfig">
+    <select id="findMonitorConfig" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		SELECT
+			monitor_config.id id,
+			monitor_config.warn_login warn_login,
+			monitor_config.warn_charge warn_charge
+		FROM
+			monitor_config
+    </select>
+    <insert id="insert" parameterType="java.util.HashMap">
+        insert into monitor_config(id,warn_login,warn_charge,create_time,create_name,create_by,update_time,update_name,update_by)
+        values(
+          #{id},
+          #{warnLogin},
+          #{warnCharge},
+          now(),
+          #{currentUser.loginName},
+          #{currentUser.id},
+          now(),
+          #{currentUser.loginName},
+          #{currentUser.id}
+        )
+    </insert>
+    
+    <update id="update" parameterType="java.util.HashMap">
+        UPDATE 
+        	monitor_config 
+        SET 
+        	warn_login = #{warnLogin},
+        	warn_charge = #{warnCharge},
+        	update_time =now(),
+        	update_name = #{currentUser.loginName},
+        	update_by = #{currentUser.id}
+        WHERE 
+        	id = #{currentId}
+    </update>
+</mapper>

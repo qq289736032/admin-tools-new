@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="territoryWar">
+	
+	<select id="factionFightNum" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		<!-- 领地战帮会战力-->
+		SELECT guild_name,fight 
+			FROM lingdi_log 
+			where 1 = 1
+			<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+			<if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach> 
+			</if>
+			GROUP BY guild_name
+			ORDER BY fight desc
+	</select>
+	
+	<select id="mapOccupyFaction" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		<!-- 地图占领帮会统计-->
+		SELECT map_id,guild_name 
+		FROM lingdi_log 
+		where map_id!=''
+		<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+		<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+		<if test="@Ognl@isNotBlank(serverIdList)">
+		AND server_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach> 
+		</if>
+		GROUP BY map_id
+	</select>
+	
+	<select id="territoryWarDie" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		<!-- 领地战各地图死亡人数统计-->
+			select stage_id,count(DISTINCT role_id) cou,sum(num) num from(
+			<foreach collection="list" item="items" index="index" separator="UNION ALL">
+			select stage_id,role_id,count(role_id) num from dead_log_${items} GROUP BY stage_id,role_id
+			<if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach> 
+			</if>
+			</foreach>
+			) a
+			GROUP BY stage_id
+	</select>
+	
+	<select id="territoryWarPull" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		<!-- 领地战拔旗-->
+		select map_id,count(role_id) cou
+		from gather_log 
+		where gather_id='qizhi_001' 
+		<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+		<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+		<if test="@Ognl@isNotBlank(serverIdList)">
+		AND server_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach> 
+		</if>
+		group by map_id
+	</select>
+	
+</mapper>

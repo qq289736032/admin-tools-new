@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="yunDart">	
+	<select id="yunDartStatistics" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		<!-- 运镖统计 -->
+		SELECT  COUNT(DISTINCT role_id) cou,
+			sum(case when result=1 then 1 else 0 end) succe,
+			sum(case when result=0 then 1 else 0 end) defeate 
+			from husong_log
+			where 1 = 1
+			<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+			<if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach> 
+			</if> 
+	</select>
+	
+	<select id="dartCarStatistics" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		<!-- 镖车统计 -->
+		SELECT meiren_id, count(DISTINCT role_id) cou,count(role_id) num,
+			sum(case when result=1 then 1 else 0 end) succe,
+			sum(case when result=0 then 1 else 0 end) defeate 
+			from husong_log 
+			where 1 = 1
+			<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+			<if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach> 
+			</if> 
+			GROUP BY meiren_id 
+			order by meiren_id desc
+	</select>
+	
+	<select id="dartCarKill" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		<!-- 镖车被击杀次数 -->
+		select sum(cou) cou from(
+		<foreach collection="list" item="items" index="index" separator="UNION ALL"> 
+		SELECT count(role_id) cou From dead_log_${items} m where (stage_id='5' or stage_id='6' or stage_id='10')
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach> 
+		</if>
+		</foreach>
+		) a 
+	</select>
+	
+</mapper>

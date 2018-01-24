@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="rebateOperaLogMapper">
+  <resultMap id="BaseResultMap" type="com.mokylin.cabal.modules.rebate.entity.RebateOperaLog">
+    <result column="id" jdbcType="VARCHAR" property="id" />
+    <result column="pid" jdbcType="VARCHAR" property="pid" />
+    <result column="plat_name" jdbcType="VARCHAR" property="platName" />
+    <result column="server_id" jdbcType="VARCHAR" property="serverId" />
+    <result column="server_name" jdbcType="VARCHAR" property="serverName" />
+    <result column="role_name" jdbcType="VARCHAR" property="roleName" />
+    <result column="role_id" jdbcType="BIGINT" property="roleId" />
+    <result column="user_id" jdbcType="VARCHAR" property="userId" />
+    <result column="gold" jdbcType="BIGINT" property="gold" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="email_title" jdbcType="VARCHAR" property="emailTitle" />
+    <result column="create_name" jdbcType="VARCHAR" property="createName" />
+    <result column="create_by" jdbcType="VARCHAR" property="createBy" />
+    <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
+    <result column="update_by" jdbcType="VARCHAR" property="updateBy" />
+    <result column="update_date" jdbcType="TIMESTAMP" property="updateDate" />
+    <result column="del_flag" jdbcType="INTEGER" property="delFlag" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.mokylin.cabal.modules.rebate.entity.RebateOperaLog">
+    <result column="email_text" jdbcType="LONGVARCHAR" property="emailText" />
+  </resultMap>
+  <sql id="Blob_Column_List">
+    email_text
+  </sql>
+  
+       <select id="paging" resultType="com.mokylin.cabal.modules.rebate.entity.RebateOperaLog" parameterType="java.util.HashMap">
+  	select *
+  	from rebate_opera_log where 1=1
+  	<if test="@Ognl@isNotBlank(startTime)">and create_date &gt;= #{startTime}</if>
+  	<if test="@Ognl@isNotBlank(endTime)">and create_date &lt;= #{endTime}</if>
+  	<if test="@Ognl@isNotBlank(pid)">and pid = #{pid}</if>
+  	<if test="@Ognl@isNotBlank(serverId)">and server_id = #{serverId}</if>
+  	<if test="@Ognl@isNotBlank(status)">and status = #{status}</if>
+  	<if test="@Ognl@isNotBlank(roleName)">and role_name like concat('%',#{roleName},'%')</if>
+  	<if test="@Ognl@isNotBlank(userId)">and user_id = #{userId}</if>
+  	<if test="@Ognl@isNotBlank(roleId)">and role_id = #{roleId}</if>
+  	<if test="@Ognl@isNotBlank(createName)">and create_name like concat('%',#{createName},'%')</if>
+  	order by create_date desc
+  	 
+  </select>
+  
+    
+       <select id="count" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+  	select count(*)
+  	from rebate_opera_log where 1=1
+  	<if test="@Ognl@isNotBlank(startTime)">and create_date = #{startTime}</if>
+  	<if test="@Ognl@isNotBlank(endTime)">and create_date = #{endTime}</if>
+  	<if test="@Ognl@isNotBlank(pid)">and pid = #{pid}</if>
+  	<if test="@Ognl@isNotBlank(serverId)">and server_id = #{serverId}</if>
+  	<if test="@Ognl@isNotBlank(status)">and status = #{status}</if>
+  	<if test="@Ognl@isNotBlank(roleName)">and role_name like concat('%',#{roleName},'%')</if>
+  	<if test="@Ognl@isNotBlank(userId)">and user_id = #{userId}</if>
+  	<if test="@Ognl@isNotBlank(roleId)">and role_id = #{roleId}</if>
+  	<if test="@Ognl@isNotBlank(createName)">and create_name like concat('%',#{createName},'%')</if>
+  	 
+  </select>
+  
+  
+        <select id="sumByDateAndRoleId" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+  	select IFNULL(sum(gold),0) as sumGold
+  	from rebate_opera_log where
+  	create_date &gt;= #{startDate} and
+  	create_date &lt;= #{endDate}
+  	and role_id = #{roleId}
+  	
+  </select>
+  <update id="updateStatus" parameterType="java.util.HashMap">
+    update rebate_opera_log set update_date = #{updateDate},update_by = #{updateBy},
+    status = #{status} where id = #{logId}
+  </update>
+  <insert id="insert" parameterType="com.mokylin.cabal.modules.rebate.entity.RebateOperaLog">
+    insert into rebate_opera_log (id, pid, plat_name, 
+      server_id, server_name, role_name, 
+      role_id, user_id, gold, 
+      status, email_title, create_name, 
+      create_by, create_date, update_by, 
+      update_date, del_flag, email_text,attachments
+      )
+    values (#{id,jdbcType=VARCHAR}, #{pid,jdbcType=VARCHAR}, #{platName,jdbcType=VARCHAR}, 
+      #{serverId,jdbcType=VARCHAR}, #{serverName,jdbcType=VARCHAR}, #{roleName,jdbcType=VARCHAR}, 
+      #{roleId,jdbcType=BIGINT}, #{userId,jdbcType=VARCHAR}, #{gold,jdbcType=BIGINT}, 
+      #{status,jdbcType=INTEGER}, #{emailTitle,jdbcType=VARCHAR}, #{createName,jdbcType=VARCHAR}, 
+      #{createBy,jdbcType=VARCHAR}, #{createDate,jdbcType=TIMESTAMP}, #{updateBy,jdbcType=VARCHAR}, 
+      #{updateDate,jdbcType=TIMESTAMP}, #{delFlag,jdbcType=INTEGER}, #{emailText,jdbcType=LONGVARCHAR}
+      ,#{attachments}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.mokylin.cabal.modules.rebate.entity.RebateOperaLog">
+    insert into rebate_opera_log
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="pid != null">
+        pid,
+      </if>
+      <if test="platName != null">
+        plat_name,
+      </if>
+      <if test="serverId != null">
+        server_id,
+      </if>
+      <if test="serverName != null">
+        server_name,
+      </if>
+      <if test="roleName != null">
+        role_name,
+      </if>
+      <if test="roleId != null">
+        role_id,
+      </if>
+      <if test="userId != null">
+        user_id,
+      </if>
+      <if test="gold != null">
+        gold,
+      </if>
+      <if test="status != null">
+        status,
+      </if>
+      <if test="emailTitle != null">
+        email_title,
+      </if>
+      <if test="createName != null">
+        create_name,
+      </if>
+      <if test="createBy != null">
+        create_by,
+      </if>
+      <if test="createDate != null">
+        create_date,
+      </if>
+      <if test="updateBy != null">
+        update_by,
+      </if>
+      <if test="updateDate != null">
+        update_date,
+      </if>
+      <if test="delFlag != null">
+        del_flag,
+      </if>
+      <if test="emailText != null">
+        email_text,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="pid != null">
+        #{pid,jdbcType=VARCHAR},
+      </if>
+      <if test="platName != null">
+        #{platName,jdbcType=VARCHAR},
+      </if>
+      <if test="serverId != null">
+        #{serverId,jdbcType=VARCHAR},
+      </if>
+      <if test="serverName != null">
+        #{serverName,jdbcType=VARCHAR},
+      </if>
+      <if test="roleName != null">
+        #{roleName,jdbcType=VARCHAR},
+      </if>
+      <if test="roleId != null">
+        #{roleId,jdbcType=BIGINT},
+      </if>
+      <if test="userId != null">
+        #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="gold != null">
+        #{gold,jdbcType=BIGINT},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="emailTitle != null">
+        #{emailTitle,jdbcType=VARCHAR},
+      </if>
+      <if test="createName != null">
+        #{createName,jdbcType=VARCHAR},
+      </if>
+      <if test="createBy != null">
+        #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null">
+        #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null">
+        #{updateBy,jdbcType=VARCHAR},
+      </if>
+      <if test="updateDate != null">
+        #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="delFlag != null">
+        #{delFlag,jdbcType=INTEGER},
+      </if>
+      <if test="emailText != null">
+        #{emailText,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+</mapper>

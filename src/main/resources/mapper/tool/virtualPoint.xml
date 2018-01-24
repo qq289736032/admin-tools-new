@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="virtualPoint">
+
+
+    <select id="paging" parameterType="map" resultType="map">
+        SELECT
+            virtual_point.id,
+            virtual_point.`global`,
+            virtual_point.server_ids serverIds,
+            virtual_point.role_ids roleIds,
+            virtual_point.role_names roleNames,
+            virtual_point.goods,
+            virtual_point.create_name createName,
+            virtual_point.create_by,
+            virtual_point.approve_by,
+            virtual_point.approve_name approveName,
+            virtual_point.state,
+            virtual_point.create_time createTime
+        FROM `virtual_point` WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(state)"> AND state = #{state}</if>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectById" parameterType="map" resultType="map">
+        SELECT
+            virtual_point.id,
+            virtual_point.`global`,
+            virtual_point.server_ids serverIds,
+            virtual_point.role_ids roleIds,
+            virtual_point.role_names roleNames,
+            virtual_point.goods,
+            virtual_point.create_name createName,
+            virtual_point.create_by,
+            virtual_point.approve_by,
+            virtual_point.approve_name approveName,
+            virtual_point.state,
+            virtual_point.create_time createTime
+        FROM virtual_point WHERE  id = #{id}
+    </select>
+
+
+    <update id="approve" parameterType="map">
+        UPDATE virtual_point SET state = #{state},approve_by = #{currentUser.id},approve_name = #{currentUser.loginName} WHERE id = #{id}
+    </update>
+
+    <update id="cancel" parameterType="map">
+        UPDATE virtual_point SET state = #{state} WHERE id = #{id}
+    </update>
+
+    <insert id="insert" parameterType="map">
+        INSERT INTO virtual_point(id,global,server_ids,role_ids,role_names,goods,create_name,create_by)
+        VALUES (#{id},#{global},#{serverIds},#{roleIds},#{receiverNames},#{virtualItems},#{currentUser.loginName},#{currentUser.id})
+    </insert>
+
+    <select id="itemList" parameterType="map" resultType="map">
+        SELECT
+            virtual_config.id,
+            virtual_config.item_id,
+            virtual_config.`name`,
+            virtual_config.create_name,
+            virtual_config.create_by,
+            virtual_config.create_date,
+            virtual_config.update_date,
+            virtual_config.del_flag
+        FROM `virtual_config`
+        WHERE del_flag = 0
+        ORDER  BY create_date DESC
+    </select>
+
+    <select id="insertItem" parameterType="map">
+      insert into virtual_config(id,item_id,name,create_name,create_by,create_date,update_date,del_flag)
+      values(#{id},#{itemId},#{name},#{currentUser.loginName},#{loginName.id},now(),now(),0)
+    </select>
+
+    <delete id="deleteItem" parameterType="map">
+        delete from virtual_config where id = #{id};
+    </delete>
+
+</mapper>

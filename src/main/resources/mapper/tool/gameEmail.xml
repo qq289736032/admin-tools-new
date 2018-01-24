@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="gameEmail">
+	<!--<select id="queryPage" resultType="com.mokylin.cabal.modules.sys.entity.User" parameterType="com.mokylin.cabal.common.persistence.Page">-->
+        <!--select * from sys_user -->
+	<!--</select>-->
+
+    <select id="paging" resultType="com.mokylin.cabal.modules.tools.entity.GameEmail" parameterType="java.util.HashMap">
+        select * from game_email where 1=1
+
+        <if test="@Ognl@isNotBlank(pid)"> and pid = #{pid} </if>
+        <if test="@Ognl@isNotBlank(state)">and state = #{state} </if>
+        <if test="@Ognl@isNotBlank(title)">and title like concat('%',#{title},'%') </if>
+        <if test="@Ognl@isNotBlank(content)">and content like concat('%',#{content},'%') </if>
+        <if test="@Ognl@isNotBlank(receiverNames)">and receiver_names like concat('%',#{receiverNames},'%') </if>
+        <if test="@Ognl@isNotBlank(receiverUserIds)">and receiver_user_ids like concat('%',#{receiverUserIds},'%') </if>
+        <if test="@Ognl@isNotBlank(globalSend)">and global_send = #{globalSend} </if>
+        <if test="@Ognl@isNotBlank(emailStatus)">and email_status = #{emailStatus} </if>
+        <if test="@Ognl@isNotBlank(createTimeStart)">and date_format(create_time,'%Y-%m-%d') <![CDATA[ >= ]]> #{createTimeStart} </if>
+        <if test="@Ognl@isNotBlank(createTimeEnd)">and date_format(create_time,'%Y-%m-%d') <![CDATA[ <= ]]> #{createTimeEnd} </if>
+        <!--<if test="isGlobalPlatformPermission == false">-->
+            <!--and create_by in-->
+            <!--<foreach item="item" index="index" collection="roleUserIdList" open="(" separator="," close=")">-->
+                <!--#{item,jdbcType=VARCHAR}-->
+            <!--</foreach>-->
+            <!--<if test="@Ognl@isNotBlank(pidList)">-->
+                <!--and-->
+                <!--<foreach item="item" index="index" collection="pidList" open="(" separator="OR" close=")">-->
+                    <!--(create_user_pid like concat ('%',#{item},'%'))-->
+                <!--</foreach>-->
+            <!--</if>-->
+        <!--</if>-->
+        order by create_time desc
+    </select>
+
+    <select id="selectOneById" resultType="com.mokylin.cabal.modules.tools.entity.GameEmail" parameterType="java.lang.String">
+        select * from game_email where id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="java.util.HashMap">
+        insert into game_email(
+            id,
+            pid,
+            server_ids,
+            receiver_names,
+            receiver_user_ids,
+            title,
+            content,
+            attachments,
+            jb,
+            yb,
+            delay_hours,
+            receive_time,
+            create_time,
+            create_name,
+            create_by,
+            create_user_pid,
+            email_status,
+            is_global
+            )values(
+                #{id},
+                #{pid},
+                #{serverIds},
+                #{receiverNames},
+                #{receiverUserIds},
+                #{title},
+                #{content},
+                #{attachments},
+                #{jb},
+                #{yb},
+                #{delayHours},
+                #{receiveTime},
+                now(),
+                #{currentUser.loginName},
+                #{currentUser.id},
+                #{pidArray},
+                #{emailStatus},
+                #{isGlobal}
+            )
+    </insert>
+
+    <update id="cancel" parameterType="java.util.HashMap">
+        update game_email SET  approve_by = #{currentUser.id},approve_name=#{currentUser.loginName},email_status = 2 where id = #{id}
+    </update>
+
+    <update id="batchCancel" parameterType="java.util.HashMap">
+        update game_email SET  approve_by = #{currentUser.id},approve_name=#{currentUser.loginName},email_status = 2
+        WHERE id in
+        <foreach item="item" index="index" collection="recordIdList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <update id="recover" parameterType="java.util.HashMap">
+        update game_email SET  approve_by = #{currentUser.id},approve_name=#{currentUser.loginName},email_status = 0
+        WHERE id = #{id}
+    </update>
+
+    <update id="batchRecover" parameterType="java.util.HashMap">
+        update game_email SET  approve_by = #{currentUser.id},approve_name=#{currentUser.loginName},email_status = 0
+        WHERE id in
+        <foreach item="item" index="index" collection="recordIdList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <update id="updateStatus" parameterType="java.util.HashMap">
+        update game_email set approve_by = #{currentUser.id},approve_name=#{currentUser.loginName},email_status = #{emailStatus}
+        where id = #{id}
+    </update>
+
+    <select id="roleMailListPaging" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        select 	     	
+        	id,
+			title,
+			content,
+			create_name,
+			create_time,
+			attachments
+		 from game_email 
+		 where (substring_index(server_ids,',',1) = #{serverId} or substring_index(server_ids,',',-1) = #{serverId}
+		 or server_ids like concat('%,',#{serverId},',%')) and 
+         (is_global = 1 or (is_global = 0 and receiver_user_ids like concat('%',#{roleId},'%')))
+        <if test="@Ognl@isNotBlank(contentKey)">and content like concat('%',#{contentKey},'%') </if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and date_format(create_time,'%Y-%m-%d') <![CDATA[ >= ]]> #{createDateStart} </if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and date_format(create_time,'%Y-%m-%d') <![CDATA[ <= ]]> #{createDateEnd} </if>
+        order by create_time desc
+    </select>
+</mapper>

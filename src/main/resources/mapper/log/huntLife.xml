@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="huntLife">
+	<select id="huntConversion" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		<!-- 猎命 -->
+			SELECT goods_id,count(role_id) num,count(DISTINCT role_id) cou
+			FROM lieming_duihuan_log 
+			where 1=1
+			<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+			<if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+			</if>
+			group by goods_id
+	</select>
+	
+</mapper>

@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="role">
+	<!--<select id="queryPage" resultType="com.mokylin.cabal.modules.sys.entity.User" parameterType="com.mokylin.cabal.common.persistence.Page">-->
+        <!--select * from sys_user -->
+	<!--</select>-->
+
+    <select id="roleDialog" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        select id,name,level from role where 1=1
+        <if test="@Ognl@isNotBlank(roleId)">and id = #{roleId} </if>
+        <if test="@Ognl@isNotBlank(roleName)">and name = #{roleName} </if>
+        <if test="@Ognl@isNotBlank(startLevel)">and level <![CDATA[ >= ]]>#{startLevel}</if>
+        <if test="@Ognl@isNotBlank(endLevel)">and level <![CDATA[ <= ]]>#{endLevel}</if>
+    </select>
+
+    <select id="findRoleByRoleNameList" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        SELECT id,user_id,name FROM role WHERE 1=1 and name IN
+        <foreach item="item" index="index" collection="roleNameList" open="(" separator="," close=")">#{item}</foreach>
+    </select>
+
+    <select id="findRoleIdByRoleName" resultType="java.lang.String" parameterType="java.util.HashMap">
+        select id from role where name = #{roleName}
+    </select>
+
+    <select id="findRoleByIdList" resultType="java.util.HashMap">
+        SELECT id roleId,pid,user_id userId,name roleName,IFNULL(isjinyan,0)+0 isjinyan,IFNULL(isfenghao,0)+0 isfenghao,server_id,last_login_ip from role where 1 = 1
+        AND id IN
+        <foreach item="item" index="index" collection="recordIdList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="findRoleByUserId" resultType="java.util.HashMap">
+        select * from role where user_id = #{userId}
+    </select>
+    
+    <select id="findRoleByUserIdAndServerId" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select id as roleId from role where user_id = #{userId} and server_id = #{serverId}
+    </select>
+
+    <select id="findRoleById" resultType="java.util.HashMap">
+        SELECT r.id roleId,r.user_id userId,r.NAME roleName,IFNULL(isjinyan,0)+0 isjinyan,IFNULL(isfenghao,0)+0 isfenghao,r.server_id serverId,
+          job,gender,LEVEL,100 POWER,r.create_ip create_ip, IFNULL(SUM(u.total_rmb),0) leiji_jine,IFNULL(rv.vip_level,0) viplevel,u.diamond diamond,bind_diamond,coin,rg.name guild_name,r.add_time,last_login_time lastLoginTime,last_logout_time lastLogoutTime,
+          u.last_charge_time lastChargeTime,3 AS guild_position
+        FROM role r LEFT JOIN guild_member g ON r.id = g.user_role_id
+        LEFT JOIN guild rg ON  g.guild_id = rg.id  LEFT JOIN user u ON r.user_id = u.user_id  LEFT JOIN  role_vip rv ON r.id = rv.user_role_id 
+        WHERE  r.id = #{id}
+
+    </select>
+    
+    <select id="findAllRoleByIds" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        SELECT 
+        	r.id roleId,
+        	r.user_id userId,
+        	r.NAME roleName,
+        	r.server_id serverId,
+          	r.level level,
+          	r.power power,
+          	r.create_ip createIp,
+          	IFNULL(SUM(u.total_rmb),0) totalRmb,
+          	IFNULL(rv.vip_level,0) vipLevel,
+          	u.diamond diamond,
+          	bind_diamond,
+          	coin,
+          	last_login_time lastLoginTime,
+          	last_logout_time lastLogoutTime,
+          	u.last_charge_time lastChargeTime
+        FROM role r LEFT JOIN user u ON r.user_id = u.user_id  LEFT JOIN  role_vip rv ON r.id = rv.user_role_id 
+        WHERE  r.id in
+        <foreach collection="roleIds" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+		</foreach>
+		group by r.id
+    </select>
+    
+    <select id="findRoleYbById" resultType="java.lang.Integer">
+        SELECT  u.diamond
+        FROM role r 
+        LEFT JOIN user u ON r.user_id = u.user_id 
+        WHERE  r.id = #{roleId}
+
+    </select>
+
+    <select id="paging" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+        select id,user_id userId,name,job,gender,level,exp,last_login_time lastLoginTime,last_logout_time lastLogoutTime,
+          add_time addTime,server_id serverId,isjinyan,isfenghao
+        from role where 1 = 1
+        <if test="@Ognl@isNotBlank(roleId)">and id = #{roleId} </if>
+        <if test="@Ognl@isNotBlank(userId)">and user_id = #{userId} </if>
+        <if test="@Ognl@isNotBlank(name)">and name like concat('%',#{name},'%') </if>
+        <if test="@Ognl@isNotBlank(endLevel)">and level <![CDATA[ <= ]]>#{endLevel}</if>
+        <if test="@Ognl@isNotBlank(startLevel)">and level <![CDATA[ >= ]]>#{startLevel}</if>
+    </select>
+
+    <select id="chargeStatistic" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select user_id,role_name,role_id,level,total_recharge_rmb leiji_jine,recharge_count,max_money,sum_yuanbao,last_recharge_time,last_login_time
+        from role WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(roleName)">and role_name = #{roleName} </if>
+        <if test="@Ognl@isNotBlank(roleId)">and role_id = #{roleId}</if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and last_login_time <![CDATA[ < ]]>unix_timestamp(DATE_ADD(#{createDateEnd},INTERVAL 1 day))*1000</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and last_login_time <![CDATA[ >= ]]>unix_timestamp(#{createDateStart})*1000</if>
+    </select>
+
+    <select id="levelRanking" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+        select level,id,name,last_upgrade_time lastUpgradeTime from role where 1 = 1
+        <if test="@Ognl@isNotBlank(roleName)">and name = #{roleName} </if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and last_upgrade_time <![CDATA[ < ]]> DATE_ADD(#{createDateEnd},INTERVAL 1 day)</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and last_upgrade_time <![CDATA[ >= ]]> #{createDateStart} </if>
+        order by level DESC
+    </select>
+	
+	<!-- FIXME 20170428 power,history_max_power,history_min_power 中后两个都 干掉，显示内容的页面也一样-->
+    <select id="battleRanking" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+        select id,name,power,last_upgrade_time lastUpgradeTime from role where 1 = 1
+        <if test="@Ognl@isNotBlank(roleName)">and name = #{roleName} </if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and last_upgrade_time <![CDATA[ < ]]> DATE_ADD(#{createDateEnd},INTERVAL 1 day)</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and last_upgrade_time <![CDATA[ >= ]]> #{createDateStart} </if>
+        order by power DESC
+    </select>
+    
+    <!-- 大中R监控 -->
+     <select id="findDaZhongRMonitorReport" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+             SELECT
+			role.pid pid,
+			role.server_id area_id,
+			role.user_id user_id,
+			role.name role_name,
+			u.total_rmb  amount,        
+			role.add_time reg_time,		
+			u.first_charge_time first_pay_time,
+			u.last_charge_time last_pay_time,
+			TO_DAYS(NOW())-TO_DAYS(role.add_time) sub_reg_time,
+			u.recharge_times pay_times,				
+			u.diamond surplus_coin,			
+			TO_DAYS(NOW())-TO_DAYS(role.last_login_time) sub_last_login_time,
+			TO_DAYS(NOW())-TO_DAYS(role.last_charge_time) sub_last_pay_time
+		FROM
+			role role  LEFT JOIN `user` u ON role.user_id = u.user_id 
+		WHERE
+
+		    u.total_rmb  >=#{amount}  
+		    <!-- <if test="@Ognl@isNotBlank(serverIdList)">
+				AND area_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+						#{item}
+				</foreach>
+			</if> -->
+    </select>
+    
+    <!-- 按角色id验证玩家是否存在 -->
+     <select id="findRoleByRoleIdList" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        SELECT id,user_id,name FROM role WHERE 1=1 and id IN
+        <foreach item="item" index="index" collection="roleIdList" open="(" separator="," close=")">#{item}</foreach>
+    </select>
+</mapper>

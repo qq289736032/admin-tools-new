@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="regDistribution">
+ 
+     <select id="findNewRegNumByDay" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+             SELECT
+                 sum(stat_reg_distribution.section_1) section_1,
+                 sum(stat_reg_distribution.section_2) section_2,
+                 sum(stat_reg_distribution.section_3) section_3,
+                 sum(stat_reg_distribution.section_4) section_4,
+                 sum(stat_reg_distribution.section_5) section_5,
+                 sum(stat_reg_distribution.section_6) section_6,
+                 sum(stat_reg_distribution.section_7) section_7,
+                 sum(stat_reg_distribution.section_8) section_8,
+                 sum(stat_reg_distribution.section_9) section_9,
+                 sum(stat_reg_distribution.section_10) section_10,
+                 sum(stat_reg_distribution.section_11) section_11,
+                 sum(stat_reg_distribution.section_12) section_12,
+                 sum(stat_reg_distribution.section_13) section_13,
+                 sum(stat_reg_distribution.section_14) section_14,
+                 sum(stat_reg_distribution.section_15) section_15,
+                 sum(stat_reg_distribution.section_16) section_16,
+                 sum(stat_reg_distribution.section_17) section_17,
+                 sum(stat_reg_distribution.section_18) section_18,
+                 sum(stat_reg_distribution.section_19) section_19,
+                 sum(stat_reg_distribution.section_20) section_20,
+                 sum(stat_reg_distribution.section_21) section_21,
+                 sum(stat_reg_distribution.section_22) section_22,
+                 sum(stat_reg_distribution.section_23) section_23,
+                 sum(stat_reg_distribution.section_24) section_24,
+                 stat_reg_distribution.log_day
+             FROM stat_reg_distribution
+          WHERE 1 = 1
+          <if test="@Ognl@isNotBlank(serverIdList)">
+             AND area_id IN
+             <foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+                 #{item}
+             </foreach>
+          </if>
+         <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+         <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+         GROUP BY log_day
+         ORDER BY log_day
+     </select>
+
+     <select id="findNewRegNumByServer" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+         SELECT
+			 stat_reg_distribution.pid,
+			 stat_reg_distribution.area_id,
+             sum(stat_reg_distribution.section_1) section_1,
+             sum(stat_reg_distribution.section_2) section_2,
+             sum(stat_reg_distribution.section_3) section_3,
+             sum(stat_reg_distribution.section_4) section_4,
+             sum(stat_reg_distribution.section_5) section_5,
+             sum(stat_reg_distribution.section_6) section_6,
+             sum(stat_reg_distribution.section_7) section_7,
+             sum(stat_reg_distribution.section_8) section_8,
+             sum(stat_reg_distribution.section_9) section_9,
+             sum(stat_reg_distribution.section_10) section_10,
+             sum(stat_reg_distribution.section_11) section_11,
+             sum(stat_reg_distribution.section_12) section_12,
+             sum(stat_reg_distribution.section_13) section_13,
+             sum(stat_reg_distribution.section_14) section_14,
+             sum(stat_reg_distribution.section_15) section_15,
+             sum(stat_reg_distribution.section_16) section_16,
+             sum(stat_reg_distribution.section_17) section_17,
+             sum(stat_reg_distribution.section_18) section_18,
+             sum(stat_reg_distribution.section_19) section_19,
+             sum(stat_reg_distribution.section_20) section_20,
+             sum(stat_reg_distribution.section_21) section_21,
+             sum(stat_reg_distribution.section_22) section_22,
+             sum(stat_reg_distribution.section_23) section_23,
+             sum(stat_reg_distribution.section_24) section_24,
+						stat_reg_distribution.log_day
+         FROM stat_reg_distribution
+         WHERE 1 = 1
+         <if test="@Ognl@isNotBlank(serverIdList)">
+             AND area_id IN
+             <foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+                 #{item}
+             </foreach>
+         </if>
+         <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+         <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+         GROUP BY pid,area_id,log_day
+         ORDER BY log_day,pid,area_id
+     </select>
+     
+     
+     <!-- 七天对比 -->
+     <select id="newRegNumByDayCompare" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+         SELECT  #{startDate} as logDay,
+                 sum(stat_reg_distribution.section_1) h1,
+                 sum(stat_reg_distribution.section_2) h2,
+                 sum(stat_reg_distribution.section_3) h3,
+                 sum(stat_reg_distribution.section_4) h4,
+                 sum(stat_reg_distribution.section_5) h5,
+                 sum(stat_reg_distribution.section_6) h6,
+                 sum(stat_reg_distribution.section_7) h7,
+                 sum(stat_reg_distribution.section_8) h8,
+                 sum(stat_reg_distribution.section_9) h9,
+                 sum(stat_reg_distribution.section_10) h10,
+                 sum(stat_reg_distribution.section_11) h11,
+                 sum(stat_reg_distribution.section_12) h12,
+                 sum(stat_reg_distribution.section_13) h13,
+                 sum(stat_reg_distribution.section_14) h14,
+                 sum(stat_reg_distribution.section_15) h15,
+                 sum(stat_reg_distribution.section_16) h16,
+                 sum(stat_reg_distribution.section_17) h17,
+                 sum(stat_reg_distribution.section_18) h18,
+                 sum(stat_reg_distribution.section_19) h19,
+                 sum(stat_reg_distribution.section_20) h20,
+                 sum(stat_reg_distribution.section_21) h21,
+                 sum(stat_reg_distribution.section_22) h22,
+                 sum(stat_reg_distribution.section_23) h23,
+                 sum(stat_reg_distribution.section_24) h24
+             FROM stat_reg_distribution
+          WHERE 1 = 1
+          <if test="@Ognl@isNotBlank(serverIdList)">
+             AND area_id IN
+             <foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+                 #{item}
+             </foreach>
+          </if>
+         <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+         <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+         union
+         SELECT  #{beforeStart} as logDay,
+                 sum(stat_reg_distribution.section_1) h1,
+                 sum(stat_reg_distribution.section_2) h2,
+                 sum(stat_reg_distribution.section_3) h3,
+                 sum(stat_reg_distribution.section_4) h4,
+                 sum(stat_reg_distribution.section_5) h5,
+                 sum(stat_reg_distribution.section_6) h6,
+                 sum(stat_reg_distribution.section_7) h7,
+                 sum(stat_reg_distribution.section_8) h8,
+                 sum(stat_reg_distribution.section_9) h9,
+                 sum(stat_reg_distribution.section_10) h10,
+                 sum(stat_reg_distribution.section_11) h11,
+                 sum(stat_reg_distribution.section_12) h12,
+                 sum(stat_reg_distribution.section_13) h13,
+                 sum(stat_reg_distribution.section_14) h14,
+                 sum(stat_reg_distribution.section_15) h15,
+                 sum(stat_reg_distribution.section_16) h16,
+                 sum(stat_reg_distribution.section_17) h17,
+                 sum(stat_reg_distribution.section_18) h18,
+                 sum(stat_reg_distribution.section_19) h19,
+                 sum(stat_reg_distribution.section_20) h20,
+                 sum(stat_reg_distribution.section_21) h21,
+                 sum(stat_reg_distribution.section_22) h22,
+                 sum(stat_reg_distribution.section_23) h23,
+                 sum(stat_reg_distribution.section_24) h24
+          FROM stat_reg_distribution
+          WHERE 1 = 1
+          <if test="@Ognl@isNotBlank(serverIdList)">
+             AND area_id IN
+             <foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+                 #{item}
+             </foreach>
+          </if>
+         <if test="@Ognl@isNotBlank(beforeEnd)">and log_day <![CDATA[ <= ]]>#{beforeEnd}</if>
+         <if test="@Ognl@isNotBlank(beforeStart)">and log_day <![CDATA[ >= ]]>#{beforeStart}</if>
+     </select>		  
+</mapper>

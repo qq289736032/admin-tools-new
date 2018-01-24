@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cloak">
+<!-- 翅膀用户分布 -->
+    <select id="cloakUser" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+    	SELECT level,count(distinct role_id) num FROM (
+			SELECT role_id, max(level) level 
+			FROM cloak_upgrade_log 
+			WHERE 1 = 1
+			and level!=0
+			AND log_day <![CDATA[ <= ]]>  #{logDay}
+			<if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+						#{item}
+				</foreach>
+			</if>
+			GROUP BY role_id
+		) AS A
+		WHERE 1 = 1
+		GROUP BY level  
+		ORDER BY level
+    </select>
+    
+    <!-- 幻化类型 -->
+    <select id="cloakType" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+    	SELECT 
+    		skin_type,
+    		count(distinct role_id) as skin
+    	FROM 
+    		cloak_turned_log
+    	WHERE 
+    		1 = 1 
+        <if test="@Ognl@isNotBlank(logDay)">and log_day <![CDATA[ <= ]]>#{logDay}</if> 
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+						#{item}
+				</foreach>
+		</if>
+    	GROUP BY skin_type 
+    	ORDER BY skin_type
+    </select>
+    
+    <!-- 每日翅膀进阶统计 -->
+    <select id="cloakStatistics" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+	SELECT a.level,a.id_num,b.max_num,b.min_num
+	FROM
+		(
+			SELECT level,count(role_id) id_num,log_day
+			FROM
+				(
+					SELECT max(level) level,role_id,log_day
+					FROM
+						cloak_upgrade_log
+					WHERE 1=1
+					and level!=0
+					<if test="@Ognl@isNotBlank(logDay)">and log_day <![CDATA[ <= ]]>#{logDay}</if> 
+					<if test="@Ognl@isNotBlank(serverIdList)">
+						AND server_id IN
+							<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+									#{item}
+							</foreach>
+					</if>
+					GROUP BY role_id
+				) c
+			GROUP BY level
+		) a
+	LEFT JOIN(
+		SELECT rol.level,MAX(sum_num)AS max_num,MIN(sum_num)AS min_num
+		FROM
+			(
+				SELECT role_id,MAX(level)AS level,SUM(upgrade_num)sum_num
+				FROM
+					cloak_upgrade_log
+				WHERE 1=1
+				and level!=0
+				<if test="@Ognl@isNotBlank(logDay)">and log_day <![CDATA[ <= ]]>#{logDay}</if> 
+				<if test="@Ognl@isNotBlank(serverIdList)">
+					AND server_id IN
+						<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+								#{item}
+						</foreach>
+				</if>
+				GROUP BY role_id
+			)AS rol
+		GROUP BY level
+	)AS b ON b. level = a. level
+	GROUP BY level
+	ORDER BY level
+    </select>
+    
+     <!-- 每日翅膀进阶清0统计 -->
+    <select id="cloakDayStatistics" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+    SELECT a.level,a.id_num,b.max_num,b.min_num
+	FROM
+		(
+			SELECT level,count(role_id) id_num,log_day
+			FROM
+				(
+					SELECT max(level) level,role_id,log_day
+					FROM
+						cloak_lucky_log
+					WHERE 1=1
+					and level!=0
+					<if test="@Ognl@isNotBlank(logDay)">and log_day <![CDATA[ <= ]]>#{logDay}</if> 
+					<if test="@Ognl@isNotBlank(serverIdList)">
+						AND server_id IN
+							<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+									#{item}
+							</foreach>
+					</if>
+					GROUP BY role_id
+				) c
+			GROUP BY level
+		) a
+	LEFT JOIN(
+		SELECT rol.level,MAX(sum_num)AS max_num,MIN(sum_num)AS min_num
+		FROM
+			(
+				SELECT role_id,MAX(level)AS level,SUM(upgrade_num)sum_num
+				FROM
+					cloak_lucky_log
+				WHERE 1=1
+				and level!=0
+				<if test="@Ognl@isNotBlank(logDay)">and log_day <![CDATA[ <= ]]>#{logDay}</if> 
+				<if test="@Ognl@isNotBlank(serverIdList)">
+					AND server_id IN
+						<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+								#{item}
+						</foreach>
+				</if>
+				GROUP BY role_id
+			)AS rol
+		GROUP BY level
+	)AS b ON b. level = a. level
+	GROUP BY level
+	ORDER BY level
+    </select>
+</mapper>

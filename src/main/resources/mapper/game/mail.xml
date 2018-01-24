@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="mail">
+
+    <select id="findMailList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	            SELECT
+	     	id,
+	     	role_id,	   
+			system_mail_id,
+			title,
+			content,
+			sender_name,
+			add_time,
+			attachment,
+			opened
+		FROM
+			mail
+		WHERE 1=1<!--area_id = #{serverId}-->
+			<if test="@Ognl@isNotBlank(roleId)">and role_id = #{roleId} </if>
+            <!--<if test="@Ognl@isNotBlank(roleName)">and role_name = #{roleName} </if>-->
+            <if test="@Ognl@isNotBlank(contentKey)">and content like concat('%',#{contentKey},'%') </if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and date_format(add_time,'%Y-%m-%d') <![CDATA[ <= ]]> #{createDateEnd}</if>
+          	<if test="@Ognl@isNotBlank(createDateStart)">and date_format(add_time,'%Y-%m-%d') <![CDATA[ >= ]]> #{createDateStart}</if>
+		order by add_time desc
+    </select>
+    
+</mapper>

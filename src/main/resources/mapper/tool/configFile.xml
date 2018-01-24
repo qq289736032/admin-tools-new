@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="configFile">
+
+    <select id="paging" resultType="com.mokylin.cabal.modules.tools.entity.ConfigFile" parameterType="java.util.HashMap">
+        select * from analyze_file
+
+        order by create_date desc
+    </select>
+
+
+    <select id="selectOneById" resultType="com.mokylin.cabal.modules.tools.entity.ConfigFile" parameterType="java.lang.String">
+        select * from analyze_file where id = #{id}
+    </select>
+
+    <update id="delete" parameterType="java.lang.String">
+        delete from analyze_file  where file_type = #{id}
+    </update>
+
+    <insert id="insert" parameterType="java.util.HashMap">
+        insert into analyze_file(
+            id,
+			file_name,
+			new_name,
+            file_path,
+            file_desc,
+            file_type,
+            create_date,
+			create_by,
+			create_name,
+			update_date
+		)
+		values(
+		    #{id},
+            #{fileName},
+            #{newName},
+            #{filePath},
+            #{fileDesc},
+            #{fileType},
+			now(),
+			#{currentUser.id},
+			#{currentUser.loginName},
+			now()
+		)
+    </insert>
+
+    <update id="update">
+        update analyze_file set
+          new_name = #{newName},
+          file_path = #{filePath},
+          file_desc = #{fileDesc},
+          update_date = now(),
+          update_by = #{currentUser.id}
+        where id = #{id}
+    </update>
+
+    <select id="selectOneByName" parameterType="java.util.HashMap" resultType="com.mokylin.cabal.modules.tools.entity.ConfigFile">
+        SELECT *
+        FROM analyze_file where file_type=#{fileType}
+    </select>
+
+</mapper>

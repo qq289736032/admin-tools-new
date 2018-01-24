@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="charge">
+    <select id="platformRecharge"  resultType="java.util.HashMap" parameterType="java.util.HashMap">
+      select platform,sum(amount) amount from charge where result=1 
+	        <if test="@Ognl@isNotBlank(pidsList)">
+			AND platform IN
+		     <foreach item="item" index="index" collection="pidsList" open="(" separator="," close=")">
+		       #{item}
+		     </foreach>
+	    </if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_time <![CDATA[ <= ]]>#{createDateEnd}</if>
+            <if test="@Ognl@isNotBlank(createDateStart)">and log_time <![CDATA[ >= ]]>#{createDateStart}</if>
+            GROUP BY platform
+    </select>
+    
+    <select id="platformRechargetotal"  resultType="java.util.HashMap" parameterType="java.util.HashMap">
+      select sum(amount) total from charge where result=1 
+	        <if test="@Ognl@isNotBlank(pidsList)">
+			AND platform IN
+		     <foreach item="item" index="index" collection="pidsList" open="(" separator="," close=")">
+		       #{item}
+		     </foreach>
+	    </if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_time <![CDATA[ <= ]]>#{createDateEnd}</if>
+            <if test="@Ognl@isNotBlank(createDateStart)">and log_time <![CDATA[ >= ]]>#{createDateStart}</if>
+    </select>
+    
+    <select id="selectAllOrderId"  resultType="java.util.HashMap" >
+      select order_id as orderId,user_id as userId,server_id as serverId,
+      charge_yb as gold,platform as pid
+      from charge where result=1 
+    </select>
+    <select id="statUserOrderTimeReport"  parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	    select date_format(charge.order_time,'%Y%m%d') order_time_format,count(1) num from (select user_id,order_time from charge
+		WHERE 1=1
+		<if test="@Ognl@isNotBlank(startAmount)">
+		 and amount <![CDATA[>=]]> #{startAmountSql} 
+		</if>
+		<if test="@Ognl@isNotBlank(endAmount)">
+		and amount <![CDATA[<=]]> #{endAmountSql}
+		</if>
+		group by user_id) charge
+		where 1=1
+		<if test="@Ognl@isNotBlank(createDateEnd)">and date_format(charge.order_time,'%Y%m%d') <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+	    <if test="@Ognl@isNotBlank(createDateStart)">and date_format(charge.order_time,'%Y%m%d') <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+		group by order_time_format
+    </select>
+    
+    <select id="findUseIdOrderTime" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select charge.user_id,date_format(charge.order_time,'%Y%m%d') order_time,count(1) num from (select user_id,order_time from charge
+		WHERE 1=1
+		<if test="@Ognl@isNotBlank(startAmount)">
+		 and amount <![CDATA[>=]]> #{startAmountSql} 
+		</if>
+		<if test="@Ognl@isNotBlank(endAmount)">
+		and amount <![CDATA[<=]]> #{endAmountSql}
+		</if>
+		group by user_id) charge
+		where 1=1
+		<if test="@Ognl@isNotBlank(createDateEnd)">and date_format(charge.order_time,'%Y%m%d') <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+	    <if test="@Ognl@isNotBlank(createDateStart)">and date_format(charge.order_time,'%Y%m%d') <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+		group by user_id;
+    </select>
+    
+    <select id="staticChargeUserIdOrderTime" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select user_id,date_format(order_time,'%Y%m%d') order_time from charge
+		where 1=1
+		<if test="@Ognl@isNotBlank(currentDate)">and date_format(order_time,'%Y%m%d') <![CDATA[ <= ]]>replace(#{currentDate},'-','')</if>
+	    <if test="@Ognl@isNotBlank(createDateStart)">and date_format(order_time,'%Y%m%d') <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+		group by date_format(order_time,'%Y%m%d'),user_id
+    </select>
+</mapper>

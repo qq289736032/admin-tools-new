@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="guardTemple">
+	<select id="peopleNum" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		<!-- 守护神殿关卡人数统计 -->		
+		select gate,count(gate) cou FROM(
+			SELECT role_id ,gate_id,
+				CASE
+				WHEN gate_id BETWEEN 1 and 25 then 'gate01'
+				WHEN gate_id BETWEEN 26 and 50 then 'gate02'
+				WHEN gate_id BETWEEN 51 and 75 then 'gate03'
+				WHEN gate_id BETWEEN 76 and 100 then 'gate04'
+				WHEN gate_id BETWEEN 101 and 125 then 'gate05'
+				WHEN gate_id BETWEEN 126 and 150 then 'gate06'
+				WHEN gate_id BETWEEN 151 and 175 then 'gate07'
+				WHEN gate_id BETWEEN 176 and 200 then 'gate08'
+				WHEN gate_id BETWEEN 201 and 225 then 'gate09'
+				WHEN gate_id BETWEEN 226 and 250 then 'gate10'
+				END as gate
+			FROM (
+				select max(gate_id) gate_id,role_id 
+				from shouhu_log 
+				where 1 = 1
+				<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+				<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+				<if test="@Ognl@isNotBlank(serverIdList)">
+				AND server_id IN
+					<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+						#{item}
+					</foreach> 
+				</if>
+				GROUP BY role_id
+				) a
+			where 1 = 1
+			) A
+		group by gate
+		order by gate
+	</select>
+	
+</mapper>

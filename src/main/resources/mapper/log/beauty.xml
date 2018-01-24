@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="beauty">
+    <select id="findBeauty" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+    	SELECT
+			beauty_id,
+			count(DISTINCT role_id )  as count
+		FROM
+			beauty_care_log
+		WHERE
+			1 = 1  
+	    AND log_day <![CDATA[ <= ]]> #{logDay} 
+		<if test="@Ognl@isNotBlank(serverIdList)">
+				 AND server_id IN
+					<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+							#{item}
+					</foreach> 
+		</if>
+		GROUP By  beauty_id    
+		ORDER BY
+			log_day DESC
+    </select>
+    <select id="findBeautyActive" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+    	SELECT
+			beauty_id,
+			count(DISTINCT role_id )  as count
+		FROM
+			beauty_active_log
+		WHERE 1 = 1  
+	    AND log_day <![CDATA[ <= ]]> #{logDay}  
+		<if test="@Ognl@isNotBlank(serverIdList)">
+				AND server_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach> 
+		    </if>
+		GROUP BY beauty_id  
+		ORDER BY log_day DESC
+    </select>
+    <!-- 星图分布  等级分布 -->
+    <select id="starlevelDistribution" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select level,equip_type, count(*) num from
+        (select  distinct role_id, level, equip_type,log_day,server_id,vip_level from star_upgrade_log ) a
+        WHERE 1 =1
+              AND log_day <![CDATA[ <= ]]> #{logDay} 
+        <if test="@Ognl@isNotBlank(viplevel)">
+            <choose>
+                <when test="viplevel == 0">and vip_level <![CDATA[ >= ]]> 0</when>
+                <otherwise>and vip_level = #{viplevel}</otherwise>
+            </choose>
+        </if>
+        <if test="@Ognl@isNotBlank(serverIdList)">
+            and  server_id in
+            <foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        group by level,equip_type
+        order by level asc;
+    </select>
+    <!-- 所有equip_type-->
+    <select  id="equipType" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+       select DISTINCT equip_type  from    star_upgrade_log
+    </select>
+    <!-- level最大值 -->
+    <select id="levelMax" resultType="java.util.HashMap">
+    	select max(level) maxLevel 
+    	from star_upgrade_log
+    	where 1 = 1
+            <if test="@Ognl@isNotBlank(logDay)">and log_day <![CDATA[ < ]]>#{logDay} </if>
+			<if test="@Ognl@isNotBlank(serverIdList)">
+				 AND server_id IN
+					<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+							#{item}
+					</foreach> 
+		    </if>
+		    <if test="@Ognl@isNotBlank(viplevel)">
+            <choose>
+                <when test="viplevel == 0">and vip_level <![CDATA[ >= ]]> 0</when>
+                <otherwise>and vip_level = #{viplevel}</otherwise>
+            </choose>
+           </if> 
+           order by level asc
+    </select>
+</mapper>

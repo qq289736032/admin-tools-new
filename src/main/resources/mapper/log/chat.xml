@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="chat">
+
+    <select id="paging" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT
+            role_chat_record.id,
+            role_chat_record.chat_time chatTime,
+            role_chat_record.chat_channel channel,
+            role_chat_record.role_id roleId,
+            role_chat_record.role_name roleName,
+            role_chat_record.chat_with_id chatWithId,
+            role_chat_record.chat_with_name chatWithName,
+            role_chat_record.chat_content content
+        FROM `role_chat_record`
+        WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(filter)">${filter} </if>
+        <if test="@Ognl@isNotBlank(currentServerId)"> AND area_id = #{currentServerId}</if>
+        <if test="@Ognl@isNotBlank(roleName)">and role_name = #{roleName} </if>
+        <if test="@Ognl@isNotBlank(channel)">and chat_channel = #{channel} </if>
+        <if test="@Ognl@isNotBlank(chatWithName)">and chat_with_name = #{chatWithName} </if>
+        <if test="@Ognl@isNotBlank(chatTimeEnd)">and FROM_UNIXTIME(chat_time/1000,'%Y-%m-%d') <![CDATA[ < ]]>DATE_ADD(#{chatTimeEnd},INTERVAL 1 day)</if>
+        <if test="@Ognl@isNotBlank(chatTimeStart)">and FROM_UNIXTIME(chat_time/1000,'%Y-%m-%d') <![CDATA[ >= ]]>#{chatTimeStart}</if>
+        order by chat_time desc
+    </select>
+    <select id="export" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+        select  
+           role_name roleName,
+           chat_channel channel,
+           chat_with_name chatWithName,
+           chat_content content,
+           chat_time 
+        from role_chat_record
+         where 1 = 1
+        <if test="@Ognl@isNotBlank(roleName)">and role_name = #{roleName} </if>
+        <if test="@Ognl@isNotBlank(channel)">and chat_channel = #{channel} </if>
+        <if test="@Ognl@isNotBlank(chatWithName)">and chat_with_name = #{chatWithName} </if>
+        <if test="@Ognl@isNotBlank(chatTimeEnd)">and chat_time<![CDATA[ < ]]>#{chatTimeEnd}</if>
+        <if test="@Ognl@isNotBlank(chatTimeStart)">and chat_time<![CDATA[ >= ]]>#{chatTimeStart}</if>
+        order by chat_time desc
+    </select>
+</mapper>

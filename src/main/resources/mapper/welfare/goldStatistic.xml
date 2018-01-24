@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="goldStatistic">
+
+	<insert id="insert"
+		parameterType="java.util.HashMap">
+		insert into gold_statistic(
+			id,
+			role_id,
+			inside_gold_count,
+			plat_gold_count,
+			all_gold_count,
+			charge_count,
+			create_name,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag
+		)
+		values
+
+		(
+			#{id},
+			#{roleId},
+			#{insideGoldCount},
+			#{platGoldCount},
+			#{allGoldCount},
+			#{chargeCount},
+			#{createName},
+			#{createBy},
+			now(),
+			#{updateBy},
+			now(),
+			0
+		)
+
+	</insert>
+
+
+</mapper>

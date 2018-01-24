@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="vip">
+    <select id="findSuper" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+	    SELECT
+		      id,
+			  pid,
+			  server_ids,
+			  qq ,
+			  pic ,
+			  min_recharge,
+			  status,
+			  month_min_recharge,
+			  create_by ,
+			  create_name ,
+			  add_time 	
+		FROM
+			  vip_qq
+	   WHERE
+			1 = 1
+			<if test="@Ognl@isNotBlank(qq)">and qq = #{qq}</if>
+		ORDER BY
+			 add_time DESC
+    </select>
+
+     <insert id="insert" parameterType="map">
+        INSERT INTO vip_qq(id,pid,qq,server_ids,pic,min_recharge,status,month_min_recharge,create_by,create_name)
+        VALUES (#{id},#{pid},#{qq},#{serverIds},#{pic},#{minRecharge},0,#{mmRecharge},#{currentUser.id},#{currentUser.loginName})
+    </insert>
+
+    <update id="status" parameterType="map">
+        UPDATE vip_qq SET status = #{status} WHERE id = #{id}
+    </update>
+
+</mapper>

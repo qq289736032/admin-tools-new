@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="gmPublish">
+
+    <select id="paging" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT
+            gm_punish.id,
+            gm_punish.user_id userId,
+            gm_punish.role_id roleId,
+            gm_punish.role_name roleName,
+            gm_punish.is_jinyan isjinyan,
+            gm_punish.is_fenhao isfenhao,
+            gm_punish.operator_id createBy,
+            gm_punish.operator_name createName,
+            gm_punish.operation_type operationType,
+            gm_punish.operation_reason msg,
+            gm_punish.operation_time createDate,
+            gm_punish.pid,
+            gm_punish.server_id serverId,
+            gm_punish.log_month,
+            gm_punish.log_day,
+            gm_punish.log_hour
+        FROM gm_punish WHERE 1 = 1
+        <if test="@Ognl@isNotBlank(roleId)">and role_id = #{roleId} </if>
+        <if test="@Ognl@isNotBlank(roleName)">and role_name = #{roleName} </if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and operation_time <![CDATA[ <= ]]>unix_timestamp(DATE_ADD(#{createDateEnd},INTERVAL 1 day))*1000</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and operation_time <![CDATA[ >= ]]>unix_timestamp(#{createDateStart})*1000</if>
+    </select>
+
+</mapper>

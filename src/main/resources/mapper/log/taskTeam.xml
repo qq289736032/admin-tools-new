@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="taskTeam">
+	<select id="teamTask" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		select guankaid,count(role_id) cou from teamfuben_log 
+			where 1=1
+			<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+			<if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+			</if>
+			GROUP BY guankaid
+			order by guankaid
+	</select>
+	<select id="firstGetNumber" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		<!-- 组队副本首次通关宝箱领取人数 -->
+		SELECT count(role_id) cou FROM(
+			SELECT role_id 
+			FROM teamfuben_log 
+			where type=1
+			<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+			<if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+			</if> 
+			group by role_id) AS A	
+	</select>
+	<select id="teamNumber" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+        <!-- 组队副本参与人数-->
+		SELECT count(role_id) cou FROM(
+			SELECT role_id 
+			FROM teamfuben_log 
+			where 1=1 
+			<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+			<if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+			</if> 
+			group by role_id) AS A
+	</select>
+	<select id="teamPayNumber" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		<!-- 组队副本付费玩家参与人数-->
+		SELECT count(role_id) cou FROM(
+			SELECT role_id 
+			FROM teamfuben_log 
+			where vip_level>=1 
+			<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+			<if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+			</if> 
+			group by role_id) AS A	
+	</select>
+	
+	<select id="taskTeamBrand" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">	
+		<!-- 组队副本翻牌统计-->
+		select guanka_id,
+			 sum(case when cou=1 then 1 else 0 end) one,
+			 sum(case when cou=2 then 1 else 0 end) two,
+			 sum(case when cou=3 then 1 else 0 end) three,
+			 sum(case when cou=4 then 1 else 0 end) four,
+			 sum(case when cou=5 then 1 else 0 end) five,
+			 sum(case when one_key=1 then 1 else 0 end) one_key
+		from(
+		select role_id,guanka_id,max(one_key) one_key,
+			case when max(one_key)=1 then 5
+				 when max(one_key)=0 then count(pai_index) 
+			end as cou
+		from fanpai_log
+		where 1=1
+		<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+			<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+			<if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if> 
+		GROUP BY guanka_id,role_id 
+		) a 
+		GROUP BY guanka_id
+		order by guanka_id
+	</select>
+	
+</mapper>

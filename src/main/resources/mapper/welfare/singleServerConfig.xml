@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="singleServerConfig">
+
+
+	<select id="paging"
+		resultType="com.mokylin.cabal.modules.welfare.entity.SingleServerConfig"
+		parameterType="java.util.HashMap">
+		select * from single_server_config where del_flag = 0
+		<if test="@Ognl@isNotBlank(pid)">and pid = #{pid}</if>
+		<if test="@Ognl@isNotBlank(serverId)">and server_id = #{serverId}</if>
+		<if test="@Ognl@isNotBlank(status)">and status = #{status}</if>
+		<if test="@Ognl@isNotBlank(ids)">
+				and id in
+				<foreach collection="ids" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+		</if>
+		order by create_date desc
+	</select>
+	
+	<select id="count"
+		resultType="java.lang.Integer"
+		parameterType="java.util.HashMap">
+		select count(*) from single_server_config where del_flag = 0
+		<if test="@Ognl@isNotBlank(pid)">and pid = #{pid}</if>
+		<if test="@Ognl@isNotBlank(serverId)">and server_id = #{serverId}</if>
+		<if test="@Ognl@isNotBlank(status)">and status = #{status}</if>
+	</select>
+	
+	<select id="selectAllByServerIdAndPid"
+		resultType="com.mokylin.cabal.modules.welfare.entity.SingleServerConfig"
+		parameterType="java.util.HashMap">
+		select * from single_server_config where del_flag = 0 and pid in
+		<foreach collection="pids" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+				and server_id in 
+				<foreach collection="sids" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+	</select>
+	
+		<select id="selectOneByServerIdAndPid"
+		resultType="com.mokylin.cabal.modules.welfare.entity.SingleServerConfig"
+		parameterType="java.util.HashMap">
+		select * from single_server_config where pid = #{pid} and server_id = #{serverId} and del_flag = 0
+	</select>
+	
+	
+	
+	<select id="selectOneById"
+		resultType="com.mokylin.cabal.modules.welfare.entity.SingleServerConfig"
+		parameterType="java.lang.Integer">
+		select * from single_server_config where id = #{id} and del_flag = 0
+	</select>
+	
+	<!-- 根据平台ID查询所有的特殊配置 -->
+	<select id="selectAllByPid"
+		resultType="com.mokylin.cabal.modules.welfare.entity.SingleServerConfig"
+		parameterType="java.util.HashMap">
+		select * from single_server_config where del_flag = 0 
+		<if test="@Ognl@isNotBlank(pids)"> 
+			and pid in
+		 	<foreach collection="pids" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+		 	</foreach>
+		</if>
+		<if test="@Ognl@isNotBlank(isInfluence)">and is_influence=#{isInfluence}</if>
+		
+	</select>
+
+
+	
+
+	
+	<update id="delete" parameterType="java.util.HashMap">
+		UPDATE
+			single_server_config
+		SET
+			del_flag = 1
+		WHERE
+			id in
+			<foreach collection="ids" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+	</update>
+	
+	<update id="updateByServerIdAndPid"
+		parameterType="java.util.HashMap">
+		update 
+			single_server_config 
+		set
+			new_service_gold = #{newServiceGold},
+			r_resource_amount = #{RResourceAmount},
+			r_resource_ratio = #{RResourceRatio},
+			single_charge_ratio = #{singleChargeRatio},
+			top_charge = #{topCharge},
+			top_gold_day = #{topGoldDay},
+			top_hold_gold = #{topHoldGold},
+			top_internal_number = #{topInternalNumber},
+			add_time_limit = #{addTimeLimit},
+			update_by = #{updateBy},
+			update_date = now(),
+			status = #{status},
+			is_influence = #{isInfluence}
+		
+		where pid in
+				<foreach collection="pids" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+				and server_id in 
+				<foreach collection="sids" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+	</update>
+	
+	<insert id="insert" parameterType="com.mokylin.cabal.modules.welfare.entity.SingleServerConfig">
+        insert into single_server_config(
+           	id,
+			new_service_gold,
+			r_resource_amount,
+			r_resource_ratio,
+			single_charge_ratio,
+			top_charge,
+			top_gold_day,
+			top_hold_gold,
+			top_internal_number,
+			add_time_limit,
+			plat_name,
+			pid,
+			server_id,
+			server_name,
+			create_name,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag,
+			status,
+			is_influence
+		)
+		values(
+		    #{id},
+			#{newServiceGold},
+			#{RResourceAmount},
+			#{RResourceRatio},
+			#{singleChargeRatio},
+			#{topCharge},
+			#{topGoldDay},
+			#{topHoldGold},
+			#{topInternalNumber},
+			#{addTimeLimit},
+			#{platName},
+			#{pid},
+			#{serverId},
+			#{serverName},
+			#{createName},
+			#{createBy},
+			now(),
+			#{updateBy},
+			now(),
+			0,
+			#{status},
+			#{isInfluence}
+		)
+    </insert>
+</mapper>

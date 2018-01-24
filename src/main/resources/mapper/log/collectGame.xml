@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="collectGame">
+
+	<select id="collect" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	<!-- 收藏游戏 -->
+	select role_level,sum(num) num,sum(num1) num1
+		 from (
+			select CASE
+			WHEN role_level BETWEEN 1 and 10 then '1-10' 
+			WHEN role_level BETWEEN 11 and 20 then '11-20' 
+			WHEN role_level BETWEEN 21 and 30 then '21-30' 
+			WHEN role_level BETWEEN 31 and 40 then '31-40' 
+			WHEN role_level BETWEEN 41 and 50 then '41-50' 
+			WHEN role_level BETWEEN 51 and 60 then '51-60'
+			WHEN role_level BETWEEN 61 and 70 then '61-70'
+			WHEN role_level BETWEEN 71 and 80 then '71-80'
+			WHEN role_level BETWEEN 81 and 90 then '81-90'
+			END as role_level,
+			role_id,sum(case when flow_type=1 then 1 else 0 end) num,sum(case when flow_type=2 then 1 else 0 end) num1 
+			from goods_flow_log_${logDay} 
+			where operate_type=6011
+			<if test="@Ognl@isNotBlank(serverIdList)">
+				AND area_id IN
+					<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+							#{item}
+					</foreach>
+			</if>
+			GROUP BY role_level) a 
+			GROUP BY role_level
+    </select>
+    
+    <select id="phone" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	<!-- 手机验证 -->
+	select role_level,sum(num) num,sum(num1) num1
+		 from (
+			select CASE
+			WHEN role_level BETWEEN 1 and 10 then '1-10' 
+			WHEN role_level BETWEEN 11 and 20 then '11-20' 
+			WHEN role_level BETWEEN 21 and 30 then '21-30' 
+			WHEN role_level BETWEEN 31 and 40 then '31-40' 
+			WHEN role_level BETWEEN 41 and 50 then '41-50' 
+			WHEN role_level BETWEEN 51 and 60 then '51-60'
+			WHEN role_level BETWEEN 61 and 70 then '61-70'
+			WHEN role_level BETWEEN 71 and 80 then '71-80'
+			WHEN role_level BETWEEN 81 and 90 then '81-90'
+			END as role_level,
+			role_id,sum(case when flow_type=1 then 1 else 0 end) num,sum(case when flow_type=2 then 1 else 0 end) num1 
+			from goods_flow_log_${logDay} 
+			where operate_type=6010
+			<if test="@Ognl@isNotBlank(serverIdList)">
+				AND area_id IN
+					<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+							#{item}
+					</foreach>
+			</if>
+			GROUP BY role_level) a 
+			GROUP BY role_level
+    </select>
+    
+    <select id="collectPhone" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	<!-- 收藏游戏&&手机验证 -->
+	select role_level,sum(num) num,sum(num1) num1
+			 from (
+	select CASE
+				WHEN role_level BETWEEN 1 and 10 then '1-10' 
+				WHEN role_level BETWEEN 11 and 20 then '11-20' 
+				WHEN role_level BETWEEN 21 and 30 then '21-30' 
+				WHEN role_level BETWEEN 31 and 40 then '31-40' 
+				WHEN role_level BETWEEN 41 and 50 then '41-50' 
+				WHEN role_level BETWEEN 51 and 60 then '51-60'
+				WHEN role_level BETWEEN 61 and 70 then '61-70'
+				WHEN role_level BETWEEN 71 and 80 then '71-80'
+				WHEN role_level BETWEEN 81 and 90 then '81-90'
+				END as role_level,
+	role_id,sum(case when flow_type=1 then 1 else 0 end) num,sum(case when flow_type=2 then 1 else 0 end) num1
+	from(
+	select  a.role_level,a.role_id,a.flow_type from
+	(select role_level,role_id,flow_type from goods_flow_log_${logDay} where operate_type=6010
+		<if test="@Ognl@isNotBlank(serverIdList)">
+				AND area_id IN
+					<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+							#{item}
+					</foreach>
+		</if>
+	) a
+	,
+	(select role_level,role_id,flow_type from goods_flow_log_${logDay} where operate_type=6011
+		<if test="@Ognl@isNotBlank(serverIdList)">
+				AND area_id IN
+					<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+							#{item}
+					</foreach>
+		</if>
+	) b
+	where a.role_id=b.role_id and a.flow_type=b.flow_type) c GROUP BY role_level) d GROUP BY role_level
+	</select>
+</mapper>

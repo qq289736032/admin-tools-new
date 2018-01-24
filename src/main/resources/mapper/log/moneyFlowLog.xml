@@ -1,0 +1,540 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="moneyFlowLog">
+
+
+    <select id="findMoneyConsumeLog" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+	    SELECT
+			m.role_name role_name,
+			m.money_type money_type,
+			m.operate_type operate_type,
+			m.`value` `value`,
+			m.before_value before_value,
+			m.after_value after_value,
+			m.log_time
+		FROM
+			money_flow_log_${suffix} m
+		WHERE
+			m.flow_type = 2
+			<if test="@Ognl@isNotBlank(moneyType)">and money_type <![CDATA[ = ]]>#{moneyType}</if>
+			<if test="@Ognl@isNotBlank(operateType)">and operate_type <![CDATA[ = ]]>#{operateType}</if>
+			<if test="@Ognl@isNotBlank(roleName)">and role_name like concat('%',#{roleName},'%')</if>
+			<if test="@Ognl@isNotBlank(endDate)"> and  log_day <![CDATA[ <= ]]> #{endDate}</if>
+			<if test="@Ognl@isNotBlank(startDate)"> and log_day <![CDATA[ >= ]]> #{startDate}</if>
+			and area_id = #{currentServerId}
+-- 			ORDER BY
+-- 			m.log_time desc
+    </select>
+    <select id="findMoneyGetLog" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+	    SELECT
+			m.role_name role_name,
+			m.money_type money_type,
+			m.operate_type operate_type,
+			m.`value` `value`,
+			m.before_value before_value,
+			m.after_value after_value,
+			m.log_time
+		FROM
+			money_flow_log_${suffix} m
+		WHERE
+			m.flow_type = 1
+			<if test="@Ognl@isNotBlank(moneyType)">and money_type <![CDATA[ = ]]>#{moneyType}</if>
+			<if test="@Ognl@isNotBlank(operateType)">and operate_type <![CDATA[ = ]]>#{operateType}</if>
+			<if test="@Ognl@isNotBlank(roleName)">and role_name like concat('%',#{roleName},'%')</if>
+			<if test="@Ognl@isNotBlank(endDate)"> and  log_day <![CDATA[ <= ]]> #{endDate}</if>
+			<if test="@Ognl@isNotBlank(startDate)"> and log_day <![CDATA[ >= ]]> #{startDate}</if>
+			and area_id = #{currentServerId}   	
+-- 			ORDER BY
+-- 			m.log_time desc
+    </select>
+
+	<select id="findDailyOperationConsumeReport" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT operate_type,sum(case money_type when 0 then `value` else 0 end) 'yb',
+										sum(case money_type when 1 then `value` else 0 end) 'bdyb',
+									 sum(case money_type when 2 then `value` else 0 end) 'jb',
+									 log_time
+		FROM money_flow_log_${suffix}
+		WHERE 1 = 1
+		<if test="@Ognl@isNotBlank(roleName)">and role_name like concat('%',#{roleName},'%')</if>
+		<if test="@Ognl@isNotBlank(moneyType)">and money_type = #{moneyType}</if>
+		<if test="@Ognl@isNotBlank(operateType)">and operate_type <![CDATA[ = ]]>#{operateType}</if>
+		<if test="@Ognl@isNotBlank(endDate)"> and  log_day <![CDATA[ <= ]]> replace(#{endDate},'-','')</if>
+		<if test="@Ognl@isNotBlank(startDate)"> and log_day <![CDATA[ >= ]]> replace(#{startDate},'-','')</if>
+		and flow_type = 2
+		GROUP BY operate_type,money_type
+	</select>
+
+	<select id="" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT resource_line,sum(`value`) yb,count(DISTINCT role_id) num
+		FROM money_flow_log_${suffix}
+		WHERE money_type = 2
+		AND flow_type = 2
+		GROUP BY resource_line
+	</select>
+
+	<!--元宝产出统计 vip0num免费用户 vipnum付费用户-->
+	<select id="findTreasureProduce" resultType="map" parameterType="map">
+		SELECT operate_type,sum(vip0) vip0,sum(vip0times) vip0times,sum(vip) vip,sum(viptimes) viptimes,sum(vip0num) vip0num,sum(vipnum) vipnum FROM(
+			SELECT a.operate_type,a.area_id,a.vip0,a.vip0times,a.vip,a.viptimes,
+				(
+					select count(distinct role_id) from money_flow_log_${suffix} where operate_type = a.operate_type and area_id = a.area_id and vip_level = -1  and money_type = 2 AND flow_type = 1
+				) vip0num,
+				(
+					select count(distinct role_id) from money_flow_log_${suffix} where operate_type = a.operate_type and area_id = a.area_id and vip_level > -1  and money_type = 2 AND flow_type = 1
+				) vipnum
+			FROM(
+				SELECT operate_type,area_id,sum(case vip_level when -1 THEN `value` ELSE 0 END) vip0,sum(case vip_level when -1 THEN 1 ELSE 0 END) vip0times ,
+						sum(case vip_level when vip_level >-1 THEN `value` ELSE 0 END) vip,sum(case vip_level when vip_level > -1 THEN 1 ELSE 0 END) viptimes
+				FROM money_flow_log_${suffix}
+				WHERE 1 = 1
+				and money_type = 2 AND flow_type = 1
+				GROUP BY operate_type,area_id
+			) as a
+		) as b
+		WHERE 1 = 1
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			and  b.area_id in
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="@Ognl@isNotBlank(filter)">${filter} </if>
+		GROUP by operate_type
+	</select>
+
+	<!--元宝产出统计 vip0num免费用户 vipnum付费用户-->
+	<select id="findTreasureConsume" resultType="map" parameterType="map">
+		SELECT operate_type,sum(vip0) vip0,sum(vip0times) vip0times,sum(vip) vip,sum(viptimes) viptimes,sum(vip0num) vip0num,sum(vipnum) vipnum FROM(
+		SELECT a.operate_type,a.area_id,a.vip0,a.vip0times,a.vip,a.viptimes,
+		(
+		select count(distinct role_id) from money_flow_log_${suffix} where operate_type = a.operate_type and area_id = a.area_id and vip_level = -1  and money_type = 2 AND flow_type = 2
+		) vip0num,
+		(
+		select count(distinct role_id) from money_flow_log_${suffix} where operate_type = a.operate_type and area_id = a.area_id and vip_level > -1  and money_type = 2 AND flow_type = 2
+		) vipnum
+		FROM(
+		SELECT operate_type,area_id,sum(case vip_level when -1 THEN `value` ELSE 0 END) vip0,sum(case vip_level when -1 THEN 1 ELSE 0 END) vip0times ,
+		sum(case vip_level when vip_level >-1 THEN `value` ELSE 0 END) vip,sum(case vip_level when vip_level > -1 THEN 1 ELSE 0 END) viptimes
+		FROM money_flow_log_${suffix}
+		WHERE 1 = 1
+		and money_type = 2 AND flow_type = 2
+		GROUP BY operate_type,area_id
+		) as a
+		) as b
+		WHERE 1 = 1
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			and  b.area_id in
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="@Ognl@isNotBlank(filter)">${filter} </if>
+		GROUP by operate_type
+	</select>
+
+
+	<!--元宝产出统计 vip0num免费用户 vipnum付费用户-->
+	<select id="findBandingProduce" resultType="map" parameterType="map">
+		SELECT operate_type,sum(vip0) vip0,sum(vip0times) vip0times,sum(vip) vip,sum(viptimes) viptimes,sum(vip0num) vip0num,sum(vipnum) vipnum FROM(
+		SELECT a.operate_type,a.area_id,a.vip0,a.vip0times,a.vip,a.viptimes,
+		(
+		select count(distinct role_id) from money_flow_log_${suffix} where operate_type = a.operate_type and area_id = a.area_id and vip_level = -1  and money_type = 3 AND flow_type = 1
+		) vip0num,
+		(
+		select count(distinct role_id) from money_flow_log_${suffix} where operate_type = a.operate_type and area_id = a.area_id and vip_level > -1  and money_type = 3 AND flow_type = 1
+		) vipnum
+		FROM(
+		SELECT operate_type,area_id,sum(case vip_level when -1 THEN `value` ELSE 0 END) vip0,sum(case vip_level when -1 THEN 1 ELSE 0 END) vip0times ,
+		sum(case vip_level when vip_level >-1 THEN `value` ELSE 0 END) vip,sum(case vip_level when vip_level > -1 THEN 1 ELSE 0 END) viptimes
+		FROM money_flow_log_${suffix}
+		WHERE 1 = 1
+		and money_type = 3 AND flow_type = 1
+		GROUP BY operate_type,area_id
+		) as a
+		) as b
+		WHERE 1 = 1
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			and  b.area_id in
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="@Ognl@isNotBlank(filter)">${filter} </if>
+		GROUP by operate_type
+	</select>
+
+	<!--元宝产出统计 vip0num免费用户 vipnum付费用户-->
+	<select id="findBandingConsume" resultType="map" parameterType="map">
+		SELECT operate_type,sum(vip0) vip0,sum(vip0times) vip0times,sum(vip) vip,sum(viptimes) viptimes,sum(vip0num) vip0num,sum(vipnum) vipnum FROM(
+		SELECT a.operate_type,a.area_id,a.vip0,a.vip0times,a.vip,a.viptimes,
+		(
+		select count(distinct role_id) from money_flow_log_${suffix} where operate_type = a.operate_type and area_id = a.area_id and vip_level = -1  and money_type = 3 AND flow_type = 2
+		) vip0num,
+		(
+		select count(distinct role_id) from money_flow_log_${suffix} where operate_type = a.operate_type and area_id = a.area_id and vip_level > -1  and money_type = 3 AND flow_type = 2
+		) vipnum
+		FROM(
+		SELECT operate_type,area_id,sum(case vip_level when -1 THEN `value` ELSE 0 END) vip0,sum(case vip_level when -1 THEN 1 ELSE 0 END) vip0times ,
+		sum(case vip_level when vip_level >-1 THEN `value` ELSE 0 END) vip,sum(case vip_level when vip_level > -1 THEN 1 ELSE 0 END) viptimes
+		FROM money_flow_log_${suffix}
+		WHERE 1 = 1
+		and money_type = 3 AND flow_type = 2
+		GROUP BY operate_type,area_id
+		) as a
+		) as b
+		WHERE 1 = 1
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			and  b.area_id in
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="@Ognl@isNotBlank(filter)">${filter} </if>
+		GROUP by operate_type
+	</select>
+	
+	<!--金币产出统计 vip0num免费用户 vipnum付费用户-->
+	<select id="findCoinProduce" resultType="map" parameterType="map">
+		SELECT operate_type,sum(vip0) vip0,sum(vip0times) vip0times,sum(vip) vip,sum(viptimes) viptimes,sum(vip0num) vip0num,sum(vipnum) vipnum FROM(
+			SELECT a.operate_type,a.area_id,a.vip0,a.vip0times,a.vip,a.viptimes,
+				(
+					select count(distinct role_id) from money_flow_log_${suffix} where operate_type = a.operate_type and area_id = a.area_id and vip_level = -1  and money_type =1 AND flow_type = 1
+				) vip0num,
+				(
+					select count(distinct role_id) from money_flow_log_${suffix} where operate_type = a.operate_type and area_id = a.area_id and vip_level > -1  and money_type = 1 AND flow_type = 1
+				) vipnum
+			FROM(
+				SELECT operate_type,area_id,sum(case vip_level when -1 THEN `value` ELSE 0 END) vip0,sum(case vip_level when -1 THEN 1 ELSE 0 END) vip0times ,
+						sum(case vip_level when vip_level >-1 THEN `value` ELSE 0 END) vip,sum(case vip_level when vip_level > -1 THEN 1 ELSE 0 END) viptimes
+				FROM money_flow_log_${suffix}
+				WHERE 1 = 1
+				and money_type = 1 AND flow_type = 1
+				GROUP BY operate_type,area_id
+			) as a
+		) as b
+		WHERE 1 = 1
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			and  b.area_id in
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="@Ognl@isNotBlank(filter)">${filter} </if>
+		GROUP by operate_type
+		</select>
+		
+		<!--金币消耗统计 vip0num免费用户 vipnum付费用户-->
+	<select id="coinProduceConsume" resultType="map" parameterType="map">
+		SELECT operate_type,sum(vip0) vip0,sum(vip0times) vip0times,sum(vip) vip,sum(viptimes) viptimes,sum(vip0num) vip0num,sum(vipnum) vipnum FROM(
+		SELECT a.operate_type,a.area_id,a.vip0,a.vip0times,a.vip,a.viptimes,
+		(
+		select count(distinct role_id) from money_flow_log_${suffix} where operate_type = a.operate_type and area_id = a.area_id and vip_level = -1  and money_type = 1 AND flow_type = 2
+		) vip0num,
+		(
+		select count(distinct role_id) from money_flow_log_${suffix} where operate_type = a.operate_type and area_id = a.area_id and vip_level > -1  and money_type = 1 AND flow_type = 2
+		) vipnum
+		FROM(
+		SELECT operate_type,area_id,sum(case vip_level when -1 THEN `value` ELSE 0 END) vip0,sum(case vip_level when -1 THEN 1 ELSE 0 END) vip0times ,
+		sum(case vip_level when vip_level >-1 THEN `value` ELSE 0 END) vip,sum(case vip_level when vip_level > -1 THEN 1 ELSE 0 END) viptimes
+		FROM money_flow_log_${suffix}
+		WHERE 1 = 1
+		and money_type = 1 AND flow_type = 2
+		GROUP BY operate_type,area_id
+		) as a
+		) as b
+		WHERE 1 = 1
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			and  b.area_id in
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="@Ognl@isNotBlank(filter)">${filter} </if>
+		GROUP by operate_type
+	</select>
+	
+	<select id="bigLottoConsume" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		<!-- 每日大乐透消耗 -->	
+		<foreach collection="list" item="items" index="index" separator="UNION ALL"> 	
+		SELECT log_day,sum(m.value) cou FROM money_flow_log_${items} m WHERE operate_type=3261 
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		group by log_day
+		</foreach>
+	</select>
+	
+	<select id="plotTask" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		<!-- 剧情副本消耗统计 -->	
+		select money_type,count(DISTINCT role_id) cou,sum(value) num from (
+		<foreach collection="list" item="items" index="index" separator="UNION ALL"> 
+		SELECT money_type,role_id,value FROM money_flow_log_${items} m where operate_type=4052 
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		</foreach>
+		) a
+		GROUP BY money_type
+	</select>
+	
+	<select id="huntLife" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		<!-- 猎命-->			
+		SELECT operate_type,count(distinct role_id) num,count(role_id) cou,sum(value) consume FROM (
+			<foreach collection="list" item="items" index="index" separator="UNION ALL"> 
+			select operate_type,role_id,value,area_id from money_flow_log_${items} m WHERE operate_type=5067 or operate_type=5065
+			<if test="@Ognl@isNotBlank(serverIdList)">
+				AND area_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			</foreach>
+			) a 
+		group by operate_type
+	</select>
+	
+	<select id="templeSeckill" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		<!-- 守护神殿秒杀人数-->	
+		select count(role_id) cou from (
+		<foreach collection="list" item="items" index="index" separator="UNION ALL">
+		select role_id from money_flow_log_${items} m where operate_type=2165 and flow_type=2 
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		group by role_id
+		</foreach>
+		) a
+	</select>
+	
+	<select id="templeReset" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		<!-- 守护神殿重置副本消费点券数-->	
+		select sum(num) num from (
+		<foreach collection="list" item="items" index="index" separator="UNION ALL">
+		SELECT sum(value) num	from money_flow_log_${items} m where operate_type=2160 and flow_type=2 and money_type=3
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>
+		</foreach>
+		) a
+	</select>
+	
+	<select id="tenParticipantNum" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		<!-- 幻魔密境10点参与人数统计-->			
+		select count(DISTINCT role_id) cou,count(role_id) num,sum(value) sumVal from (
+		<foreach collection="list" item="items" index="index" separator="UNION ALL">
+		SELECT role_id,value from money_flow_log_${items} m where money_type=1 and operate_type='6032' and flow_type=2 and log_hour  <![CDATA[ < ]]> ${items}16
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>
+		</foreach>
+		) a
+		UNION ALL
+		select count(DISTINCT role_id) cou,count(role_id) num,sum(value) sumVal from(
+		<foreach collection="list" item="items" index="index" separator="UNION ALL">
+		SELECT role_id,value from money_flow_log_${items} m where money_type=2 and operate_type='6032' and flow_type=2 and log_hour  <![CDATA[ < ]]> ${items}16
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>
+		</foreach>
+		) b
+		
+		
+		
+	</select>
+	
+	<select id="sixteenParticipantNum" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		<!-- 幻魔密境16点参与人数统计-->		
+		select count(DISTINCT role_id) cou,count(role_id) num,sum(value) sumVal from(
+		<foreach collection="list" item="items" index="index" separator="UNION ALL">
+		SELECT  role_id,value from money_flow_log_${items} m where money_type=1 and operate_type='6032' and flow_type=2 and log_hour  <![CDATA[ >= ]]> ${items}16
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>
+		</foreach>
+		) a
+		UNION ALL
+		select count(DISTINCT role_id),count(role_id) num,sum(value) sumVal from(
+		<foreach collection="list" item="items" index="index" separator="UNION ALL">
+		SELECT role_id,value from money_flow_log_${items} m where money_type=2 and operate_type='6032' and flow_type=2 and log_hour  <![CDATA[ >= ]]> ${items}16
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>
+		</foreach>
+		) b
+	</select>
+	
+	<select id="yunDartConsume" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		<!-- 运镖消耗统计点券刷新-->	
+		select count(DISTINCT role_id) cou,count(role_id) num from(
+		<foreach collection="list" item="items" index="index" separator="UNION ALL"> 
+		SELECT role_id FROM money_flow_log_${items} m where operate_type='2100' and flow_type=2
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>
+		</foreach>
+		) a
+	</select>
+	
+	<select id="outputGoldIngot" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		<!-- 绑定元宝消耗统计-->	
+		select operate_type,sum(num) num from (
+		<foreach collection="list" item="items" index="index" separator="UNION ALL">
+		SELECT operate_type ,sum(value) num FROM money_flow_log_${items} m where money_type=3 and flow_type=1 group by operate_type
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		</foreach>
+		) a group by operate_type
+		
+	</select>
+	
+	<select id="outputGoldIngotSum" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		<!-- 绑定元宝消耗总数-->	
+		select sum(num) num from (
+		<foreach collection="list" item="items" index="index" separator="UNION ALL">
+		SELECT sum(value) num FROM money_flow_log_${items} where money_type=3 and flow_type=1
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		</foreach>
+		) a
+	</select>
+	
+	<select id="icePrisonDoubleExp" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		<!-- 极冰寒牢购买双倍经验人数-->	
+		select count(role_id) cou from (
+			<foreach collection="list" item="items" index="index" separator="UNION ALL">
+			select role_id from money_flow_log_${items} where flow_type=2 and operate_type=3013
+			<if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach> 
+			</if>
+			group by role_id
+			</foreach>
+		) a
+	</select>
+	
+	<select id="oneServerBuy" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		<!-- 单服竞技场购买竞技场次数-->	
+		select sum(cou) cou,sum(num) num,sum(value) value from(
+			<foreach collection="list" item="items" index="index" separator="UNION ALL">
+			select count(role_id) cou,
+				   (select count(role_id) from (select role_id from money_flow_log_${items}  where flow_type=2 and money_type=3131 
+				   	<if test="@Ognl@isNotBlank(serverIdList)">
+						AND area_id IN
+						<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+							#{item}
+						</foreach> 
+					</if>
+				   GROUP BY role_id) a) num, 
+				   sum(value) value 
+			from money_flow_log_${items}
+			where flow_type=2 and money_type=3131
+			<if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach> 
+			</if>
+			</foreach>
+			) b
+	</select>
+	
+	<select id="oneServerConsume" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		<!-- 单服竞技场冷却消费-->	
+		select sum(cou) cou,sum(num) num,sum(value) value from(
+			<foreach collection="list" item="items" index="index" separator="UNION ALL">
+			select count(role_id) cou,
+				   (select count(role_id) from (select role_id from money_flow_log_${items}  where flow_type=2 and money_type=3132 
+				   	<if test="@Ognl@isNotBlank(serverIdList)">
+						AND area_id IN
+						<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+							#{item}
+						</foreach> 
+					</if>
+				   GROUP BY role_id) a) num, 
+				   sum(value) value 
+			from money_flow_log_${items}
+			where flow_type=2 and money_type=3132
+			<if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach> 
+			</if>
+			</foreach>
+			) b
+	</select>
+	
+	<select id="currencyAddExpend" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+	<!-- 货币增加消耗接口 -->
+	select user_id user_name,
+		   role_id,
+		   role_name,
+		   area_id server,
+		   money_type currency_type,
+		   IF(flow_type=2,-VALUE,VALUE) variation,
+		   after_value remain,
+		   operate_type op_type,
+		   FROM_UNIXTIME(log_time/1000) op_time
+	from money_flow_log_${suffix}
+	where pid='37wan_1' and money_type!=1
+	<if test="@Ognl@isNotBlank(server)">
+	and area_id=#{server} 
+	</if>
+	and  log_time <![CDATA[ >= ]]> #{start_time} and log_time<![CDATA[ <= ]]> #{end_time} and log_day=${logDay}
+    </select>
+	
+	
+	<!--活动道具日志 -->
+	<select id="actMoneyStat" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select log_day, operate_type, money_type, flow_type, sum(value) add_num, count(distinct role_id) role_num
+		from money_flow_log_${suffix}
+		where 1 = 1
+		<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+		<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+		<if test="@Ognl@isNotBlank(operaTypeList)"> 
+		 and operate_type in 
+		<foreach item="item" index="index" collection="operaTypeList" open="(" separator="," close=")">
+	            #{item}
+	    </foreach>
+	    </if>
+		group by log_day, operate_type, money_type, flow_type
+		order by operate_type, flow_type, money_type;
+	</select>
+</mapper>

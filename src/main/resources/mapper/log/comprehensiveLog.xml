@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="comprehensiveLog">
+<!--综合日志查询 -->
+<select id="paging" parameterType="java.util.HashMap" resultType="com.mokylin.cabal.modules.log.entity.comprehensiveDetail">
+	 select  role_name as roleName, 
+	  		 operation_type as operationType, 
+	  		 fail_times as failTimes,
+	  		 succ_times as succTimes,
+	  		 log_hour as logHour  from comprehensive_log
+	 where 1=1
+	 <if test="@Ognl@isNotBlank(roleName)"> and role_name = #{roleName} </if>
+	 <if test="@Ognl@isNotBlank(operaTypeList)"> 
+	 and  operation_type in 
+	 <foreach item="item" index="index" collection="operaTypeList" open="(" separator="," close=")">
+            #{item}
+     </foreach>
+	  and area_id = #{currentServerId}
+     </if>
+	 <if test="@Ognl@isNotBlank(createDateEnd)"> and  log_hour <![CDATA[ <= ]]> replace(replace(#{createDateEnd},'-',''),' ','')</if>
+	 <if test="@Ognl@isNotBlank(createDateStart)"> and log_hour <![CDATA[ >= ]]>  replace(replace(#{createDateStart},'-',''),' ','')</if>
+</select>
+
+
+
+</mapper>

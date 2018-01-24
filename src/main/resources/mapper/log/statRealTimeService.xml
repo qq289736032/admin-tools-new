@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="statRealTimeService">
+    <select id="findRealTimeServiceReport" resultType="java.util.LinkedHashMap" parameterType="java.util.HashMap">
+        SELECT
+        stat_real_time_service.log_minute log_minute,
+        stat_real_time_service.pid pid,
+        stat_real_time_service.area_id area_id,
+        stat_real_time_service.ru ru,
+        stat_real_time_service.au au,
+        stat_real_time_service.num num,
+        stat_real_time_service.pa pa,
+        stat_real_time_service.pay_times pay_times,
+        stat_real_time_service.income income,
+        stat_real_time_service.pay_rate pay_rate,
+        stat_real_time_service.arpu arpu
+        FROM
+        stat_real_time_service
+        WHERE
+        1 = 1
+        AND area_id = #{currentServerId}
+        <if test="@Ognl@isNotBlank(logDay)">and log_day <![CDATA[ = ]]> #{logDay}</if>
+        <if test="@Ognl@isNotBlank(filter)">${filter}</if>
+        ORDER BY
+        stat_real_time_service.log_minute DESC,area_id DESC
+    </select>
+
+    <select id="realTime" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        SELECT
+        stat_real_time_service.log_minute log_minute,
+        stat_real_time_service.pid pid,
+        stat_real_time_service.area_id area_id,
+        stat_real_time_service.ru ru,
+        stat_real_time_service.au au,
+        stat_real_time_service.num num,
+        stat_real_time_service.pa pa,
+        stat_real_time_service.pay_times pay_times,
+        stat_real_time_service.income income,
+        stat_real_time_service.pay_rate pay_rate,
+        stat_real_time_service.arpu arpu
+        FROM
+        stat_real_time_service
+        WHERE
+        1 = 1
+        <if test="@Ognl@isNotBlank(filter)">${filter}</if>
+        <if test="@Ognl@isNotBlank(logHour)">and log_hour <![CDATA[ = ]]>replace(replace(#{logHour},'-',''),' ','')</if>
+        ORDER BY
+        stat_real_time_service.log_minute DESC
+    </select>
+
+    <select id="findNewRegister" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        SELECT
+        stat_real_time_service.log_day log_day,
+        stat_real_time_service.log_hour%100 log_hour,
+        stat_real_time_service.ru ru
+        FROM
+        stat_real_time_service
+        WHERE
+        1 = 1
+        <if test="@Ognl@isNotBlank(createDateStart)">and stat_real_time_service.log_day <![CDATA[ = ]]>
+            replace(replace(#{createDateStart},'-',''),' ','')
+        </if>
+        <if test="@Ognl@isNotBlank(serverIdList)">
+            AND area_id IN
+            <foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        ORDER BY
+        log_hour ASC
+    </select>
+    <select id="findServerNewRegister" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        SELECT DISTINCT
+        stat_real_time_service.log_day log_day,
+        stat_real_time_service.pid pid,
+        stat_real_time_service.area_id area_id,
+        SUM(stat_real_time_service.ru) sum_register
+        FROM
+        stat_real_time_service
+        WHERE
+        1 = 1
+        <if test="@Ognl@isNotBlank(createDateStart)">and stat_real_time_service.log_day <![CDATA[ = ]]>
+            replace(replace(#{createDateStart},'-',''),' ','')
+        </if>
+        <if test="@Ognl@isNotBlank(serverIdList)">
+            AND area_id IN
+            <foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        GROUP BY
+        stat_real_time_service.log_day,
+        stat_real_time_service.pid,
+        stat_real_time_service.area_id
+    </select>
+
+    <!-- 在线数据时点分布 -->
+    <select id="onlinePointDis" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select DATE_FORMAT(log_day,'%Y-%m-%d')as logDay,
+        log_hour as logHour,
+        sum(num) as onlineCount
+        from stat_real_time_service
+        where 1=1
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+        <if test="@Ognl@isNotBlank(serverIdList)">
+            AND area_id IN
+            <foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        GROUP BY DATE_FORMAT(log_day,'%Y-%m-%d'),log_hour
+        ORDER BY log_hour desc
+    </select>
+
+    <!-- 充值消费时点分布 -->
+    <select id="findRechargeTimePointDistribution" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        SELECT
+        log_day,
+        log_hour,
+        sum(pa) pa, <!-- 充值用户 -->
+        sum(income) income, <!-- 充值金额 -->
+        sum(pa) / sum(au) pay_rate, <!-- 付费率 -->
+        sum(income) / sum(pa) arpu <!-- ARPU -->
+        FROM stat_real_time_service
+        WHERE 1 = 1
+        and log_minute in (select max(log_minute) from stat_real_time_service group by log_day,log_hour)
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+        <if test="@Ognl@isNotBlank(serverIdList)">
+            AND area_id IN
+            <foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        GROUP BY log_day, log_hour
+        ORDER BY log_day DESC, log_hour ASC
+    </select>
+
+    <!-- 消费时点分布 -->
+    <select id="findConsumeTimePointDistribution" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        SELECT
+        log_day,
+        log_hour,
+        sum(consume_account) consume_account, <!-- 消费人数 -->
+        sum(consume_amount) consume_amount, <!-- 消费金额 -->
+        sum(consume_account) / sum(au) pay_rate, <!-- 付费率 -->
+        sum(consume_amount) / sum(consume_account) arpu <!-- ARPU -->
+        FROM stat_real_time_service
+        WHERE 1 = 1
+        and log_minute in (select max(log_minute) from stat_real_time_service group by log_day,log_hour)
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+        <if test="@Ognl@isNotBlank(serverIdList)">
+            AND area_id IN
+            <foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        GROUP BY log_day, log_hour
+        ORDER BY log_day DESC, log_hour ASC
+    </select>
+
+    <!-- 消费绑定时点分布 -->
+    <select id="findConsumeBandingTimePointDistribution" resultType="java.util.HashMap"
+            parameterType="java.util.HashMap">
+        SELECT
+        log_day,
+        log_hour,
+        sum(consume_banding_account) consume_account, <!-- 消费人数 -->
+        sum(consume_banding_amount) consume_amount, <!-- 消费金额 -->
+        sum(consume_banding_account) / sum(au) pay_rate, <!-- 付费率 -->
+        sum(consume_banding_amount) / sum(consume_banding_account) arpu <!-- ARPU -->
+        FROM stat_real_time_service
+        WHERE 1 = 1
+        and log_minute in (select max(log_minute) from stat_real_time_service group by log_day,log_hour)
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+        <if test="@Ognl@isNotBlank(serverIdList)">
+            AND area_id IN
+            <foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        GROUP BY log_day, log_hour
+        ORDER BY log_day DESC, log_hour ASC
+    </select>
+
+    <select id="findByDay" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		SELECT (
+			SELECT COUNT(DISTINCT role_id) dau
+			FROM role_login
+			WHERE server_id = #{serverId}
+			AND pid = #{game}
+			AND log_day = #{date}
+		) dau,
+		(
+			SELECT COUNT(DISTINCT role_id) dru
+			FROM role_registration
+			WHERE server_id = #{serverId}
+			AND pid = #{game}
+			AND log_day = #{date}
+		) dru,
+		(
+			SELECT max(count) pcu
+			FROM role_online
+			WHERE server_id = #{serverId}
+			AND pid = #{game}
+			AND log_day = #{date}
+		) pcu
+	</select>
+
+    <select id="findBylogTimeAvg" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+
+		SELECT
+		(
+		SELECT MAX(count)
+		FROM role_online
+		WHERE server_id =  #{serverId}
+		AND pid = #{pid}
+		AND log_time <![CDATA[ <=  ]]> #{endTime} AND log_time  <![CDATA[  > ]]> #{startTime}
+		)top,
+		( SELECT min(count)
+		FROM role_online
+		WHERE server_id = #{serverId}
+		AND pid = #{pid}
+		AND log_time <![CDATA[ <= ]]>  #{endTime} AND log_time  <![CDATA[  >  ]]> #{startTime}
+		) low,
+		(
+		SELECT IFNULL(SUM(count)/COUNT(*),0)
+		FROM role_online
+		WHERE server_id =  #{serverId}
+		AND pid = #{pid}
+		AND log_time <![CDATA[ <= ]]>  #{endTime} AND log_time  <![CDATA[  >  ]]> #{startTime}
+		) online
+
+	</select>
+
+    <select id="findByCreateRoleCount" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+     SELECT (
+        SELECT COUNT(DISTINCT role_id)
+	    FROM role_registration
+	    WHERE server_id = #{serverId}
+	    AND pid =  #{pid}
+  	    AND registration_time <![CDATA[ <= ]]>  #{endTime}  AND registration_time  <![CDATA[  >  ]]> #{startTime}
+  ) register
+	</select>
+
+
+    <select id="realTimeFen" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        SELECT
+        stat_real_time_service.log_minute log_minute,
+        stat_real_time_service.pid pid,
+        stat_real_time_service.area_id area_id,
+        stat_real_time_service.ru ru,
+        stat_real_time_service.au au,
+        stat_real_time_service.num num,
+        stat_real_time_service.pa pa,
+        stat_real_time_service.pay_times pay_times,
+        stat_real_time_service.income income,
+        stat_real_time_service.pay_rate pay_rate,
+        stat_real_time_service.arpu arpu
+        FROM
+        stat_real_time_service
+        WHERE
+        area_id = #{currentServerId}
+        <if test="@Ognl@isNotBlank(filter)">${filter}</if>
+        <if test="@Ognl@isNotBlank(logDay)">and log_day <![CDATA[ = ]]> #{logDay}</if>
+        and log_minute in(SELECT min(log_minute) from stat_real_time_service
+        WHERE area_id = #{currentServerId}
+        <if test="@Ognl@isNotBlank(filter)">${filter}</if>
+        <if test="@Ognl@isNotBlank(logDay)">and log_day <![CDATA[ = ]]> #{logDay}</if>
+        GROUP BY log_hour)
+        ORDER BY
+        stat_real_time_service.log_minute DESC
+    </select>
+    <select id="month" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		SELECT
+		max(onlineCount) pccu
+		from
+		(
+			select
+			sum(num) as onlineCount
+			from stat_real_time_service where log_month=#{month}
+			GROUP BY log_minute
+		) a
+	</select>
+
+    <select id="realTimePort" resultType="Integer" parameterType="java.util.HashMap">
+		select num from stat_real_time_service where area_id=#{server} and log_day=FROM_UNIXTIME(#{time}/1000,'%Y%m%d') ORDER BY log_minute DESC  LIMIT 1
+	</select>
+
+
+</mapper>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="goodsSales">
+
+<!--物品销售  -->
+<select id="goodsSalesList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select shop_type as type,
+			   operate_type as operateType,
+			   item_name as itemName,
+			   item_id as itemId,
+			   sum(item_num) as itemNum,
+			   sum(ta)+sum(bta) as amount,
+			   sum(ta) as consuYb,
+			   sum(tca) as ybPopulation,
+			   sum(ct) as ybNum,
+			   sum(bta) as bindYb,
+			   sum(bca) as bindPopulation,
+			   sum(bct) as bindNum
+		from stat_goods_sales
+		where 1=1
+		<if test="@Ognl@isNotBlank(stype)">and is_open_day = #{stype}</if>
+		<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+    	<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>
+     	group by shop_type,item_name,item_id,operate_type
+     	order by amount,consuYb
+</select>
+
+<!-- 获取消耗元宝总数 -->
+<select id="selecTotal" parameterType="java.util.HashMap" resultType="Integer">
+		select  sum(ta)+sum(bta) as total from stat_goods_sales  where 1=1
+		<if test="@Ognl@isNotBlank(stype)">and is_open_day = #{stype}</if>
+		<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+    	<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			AND area_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>
+     	
+</select>
+</mapper>

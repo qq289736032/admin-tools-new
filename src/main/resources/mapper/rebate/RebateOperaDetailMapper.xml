@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="rebateOperaDetailMapper">
+  <resultMap id="BaseResultMap" type="com.mokylin.cabal.modules.rebate.entity.RebateOperaDetail">
+    <result column="id" jdbcType="VARCHAR" property="id" />
+    <result column="opera_log_id" jdbcType="VARCHAR" property="operaLogId" />
+    <result column="goods_name" jdbcType="VARCHAR" property="goodsName" />
+    <result column="goods_id" jdbcType="VARCHAR" property="goodsId" />
+    <result column="goods_prop" jdbcType="VARCHAR" property="goodsProp" />
+    <result column="num" jdbcType="INTEGER" property="num" />
+    <result column="sum_money" jdbcType="BIGINT" property="sumMoney" />
+    <result column="create_name" jdbcType="VARCHAR" property="createName" />
+    <result column="create_by" jdbcType="VARCHAR" property="createBy" />
+    <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
+    <result column="update_by" jdbcType="VARCHAR" property="updateBy" />
+    <result column="update_date" jdbcType="TIMESTAMP" property="updateDate" />
+    <result column="del_flag" jdbcType="INTEGER" property="delFlag" />
+     <result column="role_id" jdbcType="BIGINT" property="roleId" />
+     <result column="pid" jdbcType="VARCHAR" property="pid" />
+  </resultMap>
+   <select id="sumNum" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+  	select IFNULL(sum(num),0) as sumNum,goods_id as goodsId
+  	from rebate_opera_detail where 1=1
+  	<if test="@Ognl@isNotBlank(startTime)">and create_date &gt;= #{startTime}</if>
+  	<if test="@Ognl@isNotBlank(endTime)">and create_date &lt;= #{endTime}</if>
+  	and goods_id = #{goodsId} 
+  	and role_id = #{roleId}
+  	group by goods_id
+  	 
+  </select>
+  
+     <select id="findAll" resultType="com.mokylin.cabal.modules.rebate.entity.RebateOperaDetail" parameterType="java.util.HashMap">
+  	select *
+  	from rebate_opera_detail where opera_log_id = #{logId}
+  </select>
+  
+       <select id="statistic" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+  	select IFNULL(sum(num),0) as sumNum,pid,goods_id as goodsId,count(*) as times,count(distinct(role_id)) as countRoleId
+  	,goods_name as goodsName from rebate_opera_detail 
+  	where 1=1
+  	<if test="@Ognl@isNotBlank(startTime)">and create_date &gt;= #{startTime}</if>
+  	<if test="@Ognl@isNotBlank(endTime)">and create_date &lt;= #{endTime}</if>
+  	<if test="@Ognl@isNotBlank(pid)">and pid= #{pid}</if>
+  	<if test="@Ognl@isNotBlank(goodsId)">and goods_id= #{goodsId}</if>
+  	<if test="@Ognl@isNotBlank(goodsName)">and goods_name like concat('%',#{goodsName},'%')</if>
+  	group by pid,goods_id
+  </select>
+  
+    <select id="statisticAllRole" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+  	select IFNULL(sum(t.c),0) as countRoleId 
+  	from 
+  	(select count(distinct(r.role_id)) as c from rebate_opera_detail r group by r.goods_id) t
+  	
+  </select>
+  
+      <select id="statisticAll" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+  	 	select IFNULL(sum(a.num),0) as sumNum,count(a.id) as times
+  	from rebate_opera_detail a
+  	
+  </select>
+  
+  
+  <insert id="insert" parameterType="com.mokylin.cabal.modules.rebate.entity.RebateOperaDetail">
+    insert into rebate_opera_detail (id, opera_log_id, goods_name, 
+      goods_id, goods_prop, num, 
+      sum_money, create_name, create_by, 
+      create_date, update_by, update_date, 
+      del_flag,role_id,pid,role_name,plat_name)
+    values (#{id,jdbcType=VARCHAR}, #{operaLogId,jdbcType=VARCHAR}, #{goodsName,jdbcType=VARCHAR}, 
+      #{goodsId,jdbcType=VARCHAR}, #{goodsProp,jdbcType=VARCHAR}, #{num,jdbcType=INTEGER}, 
+      #{sumMoney,jdbcType=BIGINT}, #{createName,jdbcType=VARCHAR}, #{createBy,jdbcType=VARCHAR}, 
+      #{createDate,jdbcType=TIMESTAMP}, #{updateBy,jdbcType=VARCHAR}, #{updateDate,jdbcType=TIMESTAMP}, 
+      0,#{roleId},#{pid},#{roleName},#{platName})
+  </insert>
+  <insert id="insertSelective" parameterType="com.mokylin.cabal.modules.rebate.entity.RebateOperaDetail">
+    insert into rebate_opera_detail
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="operaLogId != null">
+        opera_log_id,
+      </if>
+      <if test="goodsName != null">
+        goods_name,
+      </if>
+      <if test="goodsId != null">
+        goods_id,
+      </if>
+      <if test="goodsProp != null">
+        goods_prop,
+      </if>
+      <if test="num != null">
+        num,
+      </if>
+      <if test="sumMoney != null">
+        sum_money,
+      </if>
+      <if test="createName != null">
+        create_name,
+      </if>
+      <if test="createBy != null">
+        create_by,
+      </if>
+      <if test="createDate != null">
+        create_date,
+      </if>
+      <if test="updateBy != null">
+        update_by,
+      </if>
+      <if test="updateDate != null">
+        update_date,
+      </if>
+      <if test="delFlag != null">
+        del_flag,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="operaLogId != null">
+        #{operaLogId,jdbcType=VARCHAR},
+      </if>
+      <if test="goodsName != null">
+        #{goodsName,jdbcType=VARCHAR},
+      </if>
+      <if test="goodsId != null">
+        #{goodsId,jdbcType=VARCHAR},
+      </if>
+      <if test="goodsProp != null">
+        #{goodsProp,jdbcType=VARCHAR},
+      </if>
+      <if test="num != null">
+        #{num,jdbcType=INTEGER},
+      </if>
+      <if test="sumMoney != null">
+        #{sumMoney,jdbcType=BIGINT},
+      </if>
+      <if test="createName != null">
+        #{createName,jdbcType=VARCHAR},
+      </if>
+      <if test="createBy != null">
+        #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null">
+        #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null">
+        #{updateBy,jdbcType=VARCHAR},
+      </if>
+      <if test="updateDate != null">
+        #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="delFlag != null">
+        #{delFlag,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+</mapper>

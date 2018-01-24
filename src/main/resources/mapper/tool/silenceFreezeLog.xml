@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="silenceFreezeLog">
+
+    <select id="paging" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select id,user_id userId, role_id roleId, role_name roleName,isjinyan,isfenghao,server_id serverId, operation_type operationType,msg,expire_time expireTime,create_name createName,create_date createDate from role_silence_freeze_log where 1 = 1
+        <if test="@Ognl@isNotBlank(roleId)">and role_id = #{roleId} </if>
+        <if test="@Ognl@isNotBlank(roleName)">and role_name = #{roleName} </if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and create_date <![CDATA[ < ]]>DATE_ADD(#{createDateEnd},INTERVAL 1 day)</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and create_date <![CDATA[ >= ]]>#{createDateStart}</if>
+        order by createDate desc
+    </select>
+
+    <insert id="insert" parameterType="java.util.HashMap">
+        insert into role_silence_freeze_log(
+            id,
+			role_id,
+			role_name,
+            isjinyan,
+            isfenghao,
+            server_id,
+			operation_type,
+			msg,
+			create_name,
+			create_by
+		)
+		values(
+		    #{id},
+            #{roleId},
+            #{roleName},
+            #{isjinyan},
+            #{isfenghao},
+			#{serverId},
+			#{operationType},
+			#{msg},
+			#{createName},
+			#{createBy}
+		)
+    </insert>
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        insert into role_silence_freeze_log(
+            id,
+            pid,
+            user_id,
+            role_id,
+            role_name,
+            isjinyan,
+            isfenghao,
+            server_id,
+            operation_type,
+            msg,
+            expire_time,
+            create_name,
+            create_by
+        )
+        values
+        <foreach item="item" index="index" collection="list" separator=",">
+            (
+                #{item.id},
+                #{item.pid},
+                #{item.userId},
+                #{item.roleId},
+                #{item.roleName},
+                #{item.isjinyan},
+                #{item.isfenghao},
+                #{item.server_id},
+                #{item.operationType},
+                #{item.msg},
+                #{item.expireTime},
+                #{item.createName},
+                #{item.createBy}
+            )
+        </foreach>
+    </insert>
+
+</mapper>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="platformStatistics">
+
+    <select id="findByPlatform" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select pid, sum(income) income,sum(dau) dau,sum(dru) dru, sum(consume_coin) consume, sum(is_open_day) kaifu, 
+        	   sum(dpa)/sum(dau) pay_rate, sum(income)/sum(dpa) arpu
+        from stat_integrated where 1 =1 
+        <if test="@Ognl@isNotBlank(pidsList)">
+			AND pid IN
+		     <foreach item="item" index="index" collection="pidsList" open="(" separator="," close=")">
+		       #{item}
+		     </foreach>
+	    </if>
+        <if test="@Ognl@isNotBlank(endDate)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+        <if test="@Ognl@isNotBlank(startDate)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+        GROUP BY pid
+    </select>
+    
+    <select id="findByPid" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select sum(income) income,sum(dau) dau,sum(dru) dru, sum(consume_coin) consume, sum(is_open_day) kaifu,
+        sum(dpa)/sum(dau) pay_rate, sum(income)/sum(dpa) arpu
+        from stat_integrated where pid = #{pid}
+        <if test="@Ognl@isNotBlank(endDate)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+        <if test="@Ognl@isNotBlank(startDate)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+    </select>
+
+	<select id="findSumValue" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select sum(income) sum_income,sum(dru) sum_dru,sum(dau) sum_dau, sum(consume_coin) sum_consume, sum(is_open_day) sum_kaifu
+        from stat_integrated where 1 =1 
+        <if test="@Ognl@isNotBlank(pidsList)">
+			AND pid IN
+		     <foreach item="item" index="index" collection="pidsList" open="(" separator="," close=")">
+		       #{item}
+		     </foreach>
+	    </if>
+        <if test="@Ognl@isNotBlank(endDate)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+        <if test="@Ognl@isNotBlank(startDate)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+    </select>
+    
+    <select id="findOnlineDistribution" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select 
+        pid, 
+        sum(section_1) section_1,
+        sum(section_2) section_2,
+        sum(section_3) section_3,
+        sum(section_4) section_4,
+        sum(section_5) section_5,
+        sum(section_6) section_6,
+        sum(section_7) section_7,
+        sum(section_8) section_8,
+        sum(section_9) section_9,
+        sum(section_10) section_10,
+        sum(section_11) section_11,
+        sum(section_12) section_12,
+        sum(section_13) section_13,
+        sum(section_14) section_14,
+        sum(section_15) section_15,
+        sum(section_16) section_16,
+        sum(section_17) section_17,
+        sum(section_18) section_18,
+        sum(section_19) section_19,
+        sum(section_20) section_20,
+        sum(section_21) section_21,
+        sum(section_22) section_22,
+        sum(section_23) section_23,
+        sum(section_24) section_24,
+        log_day
+        from stat_online_time_distribution where 1 =1
+        <if test="@Ognl@isNotBlank(pidsList)">
+			AND pid IN
+		     <foreach item="item" index="index" collection="pidsList" open="(" separator="," close=")">
+		       #{item}
+		     </foreach>
+	    </if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+          GROUP BY log_day, pid
+          ORDER BY log_day DESC
+    </select>
+    
+    <select id="findRegDistribution" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select 
+        pid, 
+        sum(section_1) section_1,
+        sum(section_2) section_2,
+        sum(section_3) section_3,
+        sum(section_4) section_4,
+        sum(section_5) section_5,
+        sum(section_6) section_6,
+        sum(section_7) section_7,
+        sum(section_8) section_8,
+        sum(section_9) section_9,
+        sum(section_10) section_10,
+        sum(section_11) section_11,
+        sum(section_12) section_12,
+        sum(section_13) section_13,
+        sum(section_14) section_14,
+        sum(section_15) section_15,
+        sum(section_16) section_16,
+        sum(section_17) section_17,
+        sum(section_18) section_18,
+        sum(section_19) section_19,
+        sum(section_20) section_20,
+        sum(section_21) section_21,
+        sum(section_22) section_22,
+        sum(section_23) section_23,
+        sum(section_24) section_24,
+        log_day
+        from stat_reg_distribution where 1 =1
+        <if test="@Ognl@isNotBlank(pidsList)">
+			AND pid IN
+		     <foreach item="item" index="index" collection="pidsList" open="(" separator="," close=")">
+		       #{item}
+		     </foreach>
+	    </if>
+        <if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>replace(#{createDateEnd},'-','')</if>
+        <if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>replace(#{createDateStart},'-','')</if>
+          GROUP BY log_day, pid
+          ORDER BY log_day DESC
+    </select>
+</mapper>

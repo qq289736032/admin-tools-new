@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="releaseNote">
+
+
+    <select id="paging" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT * FROM `release_note` ORDER BY add_time DESC
+    </select>
+
+    <insert id="insert" parameterType="java.util.HashMap">
+        insert into release_note(id,server_ids,version_id,version_time,release_note,release_content,status,create_name,create_by)
+        values(
+          #{id},#{serverIds},#{versionId},#{versionTime},#{releaseNote},#{releaseContent},#{status},#{currentUser.loginName},#{currentUser.id}
+        )
+    </insert>
+
+    <select id="selectById" parameterType="string" resultType="map">
+        SELECT * FROM  release_note where id = #{id}
+    </select>
+
+    <select id="delete" parameterType="string">
+        DELETE FROM  release_note where id = #{id}
+    </select>
+
+    <update id="update" parameterType="map">
+        update release_note set status = #{status} where id = #{id}
+    </update>
+
+</mapper>

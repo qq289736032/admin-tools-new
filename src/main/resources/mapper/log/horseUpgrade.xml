@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="horseUpgrade">
+	<!-- 坐骑等级分布 -->
+	<select id = "horseGrade" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		SELECT level,count(distinct role_id) num FROM (
+			SELECT role_id, max(level) level ,log_day,vip_level
+			FROM horse_upgrade_log 
+			WHERE 1 = 1
+			<if test="@Ognl@isNotBlank(logDay)">and log_day <![CDATA[ <= ]]>#{logDay}</if>
+			<if test="@Ognl@isNotBlank(viplevel)">
+            <choose>
+                <when test="viplevel == 0">and vip_level <![CDATA[ >= ]]> 0</when>
+                <otherwise>and vip_level = #{viplevel}</otherwise>
+            </choose>
+        	</if>
+			<if test="@Ognl@isNotBlank(serverIdList)">
+				AND server_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+						#{item}
+				</foreach>
+			</if>
+			GROUP BY role_id
+		) AS A
+		WHERE 1 = 1
+		GROUP BY level  
+		ORDER BY level
+		
+	</select>
+	
+	 <!-- 幻化类型 -->
+    <select id="horseType" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+    	SELECT 
+    		skin_type,
+    		count(distinct role_id) as skin,
+    		log_day,
+    		vip_level
+    	FROM 
+    		horse_turned_log
+    	WHERE  1 = 1 
+    	<if test="@Ognl@isNotBlank(logDay)">and log_day <![CDATA[ <= ]]>#{logDay}</if>
+		<if test="@Ognl@isNotBlank(viplevel)">
+           <choose>
+               <when test="viplevel == 0">and vip_level <![CDATA[ >= ]]> 0</when>
+               <otherwise>and vip_level = #{viplevel}</otherwise>
+           </choose>
+        </if>
+		<if test="@Ognl@isNotBlank(serverIdList)">
+			AND server_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+    	GROUP BY skin_type 
+    	ORDER BY skin_type
+    </select>
+
+	<!-- 每日坐骑进阶分布 -->
+	<!-- 进阶成功人数 -->
+	<select id = "horseStatistics" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		SELECT a.level as level,id_num,b.min_num,b.max_num 
+		FROM(select tmp.level,COUNT(DISTINCT tmp.role_id)as id_num ,log_day,server_id,vip_level 
+			FROM horse_upgrade_log tmp where 1 = 1 
+			<if test="@Ognl@isNotBlank(logDay)">and log_day <![CDATA[ = ]]>#{logDay}</if>
+			<if test="@Ognl@isNotBlank(viplevel)">
+	        	<choose>
+	             	<when test="viplevel == 0">and vip_level <![CDATA[ >= ]]> 0</when>
+	              	<otherwise>and vip_level = #{viplevel}</otherwise>
+	        	</choose>
+	        </if>
+			<if test="@Ognl@isNotBlank(serverIdList)">
+				AND server_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if> GROUP BY tmp.level 
+			) as a left join( 
+			SELECT rol.level,MIN(sum_num) as min_num,MAX(sum_num) as max_num 
+			FROM(SELECT role_id,level,SUM(upgrade_num) as sum_num 
+				FROM horse_upgrade_log where 1 = 1 
+				<if test="@Ognl@isNotBlank(logDay)">and log_day <![CDATA[ = ]]>#{logDay}</if>
+				<if test="@Ognl@isNotBlank(viplevel)">
+		        	<choose>
+		             	<when test="viplevel == 0">and vip_level <![CDATA[ >= ]]> 0</when>
+		              	<otherwise>and vip_level = #{viplevel}</otherwise>
+		        	</choose>
+		        </if>
+				<if test="@Ognl@isNotBlank(serverIdList)">
+					AND server_id IN
+					<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+						#{item}
+					</foreach>
+				</if> GROUP BY role_id,level
+				)AS rol GROUP BY level  
+			) AS b on b.level = a.level GROUP BY level ORDER BY level
+	</select>
+	
+	<!-- 进阶清0人数 -->
+	<select id = "horseEmpty" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		SELECT a.level as level,id_num,b.min_num,b.max_num 
+		FROM(select tmp.level,COUNT(DISTINCT tmp.role_id)as id_num ,log_day,server_id,vip_level 
+			FROM horse_lucky_log tmp where 1 = 1 
+			<if test="@Ognl@isNotBlank(logDay)">and log_day <![CDATA[ = ]]>#{logDay}</if>
+			<if test="@Ognl@isNotBlank(viplevel)">
+	        	<choose>
+	             	<when test="viplevel == 0">and vip_level <![CDATA[ >= ]]> 0</when>
+	              	<otherwise>and vip_level = #{viplevel}</otherwise>
+	        	</choose>
+	        </if>
+			<if test="@Ognl@isNotBlank(serverIdList)">
+				AND server_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if> GROUP BY tmp.level 
+		) as a left join( 
+		SELECT rol.level,MIN(sum_num) as min_num,MAX(sum_num) as max_num 
+		FROM(SELECT role_id,level,SUM(upgrade_num) as sum_num 
+			FROM horse_lucky_log where 1 = 1 
+			<if test="@Ognl@isNotBlank(logDay)">and log_day <![CDATA[ = ]]>#{logDay}</if>
+			<if test="@Ognl@isNotBlank(viplevel)">
+	        	<choose>
+	             	<when test="viplevel == 0">and vip_level <![CDATA[ >= ]]> 0</when>
+	              	<otherwise>and vip_level = #{viplevel}</otherwise>
+	        	</choose>
+	        </if>
+			<if test="@Ognl@isNotBlank(serverIdList)">
+				AND server_id IN
+				<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if> GROUP BY role_id,level 
+			)AS rol GROUP BY level 
+		) AS b on b.level = a.level  GROUP BY level ORDER BY level 
+	</select>
+	
+</mapper>

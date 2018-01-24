@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="mineWar">
+	<select id="mineWarParticipation" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		<!-- 矿战活动参与人数 -->
+		select count(role_id) cou from (
+		<foreach collection="list" item="items" index="index" separator="UNION ALL"> 
+		SELECT role_id FROM enter_map_log_${items} m where map_id=58 
+		<if test="@Ognl@isNotBlank(serverIdList)">
+		AND server_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach> 
+		</if>
+		group by role_id
+		</foreach>
+		) a
+			 
+	</select>
+	
+	<select id="mineWarDeathToll" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		<!-- 矿战死亡人数 -->
+		select count(role_id) num from(
+		<foreach collection="list" item="items" index="index" separator="UNION ALL">
+		SELECT role_id FROM dead_log_${items} m where stage_id=58
+		<if test="@Ognl@isNotBlank(serverIdList)">
+		AND server_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach> 
+		</if>
+		group by role_id
+		</foreach>
+		) a 
+	</select>
+	
+	<select id="mineWarDeaths" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		<!-- 矿战死亡次数 -->
+		select sum(num) num from(
+		<foreach collection="list" item="items" index="index" separator="UNION ALL">
+		SELECT count(role_id) num FROM dead_log_${items} m where stage_id=58
+		<if test="@Ognl@isNotBlank(serverIdList)">
+		AND server_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach> 
+		</if>
+		</foreach>
+		) a	 
+	</select>
+	
+	<select id="goldMine" parameterType="java.util.HashMap" resultType="java.util.LinkedHashMap">
+		<!-- 矿战统计 -->
+		SELECT gather_id,count(DISTINCT role_id) cou,count(role_id) num 
+		FROM gather_log 
+		where map_id=58 
+		<if test="@Ognl@isNotBlank(createDateStart)">and log_day <![CDATA[ >= ]]>#{startDate}</if>
+		<if test="@Ognl@isNotBlank(createDateEnd)">and log_day <![CDATA[ <= ]]>#{endDate}</if>
+		<if test="@Ognl@isNotBlank(serverIdList)">
+		AND server_id IN
+			<foreach item="item" index="index" collection="serverIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach> 
+		</if>	
+		GROUP BY gather_id 
+		ORDER BY gather_id
+	</select>
+	
+</mapper>
